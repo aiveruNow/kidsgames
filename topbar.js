@@ -45,6 +45,30 @@
     }
   }
 
+  // ---------- Hold skærmen tændt ----------
+  // Screen Wake Lock: skærmen slukker ikke af sig selv, mens appen er åben og synlig. Slippes af browseren, når siden skjules,
+  // så den tages igen, når man vender tilbage. Kan slås fra i ⚙️ (regnespil-vaagen = 0).
+  let wakeLock = null;
+  const wakeSupported = "wakeLock" in navigator;
+  const stayAwake = () => read("regnespil-vaagen") !== "0";
+  async function requestWake() {
+    if (!wakeSupported || wakeLock || !stayAwake() || document.visibilityState !== "visible") return;
+    try {
+      const lock = await navigator.wakeLock.request("screen");
+      wakeLock = lock;
+      lock.addEventListener("release", () => { if (wakeLock === lock) wakeLock = null; });
+    } catch { /* afvist, fx lavt batteri */ }
+  }
+  function releaseWake() {
+    if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+  }
+  if (wakeSupported) {
+    requestWake();
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") requestWake(); });
+    // Nogle browsere kræver et tryk først
+    document.addEventListener("pointerup", requestWake, true);
+  }
+
   // ---------- Fuld skærm ----------
   // Manifestet bruger "standalone" (virker i alle browsere, uden adresselinje). Fuld skærm uden statuslinje kræver et tryk.
   // Siden ligger normalt i en ramme (index.html), så fuld skærm sættes på den ydre side og består, når man skifter spil.
@@ -234,6 +258,7 @@
         <div class="tb-slot"></div>
         <div class="tb-row">
           <button class="tb-toggle tb-sound" type="button"></button>
+          <button class="tb-toggle tb-awake" type="button" hidden></button>
           <button class="tb-toggle tb-full" type="button" hidden>⛶  Fuld skærm</button>
         </div>
       </div>`;
@@ -256,6 +281,18 @@
 
     paintSound();
     state.soundBtn.addEventListener("click", () => setSound(!sound));
+
+    const awakeBtn = bar.querySelector(".tb-awake");
+    if (wakeSupported) {
+      awakeBtn.hidden = false;
+      const paintAwake = () => { awakeBtn.textContent = stayAwake() ? "💡  Skærmen holdes tændt" : "🌙  Skærmen må slukke"; };
+      paintAwake();
+      awakeBtn.addEventListener("click", () => {
+        write("regnespil-vaagen", stayAwake() ? "0" : "1");
+        if (stayAwake()) requestWake(); else releaseWake();
+        paintAwake();
+      });
+    }
 
     const fsBtn = bar.querySelector(".tb-full");
     if (requestFs && !alreadyFullscreen) {
