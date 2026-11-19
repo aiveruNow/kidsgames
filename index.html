@@ -180,11 +180,63 @@
       font-size: .85rem;
     }
 
-    .download-wrap { margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
     .download.secondary { background: #fff; color: #2f6fed; box-shadow: inset 0 0 0 2px #2f6fed; }
+    .download.danger { background: #d64545; box-shadow: 0 6px 16px rgba(214, 69, 69, .3); }
     .download:disabled { opacity: .6; cursor: default; }
-    .version { margin: 6px 0 0; text-align: center; font-size: .8rem; color: #8a96a9; }
-    .offline-status { margin: 10px 0 0; text-align: center; font-size: .9rem; font-weight: 700; color: #62718a; }
+
+    .settings { position: absolute; top: 14px; right: 14px; z-index: 10; }
+
+    .settings-btn {
+      width: 46px;
+      height: 46px;
+      border: 1px solid #dfe7f3;
+      border-radius: 14px;
+      background: #ffffffe6;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 3px 10px #243a5a14;
+    }
+
+    .settings-menu {
+      position: absolute;
+      top: 54px;
+      right: 0;
+      display: grid;
+      width: min(280px, calc(100vw - 28px));
+      gap: 4px;
+      padding: 8px;
+      border: 1px solid #dfe7f3;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 14px 34px #1a2c4c33;
+    }
+
+    .settings-menu[hidden] { display: none; }
+
+    .menu-item {
+      display: block;
+      width: 100%;
+      padding: 12px 14px;
+      border: 0;
+      border-radius: 12px;
+      background: none;
+      color: #183976;
+      font: inherit;
+      font-weight: 800;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .menu-item:hover, .menu-item:focus-visible { background: #eef4ff; outline: none; }
+    .menu-item:disabled { opacity: .6; cursor: default; }
+    .menu-item.danger { color: #c13030; }
+    .menu-item.danger:hover, .menu-item.danger:focus-visible { background: #ffeded; }
+    .menu-item[hidden] { display: none; }
+
+    .dialog-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .version { margin: 4px 14px 6px; font-size: .8rem; color: #8a96a9; }
+    .offline-status { margin: 6px 14px 0; font-size: .85rem; font-weight: 700; color: #62718a; }
+    .offline-status:empty { display: none; }
 
     .download {
       display: inline-block;
@@ -471,13 +523,27 @@
       </a>
     </nav>
     <p class="footer-note">Vælg et spil og optjen stjerner.</p>
-    <p class="download-wrap">
-      <button class="download" id="install" type="button">📲 Hent som app</button>
-      <button class="download secondary" id="upgrade" type="button">🔄 Opgrader</button>
-    </p>
-    <p class="offline-status" id="offline-status" aria-live="polite"></p>
-    <p class="version" id="version">Version 1.2.1</p>
   </main>
+
+  <div class="settings">
+    <button class="settings-btn" id="settings-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="settings-menu" aria-label="Indstillinger">⚙️</button>
+    <div class="settings-menu" id="settings-menu" hidden>
+      <button class="menu-item" id="upgrade" type="button">🔄 Opgrader</button>
+      <button class="menu-item" id="install" type="button">📲 Hent som app</button>
+      <button class="menu-item danger" id="reset" type="button">🗑️ Nulstil stjerner</button>
+      <p class="offline-status" id="offline-status" aria-live="polite"></p>
+      <p class="version" id="version">Version 1.3.0</p>
+    </div>
+  </div>
+
+  <dialog id="reset-dialog">
+    <h2>Nulstil stjerner?</h2>
+    <p>Alle stjerner og fremskridt i spillene bliver slettet på denne enhed. Det kan ikke fortrydes.</p>
+    <div class="dialog-actions">
+      <button type="button" class="download secondary" id="reset-cancel">Annuller</button>
+      <button type="button" class="download danger" id="reset-ok">Ja, nulstil</button>
+    </div>
+  </dialog>
 
   <dialog id="help">
     <h2>Sådan gemmer du spillene</h2>
@@ -576,6 +642,7 @@
           if (!ready) throw new Error("timeout");
           await new Promise((r) => setTimeout(r, 500));
           sessionStorage.setItem("upgraded", "1");
+          sessionStorage.setItem("upgraded-open", "1");
           location.reload();
         }
       } catch {
@@ -586,14 +653,51 @@
     });
 
     document.getElementById("help-close").addEventListener("click", () => help.close());
+
+    // Indstillinger (dropdown øverst til højre)
+    const settingsBtn = document.getElementById("settings-btn");
+    const settingsMenu = document.getElementById("settings-menu");
+    function setMenu(open) {
+      settingsMenu.hidden = !open;
+      settingsBtn.setAttribute("aria-expanded", String(open));
+    }
+    settingsBtn.addEventListener("click", () => setMenu(settingsMenu.hidden));
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".settings, dialog")) setMenu(false);
+    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
+    if (sessionStorage.getItem("upgraded-open")) {
+      sessionStorage.removeItem("upgraded-open");
+      setMenu(true);
+    }
+
+    // Nulstil stjerner og fremskridt. Nye spil skal bruge et præfiks herfra til deres nøgler i localStorage.
+    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-"];
+    const resetDialog = document.getElementById("reset-dialog");
+    document.getElementById("reset").addEventListener("click", () => resetDialog.showModal());
+    document.getElementById("reset-cancel").addEventListener("click", () => resetDialog.close());
+    document.getElementById("reset-ok").addEventListener("click", () => {
+      try {
+        for (const key of Object.keys(localStorage)) {
+          if (GAME_KEY_PREFIXES.some((p) => key.startsWith(p))) localStorage.removeItem(key);
+        }
+      } catch { /* ingen lagring */ }
+      resetDialog.close();
+      refreshStars();
+      setMenu(true);
+      statusEl.textContent = "🗑️ Stjernerne er nulstillet.";
+    });
   </script>
   <script>
-    for (const badge of document.querySelectorAll(".stars")) {
-      let count = 0;
-      try { count = Number(localStorage.getItem(badge.dataset.store)) || 0; } catch { count = 0; }
-      badge.querySelector("span").textContent = count;
-      badge.setAttribute("aria-label", `Stjerner: ${count}`);
+    function refreshStars() {
+      for (const badge of document.querySelectorAll(".stars")) {
+        let count = 0;
+        try { count = Number(localStorage.getItem(badge.dataset.store)) || 0; } catch { count = 0; }
+        badge.querySelector("span").textContent = count;
+        badge.setAttribute("aria-label", `Stjerner: ${count}`);
+      }
     }
+    refreshStars();
   </script>
 </body>
 </html>
