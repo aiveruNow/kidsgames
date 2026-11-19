@@ -601,6 +601,26 @@
       margin: 2px auto 0;
     }
 
+    .hint-replay { display: block; margin: 6px auto 4px; }
+
+    .finger {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+      animation: fold-finger .45s ease-in-out both;
+    }
+
+    .count-num { animation: show-count .35s ease-out both; }
+
+    @keyframes fold-finger {
+      from { transform: scaleY(1); }
+      to { transform: scaleY(.38); fill: #f4b57f; }
+    }
+
+    @keyframes show-count {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .answers-title {
       margin: 18px 0 12px;
       text-align: center;
@@ -910,6 +930,8 @@
       .answer-number { font-size: 1.2rem; }
       .feedback { grid-column: 1; grid-row: 5; min-height: 20px; font-size: .8rem; }
       .lake { grid-column: 2; grid-row: 1 / span 5; height: 100%; }
+      /* Regnehjælpen lægges over søen, så den ikke dækker boldene til venstre */
+      .math-hint { left: auto; width: 54vw; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -918,6 +940,7 @@
       .stars.bump, .star-big, .star-popup-card, .sparkle { animation: none !important; }
       .sparkle { display: none; }
       .lake .waves, .lake .base-ripple, .lake.splash .ring, .lake.splash .water-body { animation: none !important; }
+      .finger, .count-num { animation: none !important; }
     }
   </style>
 </head>
@@ -1057,7 +1080,8 @@
         </div>
         <div class="math-hint" id="mathHint" hidden>
           <p id="hintText"></p>
-          <svg id="numberLine" viewBox="0 0 640 120" role="img"></svg>
+          <svg id="numberLine" viewBox="0 0 640 140" role="img"></svg>
+          <button class="hint-toggle hint-replay" id="hintReplay" type="button">🔁 Tæl igen</button>
         </div>
         <p class="answers-title">Træk en bold tilbage og skyd mod kurven</p>
         <div class="answers" id="answers" aria-label="Mulige svar"></div>
@@ -1248,26 +1272,36 @@
 
     function updateHint() {
       const isAddition = operation === "add";
-      const movement = isAddition ? "frem" : "tilbage";
-      const sign = isAddition ? "+" : "−";
-      const startX = 40 + first / maximum * 560;
-      const endX = 40 + answer / maximum * 560;
-      const middleX = (startX + endX) / 2;
-      hintText.textContent = `Start på ${first}, og hop ${second} ${movement}. Følg pilen på tallinjen.`;
-      numberLine.setAttribute("aria-label", `Tallinje fra 0 til ${maximum}. Start ved ${first}, hop ${sign}${second}.`);
+      // Største tal i hovedet, mindste tal på fingrene, og så tælles der op (plus) eller ned (minus)
+      const head = isAddition ? Math.max(first, second) : first;
+      const fingers = isAddition ? Math.min(first, second) : second;
+      const step = isAddition ? 1 : -1;
+      hintText.textContent = isAddition
+        ? `Tag det største tal, ${head}, i hovedet. Tag det mindste, ${fingers}, på fingrene, og tæl op: Hvad kommer efter ${head}?`
+        : `Tag ${head} i hovedet. Tag ${fingers} på fingrene, og tæl baglæns: Hvad kommer før ${head}?`;
+      numberLine.setAttribute("aria-label", `${head} i hovedet og ${fingers} fingre. Tæl ${isAddition ? "op" : "baglæns"} fra ${head}.`);
+
+      const slot = Math.min(52, 410 / fingers);
+      const fingerWidth = slot * .68;
+      const startX = 215 + (410 - slot * fingers) / 2;
+      let hand = "";
+      for (let i = 1; i <= fingers; i++) {
+        const number = head + step * i;
+        const centerX = startX + slot * (i - 0.5);
+        const delay = (0.6 + (i - 1) * 0.9).toFixed(1);
+        const isLast = i === fingers;
+        hand += `
+          <rect class="finger" x="${(centerX - fingerWidth / 2).toFixed(1)}" y="22" width="${fingerWidth.toFixed(1)}" height="74" rx="${(fingerWidth / 2).toFixed(1)}" fill="#ffcf9e" stroke="#e0a56b" stroke-width="2" style="animation-delay:${delay}s"/>
+          <text class="count-num" x="${centerX.toFixed(1)}" y="128" text-anchor="middle" font-size="${fingers > 7 ? 22 : 28}" font-weight="900" fill="${isLast ? "#13804f" : "#2879bd"}" font-family="Trebuchet MS, sans-serif" style="animation-delay:${delay}s">${number}</text>`;
+      }
+
       numberLine.innerHTML = `
-        <title>Tallinje med et regnehop</title>
-        <defs>
-          <marker id="hop-pil" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="#2879bd"/>
-          </marker>
-        </defs>
-        <line x1="40" y1="78" x2="600" y2="78" stroke="#9db2cb" stroke-width="4" stroke-linecap="round"/>
-        <path d="M${startX} 69 Q${middleX} 20 ${endX} 69" fill="none" stroke="#2879bd" stroke-width="3" marker-end="url(#hop-pil)"/>
-        <circle cx="${startX}" cy="78" r="8" fill="#e99a37" stroke="#fff" stroke-width="3"/>
-        <circle cx="${endX}" cy="78" r="8" fill="#20a36a" stroke="#fff" stroke-width="3"/>
-        <text x="40" y="108" text-anchor="middle" fill="#708099" font-size="15" font-family="Trebuchet MS, sans-serif">0</text>
-        <text x="600" y="108" text-anchor="middle" fill="#708099" font-size="15" font-family="Trebuchet MS, sans-serif">${maximum}</text>`;
+        <title>Tæl videre fra ${head} med ${fingers} fingre</title>
+        <rect x="18" y="14" width="160" height="112" rx="22" fill="#fff" stroke="#9ab8e9" stroke-width="3"/>
+        <text x="98" y="56" text-anchor="middle" font-size="38">🧠</text>
+        <text x="98" y="108" text-anchor="middle" font-size="46" font-weight="900" fill="#2764c5" font-family="Trebuchet MS, sans-serif">${head}</text>
+        <rect x="${(startX - 6).toFixed(1)}" y="92" width="${(slot * fingers + 12).toFixed(1)}" height="14" rx="7" fill="#f4b57f"/>
+        ${hand}`;
     }
 
     function startRound() {
@@ -1931,6 +1965,7 @@
       if (isCorrect) nextButton.focus();
     }
 
+    document.querySelector("#hintReplay").addEventListener("click", updateHint);
     hintToggle.addEventListener("click", () => {
       const isOpening = mathHint.hidden;
       mathHint.hidden = !isOpening;
