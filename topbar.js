@@ -27,6 +27,39 @@
   let sound = read("regnespil-lyd") !== "0";
   const soundOn = () => sound;
 
+  // ---------- Fuld skærm ----------
+  // Installeret som app (manifestet siger "fullscreen"): ingen browserbjælker. I en almindelig browser må siden
+  // først gå i fuld skærm efter et tryk, så første tryk på hver side starter den, medmindre man selv har afsluttet den.
+  const root = document.documentElement;
+  const requestFs = root.requestFullscreen || root.webkitRequestFullscreen;
+  const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
+  const isFull = () => Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+  const installed = matchMedia("(display-mode: fullscreen)").matches || matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+
+  function enterFs() {
+    try {
+      const p = requestFs.call(root);
+      if (p && p.catch) p.catch(() => { /* afvist */ });
+    } catch { /* afvist */ }
+  }
+
+  let wasFull = false;
+  function onFsChange() {
+    const now = isFull();
+    // Hvis barnet selv afslutter fuld skærm, tvinger vi den ikke ind igen på de næste sider
+    if (wasFull && !now && document.visibilityState === "visible") write("regnespil-fuldskaerm", "0");
+    if (now) write("regnespil-fuldskaerm", "1");
+    wasFull = now;
+  }
+
+  if (requestFs && !installed) {
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
+    document.addEventListener("pointerup", () => {
+      if (read("regnespil-fuldskaerm") !== "0" && !isFull()) enterFs();
+    }, true);
+  }
+
   const css = `
 :root { --tb-h: calc(54px + env(safe-area-inset-top, 0px)); }
 .tb {
@@ -205,22 +238,20 @@
     paintSound();
     state.soundBtn.addEventListener("click", () => setSound(!sound));
 
-    const root = document.documentElement;
-    const requestFs = root.requestFullscreen || root.webkitRequestFullscreen;
-    const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
     const fsBtn = bar.querySelector(".tb-full");
-    if (requestFs) {
+    if (requestFs && !installed) {
       fsBtn.hidden = false;
-      const sync = () => { fsBtn.textContent = (document.fullscreenElement || document.webkitFullscreenElement) ? "✕  Afslut fuld skærm" : "⛶  Fuld skærm"; };
+      const sync = () => { fsBtn.textContent = isFull() ? "✕  Afslut fuld skærm" : "⛶  Fuld skærm"; };
       fsBtn.addEventListener("click", async () => {
         try {
-          if (document.fullscreenElement || document.webkitFullscreenElement) await exitFs.call(document);
-          else await requestFs.call(root);
+          if (isFull()) await exitFs.call(document);
+          else enterFs();
         } catch { /* fuld skærm blev afvist */ }
         closeMenu();
       });
       document.addEventListener("fullscreenchange", sync);
       document.addEventListener("webkitfullscreenchange", sync);
+      sync();
     }
 
     state.gear.addEventListener("click", () => (state.panel.hidden ? openMenu() : closeMenu()));
