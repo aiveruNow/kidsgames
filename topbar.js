@@ -28,13 +28,13 @@
   const soundOn = () => sound;
 
   // ---------- Fuld skærm ----------
-  // Installeret som app (manifestet siger "fullscreen"): ingen browserbjælker. I en almindelig browser må siden
-  // først gå i fuld skærm efter et tryk, så første tryk på hver side starter den, medmindre man selv har afsluttet den.
+  // Manifestet bruger "standalone" (virker i alle browsere, uden adresselinje). Fuld skærm uden statuslinje kræver et tryk,
+  // så første tryk på hver side starter den, også i den installerede app, medmindre man selv har afsluttet den.
   const root = document.documentElement;
   const requestFs = root.requestFullscreen || root.webkitRequestFullscreen;
   const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
   const isFull = () => Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-  const installed = matchMedia("(display-mode: fullscreen)").matches || matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const alreadyFullscreen = matchMedia("(display-mode: fullscreen)").matches;
 
   function enterFs() {
     try {
@@ -52,7 +52,7 @@
     wasFull = now;
   }
 
-  if (requestFs && !installed) {
+  if (requestFs && !alreadyFullscreen) {
     document.addEventListener("fullscreenchange", onFsChange);
     document.addEventListener("webkitfullscreenchange", onFsChange);
     document.addEventListener("pointerup", () => {
@@ -239,7 +239,7 @@
     state.soundBtn.addEventListener("click", () => setSound(!sound));
 
     const fsBtn = bar.querySelector(".tb-full");
-    if (requestFs && !installed) {
+    if (requestFs && !alreadyFullscreen) {
       fsBtn.hidden = false;
       const sync = () => { fsBtn.textContent = isFull() ? "✕  Afslut fuld skærm" : "⛶  Fuld skærm"; };
       fsBtn.addEventListener("click", async () => {
