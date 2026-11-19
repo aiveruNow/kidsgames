@@ -1300,7 +1300,7 @@ async function startRound(retry) {
   if (!A || A.ch !== ch) { busy = false; return; }
   A.locked = false; A.lastInput = T; busy = false;
   const lowSay = SAY[ch];
-  say(A.lvl === 0 || A.assist ? `Skriv bogstavet ${lowSay}. ${UP(ch)} som i ${WORDS[ch][0]}` : `Skriv ${lowSay}`);
+  say(A.lvl === 0 || A.assist ? `Skriv bogstavet ${lowSay}, som i ${WORDS[ch][0]}` : `Skriv ${lowSay}`);
   if (A.lvl === 0 || A.assist) setTimeout(() => { if (A && A.ch === ch && !A.locked && A.si === 0 && A.pid === null && !A.demo && !A.st[0].segs.length) startDemo(); }, 900);
 }
 
@@ -1329,7 +1329,7 @@ async function onSuccess() {
   burst(cx, cy, clean ? 46 : 24, { shape: "star", v0: 80, v1: 300, up: 80 });
   if (clean) confetti(36);
   const word = WORDS[ch];
-  caption(`${UP(ch)} ${ch} som i ${word[0]} ${word[1]}`);
+  caption(`${G.case === "l" ? ch : UP(ch)} som i ${word[0]} ${word[1]}`);
   const praise = clean ? (G.streak >= 3 && G.streak % 3 === 0 ? `🔥 ${G.streak} i træk!` : "Perfekt!") : pick(PRAISE);
   floatText(cx, cy - P * .3, praise, { size: P * .1, color: clean ? "#ffe066" : "#fff" });
   say(clean ? `${praise.replace("🔥 ", "")}` : pick(PRAISE));
@@ -1492,7 +1492,7 @@ $("segOrder").addEventListener("click", e => {
   const v = e.target.dataset && e.target.dataset.v; if (!v || v === G.order) return;
   G.order = v; G.idx = 0; G.review = []; saveG(); paintSegs();
 });
-$("hearBtn").addEventListener("click", () => { if (A) say(`${SAY[A.ch]}. ${UP(A.ch)} som i ${WORDS[A.ch][0]}`); });
+$("hearBtn").addEventListener("click", () => { if (A) say(`${SAY[A.ch]}, som i ${WORDS[A.ch][0]}`); });
 $("hintBtn").addEventListener("click", () => startDemo());
 
 // ---------- Hovedløkke ----------
