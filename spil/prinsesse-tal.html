@@ -92,6 +92,11 @@
     .parent { display: flex; align-items: center; gap: 8px; color: #8a6b99; font-size: .85rem; font-weight: 800; margin-top: 6px; }
     .parent button { width: 34px; height: 34px; border-radius: 10px; background: #ffffffb0; font-size: 1.2rem; font-weight: 900; }
 
+    /* Egne spil: samling af prinsessting */
+    .collect { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-size: 1.7rem; line-height: 1; }
+    .collect .locked { filter: grayscale(1) brightness(1.6); opacity: .3; }
+    .act .parent { justify-content: center; }
+
     /* ---------- Aktiviteter ---------- */
     .act { display: grid; gap: 14px; }
     .ask { display: flex; align-items: center; gap: 10px; }
@@ -250,8 +255,15 @@
       set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ingen lagring */ } }
     };
 
+    // Hver leg er et eget spil: ?leg=learn, make, find eller count. Uden ?leg= vises den gamle forside med alle fire.
+    const MODES = { learn: "Lær tallene", make: "Smykkeskrinet", find: "Find tallet", count: "Hvor mange?" };
+    const legParam = new URLSearchParams(location.search).get("leg");
+    const MODE = Object.prototype.hasOwnProperty.call(MODES, legParam) ? legParam : null;
+    const STAR_KEY = MODE ? `prinsesse-${MODE}-stars` : "prinsesse-stars";
+    if (MODE) document.title = `Prinsesse Riyana: ${MODES[MODE]}`;
+
     const S = {
-      stars: Number(store.get("prinsesse-stars", 0)) || 0,
+      stars: Number(store.get(STAR_KEY, 0)) || 0,
       max: Math.min(10, Math.max(2, Number(store.get("prinsesse-max", 3)) || 3)),
       muted: !!store.get("prinsesse-mute", false),
       streak: 0,
@@ -406,7 +418,7 @@
       if (first) {
         if (++S.streak >= 3 && S.max < 10) { S.max++; S.streak = 0; levelUp = true; }
       } else S.streak = 0;
-      store.set("prinsesse-stars", S.stars);
+      store.set(STAR_KEY, S.stars);
       store.set("prinsesse-max", S.max);
       $("#starN").textContent = S.stars;
       await speak(line);
@@ -436,7 +448,7 @@
       screen = name;
       stopSpeech();
       $("#pop").hidden = true;
-      $("#back").hidden = name === "hub";
+      $("#back").hidden = name === "hub" || !!MODE;
       ({ hub: hubView, learn: learnView, make: makeRound, find: findRound, count: countRound })[name]();
     }
 
@@ -454,15 +466,38 @@
     });
 
     function scaffold() {
+      const got = Math.min(ACC.length, Math.floor(S.stars / 3));
+      // Egne spil viser samlingen af prinsessting og et valg af talområde (forsiden gør det ellers)
+      const collect = MODE && MODE !== "learn"
+        ? `<div class="collect" aria-label="Dine prinsessting">${ACC.map((a, i) => `<span class="${i < got ? "" : "locked"}">${a.e}</span>`).join("")}</div>`
+        : "";
+      const range = MODE && MODE !== "learn"
+        ? `<div class="parent">Tal: 0–${S.max}
+            <button id="lvlDown" type="button" aria-label="Færre tal">−</button>
+            <button id="lvlUp" type="button" aria-label="Flere tal">+</button>
+          </div>`
+        : "";
       view.innerHTML = `
         <section class="act">
           <div class="ask">
             <div class="avatar" id="av">👸</div>
             <button class="bubble" id="again" type="button"><span class="spk">🔊</span><span id="askText"></span></button>
           </div>
+          ${collect}
           <div class="stage" id="stage"></div>
+          ${range}
         </section>`;
       $("#again").addEventListener("click", () => speak(askSpeech));
+      if (range) {
+        const setMax = d => {
+          S.max = Math.min(10, Math.max(2, S.max + d));
+          S.streak = 0;
+          store.set("prinsesse-max", S.max);
+          go(MODE);
+        };
+        $("#lvlDown").addEventListener("click", () => setMax(-1));
+        $("#lvlUp").addEventListener("click", () => setMax(1));
+      }
       return $("#stage");
     }
 
@@ -679,7 +714,8 @@
 
     paintMute();
     $("#starN").textContent = S.stars;
-    hubView();
+    if (MODE) go(MODE);
+    else hubView();
   </script>
 </body>
 </html>

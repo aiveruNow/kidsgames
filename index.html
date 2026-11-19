@@ -10,7 +10,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Regnespil">
-  <title>Regnespil — vælg et spil</title>
+  <title>Regnespil</title>
   <style>
     :root {
       color-scheme: light;
@@ -55,6 +55,154 @@
       font-size: clamp(1rem, 3vw, 1.2rem);
       font-weight: 700;
     }
+
+    [hidden] { display: none !important; }
+
+    .home-link {
+      display: inline-block;
+      margin-bottom: 4px;
+      padding: 9px 15px;
+      border: 1px solid #dfe7f3;
+      border-radius: 14px;
+      background: #ffffffcc;
+      color: #27426f;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 3px 10px #243a5a14;
+    }
+
+    .choose {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .who {
+      display: grid;
+      min-height: min(56vh, 380px);
+      place-items: center;
+      align-content: center;
+      gap: 10px;
+      padding: 24px;
+      border-radius: 36px;
+      background: linear-gradient(160deg, var(--a), var(--b));
+      box-shadow: 0 10px 0 color-mix(in srgb, var(--b) 70%, #000), 0 22px 40px #233c6026;
+      color: #fff;
+      text-decoration: none;
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .who:hover, .who:focus-visible { transform: translateY(-5px); outline: none; }
+
+    .who:active {
+      transform: translateY(6px);
+      box-shadow: 0 4px 0 color-mix(in srgb, var(--b) 70%, #000), 0 10px 20px #233c6026;
+    }
+
+    .who-ari { --a: #ffd27a; --b: #f08a1c; }
+    .who-riyana { --a: #ff9ec4; --b: #b832d6; }
+
+    .who-icon {
+      font-size: clamp(5.5rem, 22vw, 10rem);
+      line-height: 1;
+      filter: drop-shadow(0 8px 10px #0003);
+    }
+
+    .who-name {
+      font-size: clamp(2rem, 8vw, 3.4rem);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      text-shadow: 0 3px 0 #0003;
+    }
+
+    .who-stars {
+      padding: 6px 16px;
+      border-radius: 99px;
+      background: #ffffffd9;
+      color: #8a5a00;
+      font-size: 1.2rem;
+      font-weight: 900;
+      box-shadow: 0 4px 10px #0002;
+    }
+
+    /* Stjernehelt: samlet antal stjerner øverst på barnets side */
+    .star-hero {
+      position: relative;
+      display: flex;
+      width: min(100%, 360px);
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 14px auto 6px;
+      padding: 10px 18px 10px 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #fff7d6, #ffe9a3);
+      border: 3px solid #ffd54a;
+      box-shadow: 0 10px 28px #f0a60033, inset 0 2px 0 #fff;
+      animation: hero-pulse 2.8s ease-in-out infinite;
+    }
+
+    .star-glow {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      width: 130px;
+      height: 130px;
+      margin-top: -65px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(from 0deg, #fff3b0aa 0 10deg, #fff3b000 10deg 30deg);
+      -webkit-mask: radial-gradient(circle, #000 25%, transparent 70%);
+      mask: radial-gradient(circle, #000 25%, transparent 70%);
+      animation: spin 9s linear infinite;
+      pointer-events: none;
+    }
+
+    .big-star {
+      position: relative;
+      z-index: 1;
+      width: 86px;
+      height: auto;
+      flex: none;
+      filter: drop-shadow(0 5px 8px #e0900066);
+      animation: star-bob 2.2s ease-in-out infinite;
+    }
+
+    .star-count {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      line-height: 1;
+      color: #a05a00;
+    }
+
+    .star-count b {
+      font-size: clamp(3rem, 14vw, 4.4rem);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      text-shadow: 0 3px 0 #fff, 0 6px 0 #f7c94b66;
+    }
+
+    .star-count small { font-size: 1.1rem; font-weight: 800; color: #b9770e; }
+    .star-count.pop b { animation: count-pop .6s ease-out; }
+
+    .twinkle {
+      position: absolute;
+      z-index: 2;
+      font-size: 1.3rem;
+      pointer-events: none;
+      animation: twinkle 2.4s ease-in-out infinite;
+    }
+
+    .twinkle.t1 { left: 4px; top: -10px; }
+    .twinkle.t2 { right: 14px; top: -14px; animation-delay: -.8s; }
+    .twinkle.t3 { right: -6px; bottom: 8px; animation-delay: -1.5s; }
+    .twinkle.t4 { left: 62px; bottom: -12px; animation-delay: -.4s; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes star-bob { 0%, 100% { transform: translateY(0) rotate(-6deg) scale(1); } 50% { transform: translateY(-5px) rotate(6deg) scale(1.06); } }
+    @keyframes hero-pulse { 0%, 100% { box-shadow: 0 10px 28px #f0a60033, inset 0 2px 0 #fff; } 50% { box-shadow: 0 12px 38px #f0a60066, 0 0 0 6px #ffe08a55, inset 0 2px 0 #fff; } }
+    @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); } 50% { opacity: 1; transform: scale(1.15) rotate(25deg); } }
+    @keyframes count-pop { 0% { transform: scale(1); } 45% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
     .games {
       display: grid;
@@ -286,14 +434,38 @@
 </head>
 <body>
   <main class="app">
+    <a class="home-link" id="home-link" href="index.html" hidden>🏠 Hjem</a>
     <header>
-      <h1>Regnespil</h1>
-      <p class="subtitle">Hvad har du lyst til at øve i dag?</p>
+      <h1 id="page-title">Regnespil</h1>
+      <div class="star-hero" id="star-hero" role="status" hidden>
+        <div class="star-glow" aria-hidden="true"></div>
+        <svg class="big-star" viewBox="0 0 100 96" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="star-fill" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#fff3a0"/>
+              <stop offset=".55" stop-color="#ffc928"/>
+              <stop offset="1" stop-color="#f29a00"/>
+            </linearGradient>
+          </defs>
+          <polygon points="50,3 62,35 97,36 69,57 79,91 50,71 21,91 31,57 3,36 38,35" fill="url(#star-fill)" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+          <polygon points="50,14 58,36 80,37 63,50 69,72 50,59 31,72 37,50 20,37 42,36" fill="#fff" opacity=".28"/>
+        </svg>
+        <div class="star-count" id="star-count"><b id="star-total">0</b><small>stjerner</small></div>
+        <span class="twinkle t1" aria-hidden="true">✨</span>
+        <span class="twinkle t2" aria-hidden="true">✨</span>
+        <span class="twinkle t3" aria-hidden="true">⭐</span>
+        <span class="twinkle t4" aria-hidden="true">✨</span>
+      </div>
+      <p class="subtitle" id="page-subtitle">Hvem skal spille?</p>
     </header>
 
-    <nav class="games" aria-label="Vælg spil">
-      <h2 class="group">Til alle</h2>
-      <a class="game" href="spil/plus-minus.html">
+    <nav class="choose" id="choose" aria-label="Vælg hvem der skal spille">
+      <a class="who who-ari" href="?barn=ari"><span class="who-icon" aria-hidden="true">🦁</span><span class="who-name">Ari</span><span class="who-stars" data-kid="ari">⭐ <b>0</b></span></a>
+      <a class="who who-riyana" href="?barn=riyana"><span class="who-icon" aria-hidden="true">👸</span><span class="who-name">Riyana</span><span class="who-stars" data-kid="riyana">⭐ <b>0</b></span></a>
+    </nav>
+
+    <nav class="games" id="games" aria-label="Vælg spil" hidden>
+      <a class="game" data-for="ari" href="spil/plus-minus.html">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <defs>
             <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
@@ -343,8 +515,7 @@
         </div>
       </a>
 
-      <h2 class="group">Ari</h2>
-      <a class="game" href="spil/tabeller.html">
+      <a class="game" data-for="ari" href="spil/tabeller.html">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <rect width="500" height="340" fill="#e3effc"/>
           <g fill="#c4d6ee">
@@ -410,7 +581,7 @@
           </div>
         </div>
       </a>
-      <a class="game" href="spil/loeven-leo.html">
+      <a class="game" data-for="ari" href="spil/loeven-leo.html">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <rect width="500" height="340" fill="#d9f2c4"/>
           <circle cx="430" cy="60" r="30" fill="#ffd86b"/>
@@ -449,7 +620,7 @@
           </div>
         </div>
       </a>
-      <a class="game" href="spil/leos-maal.html">
+      <a class="game" data-for="ari" href="spil/leos-maal.html">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <rect width="500" height="340" fill="#4aa845"/>
           <path d="M0 220H500V250H0zM0 280H500V310H0z" fill="#58bd52"/>
@@ -493,19 +664,17 @@
           </div>
         </div>
       </a>
-      <h2 class="group">Riyana</h2>
-      <a class="game" href="spil/prinsesse-tal.html">
+      <a class="game" data-for="riyana" href="spil/prinsesse-tal.html?leg=learn">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <defs>
-            <linearGradient id="pk" x1="0" x2="1" y1="0" y2="1">
+            <linearGradient id="pk1" x1="0" x2="1" y1="0" y2="1">
               <stop offset="0" stop-color="#ffd6ec"/>
               <stop offset="1" stop-color="#d8c4ff"/>
             </linearGradient>
           </defs>
-          <rect width="500" height="340" fill="url(#pk)"/>
+          <rect width="500" height="340" fill="url(#pk1)"/>
           <g font-size="34"><text x="40" y="60">✨</text><text x="440" y="70">✨</text><text x="420" y="300">💖</text><text x="30" y="300">💖</text></g>
-          <g class="bob"><text x="250" y="200" font-size="130" text-anchor="middle">👸</text></g>
-          <g font-size="36" text-anchor="middle"><text class="bounce" x="95" y="130">💎</text><text x="405" y="130">💄</text><text x="110" y="215">🎀</text><text x="395" y="215">💍</text></g>
+          <g class="bob"><text x="250" y="190" font-size="120" text-anchor="middle">👸</text></g>
           <g font-family="Trebuchet MS, sans-serif" font-weight="900" font-size="38" fill="#fff" text-anchor="middle">
             <g class="bounce"><rect x="130" y="244" width="64" height="64" rx="16" fill="#ec4899"/><text x="162" y="291">1</text></g>
             <g><rect x="218" y="244" width="64" height="64" rx="16" fill="#f97316"/><text x="250" y="291">2</text></g>
@@ -513,16 +682,85 @@
           </g>
         </svg>
         <div class="info">
-          <h2>Prinsesse Riyana</h2>
-          <p>Lær tallene 0–10: tæl smykker, find tal og vind prinsesseting.</p>
+          <h2>Lær tallene</h2>
+          <p>Tryk på et tal, og hør prinsessen tælle det op.</p>
           <div class="info-foot">
             <span class="play">Spil nu →</span>
-            <span class="stars" data-store="prinsesse-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
+      <a class="game" data-for="riyana" href="spil/prinsesse-tal.html?leg=make">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="pk2" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#d8f3ff"/>
+              <stop offset="1" stop-color="#e9d5ff"/>
+            </linearGradient>
+          </defs>
+          <rect width="500" height="340" fill="url(#pk2)"/>
+          <rect x="120" y="170" width="260" height="120" rx="26" fill="#fff" stroke="#f9a8d4" stroke-width="6" stroke-dasharray="14 10"/>
+          <g font-size="64" text-anchor="middle"><text class="bounce" x="180" y="250">💎</text><text x="250" y="250">💎</text><text x="320" y="250">💎</text></g>
+          <g font-size="48" text-anchor="middle"><text x="110" y="110">💍</text><text x="250" y="90">👑</text><text x="390" y="110">🎀</text></g>
+          <g font-family="Trebuchet MS, sans-serif" font-weight="900" font-size="46" fill="#a3267f" text-anchor="middle"><text x="250" y="330">3</text></g>
+        </svg>
+        <div class="info">
+          <h2>Smykkeskrinet</h2>
+          <p>Læg det rigtige antal smykker i skrinet.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="prinsesse-make-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
+      <a class="game" data-for="riyana" href="spil/prinsesse-tal.html?leg=find">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="pk3" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#ffe4f1"/>
+              <stop offset="1" stop-color="#cfe8ff"/>
+            </linearGradient>
+          </defs>
+          <rect width="500" height="340" fill="url(#pk3)"/>
+          <g font-family="Trebuchet MS, sans-serif" font-weight="900" font-size="70" fill="#fff" text-anchor="middle">
+            <g><rect x="60" y="150" width="104" height="130" rx="22" fill="#3b82f6"/><text x="112" y="244">4</text></g>
+            <g class="bounce"><rect x="198" y="150" width="104" height="130" rx="22" fill="#ec4899"/><text x="250" y="244">2</text></g>
+            <g><rect x="336" y="150" width="104" height="130" rx="22" fill="#22a653"/><text x="388" y="244">5</text></g>
+          </g>
+          <g class="bob"><text x="250" y="110" font-size="80" text-anchor="middle">🔍</text></g>
+          <g font-size="34"><text x="40" y="60">✨</text><text x="440" y="60">✨</text></g>
+        </svg>
+        <div class="info">
+          <h2>Find tallet</h2>
+          <p>Find det tal, som prinsessen spørger efter.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="prinsesse-find-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
+      <a class="game" data-for="riyana" href="spil/prinsesse-tal.html?leg=count">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="pk4" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#fff0c9"/>
+              <stop offset="1" stop-color="#ffd6ec"/>
+            </linearGradient>
+          </defs>
+          <rect width="500" height="340" fill="url(#pk4)"/>
+          <g font-size="64" text-anchor="middle"><text class="bounce" x="140" y="150">💄</text><text x="250" y="150">💄</text><text x="360" y="150">💄</text><text x="195" y="240">💄</text><text x="305" y="240">💄</text></g>
+          <g font-family="Trebuchet MS, sans-serif" font-weight="900" font-size="70" fill="#a3267f" text-anchor="middle"><text x="250" y="320">?</text></g>
+        </svg>
+        <div class="info">
+          <h2>Hvor mange?</h2>
+          <p>Tæl tingene, og vælg det rigtige tal.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="prinsesse-count-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
           </div>
         </div>
       </a>
     </nav>
-    <p class="footer-note">Vælg et spil og optjen stjerner.</p>
+    <p class="footer-note" id="footer-note" hidden>Vælg et spil og optjen stjerner.</p>
   </main>
 
   <div class="settings">
@@ -532,7 +770,7 @@
       <button class="menu-item" id="install" type="button">📲 Hent som app</button>
       <button class="menu-item danger" id="reset" type="button">🗑️ Nulstil stjerner</button>
       <p class="offline-status" id="offline-status" aria-live="polite"></p>
-      <p class="version" id="version">Version 1.4.0</p>
+      <p class="version" id="version">Version 1.7.0</p>
     </div>
   </div>
 
@@ -684,6 +922,7 @@
       } catch { /* ingen lagring */ }
       resetDialog.close();
       refreshStars();
+      refreshTotals();
       setMenu(true);
       statusEl.textContent = "🗑️ Stjernerne er nulstillet.";
     });
@@ -698,6 +937,71 @@
       }
     }
     refreshStars();
+
+    // Samlet antal stjerner pr. barn. Nye spil skal tilføje deres stjernenøgle her.
+    const STAR_KEYS = {
+      ari: ["talbasket-stars", "tabbi-stars", "leo-stars", "maal-stars"],
+      riyana: ["prinsesse-stars", "prinsesse-make-stars", "prinsesse-find-stars", "prinsesse-count-stars"]
+    };
+    function totalStars(barn) {
+      let sum = 0;
+      for (const key of STAR_KEYS[barn]) {
+        try { sum += Number(localStorage.getItem(key)) || 0; } catch { /* ingen lagring */ }
+      }
+      return sum;
+    }
+    for (const chip of document.querySelectorAll(".who-stars")) {
+      chip.querySelector("b").textContent = totalStars(chip.dataset.kid);
+    }
+
+    // Bruges efter nulstilling, så totalerne følger med
+    function refreshTotals() {
+      for (const chip of document.querySelectorAll(".who-stars")) {
+        chip.querySelector("b").textContent = totalStars(chip.dataset.kid);
+      }
+      const heroKid = new URLSearchParams(location.search).get("barn");
+      if (Object.prototype.hasOwnProperty.call(STAR_KEYS, heroKid)) {
+        document.getElementById("star-total").textContent = totalStars(heroKid);
+      }
+    }
+
+    // To visninger i samme side: valg af barn (uden parameter) og barnets spil (?barn=ari eller ?barn=riyana)
+    const KIDS = { ari: { name: "Ari", icon: "🦁" }, riyana: { name: "Riyana", icon: "👸" } };
+    const kidParam = new URLSearchParams(location.search).get("barn");
+    const kid = Object.prototype.hasOwnProperty.call(KIDS, kidParam) ? KIDS[kidParam] : null;
+    if (kid) {
+      document.getElementById("choose").hidden = true;
+      document.getElementById("games").hidden = false;
+      document.getElementById("footer-note").hidden = false;
+      document.getElementById("home-link").hidden = false;
+      document.getElementById("page-title").textContent = `${kid.icon} ${kid.name}`;
+      document.getElementById("page-subtitle").textContent = "Hvad har du lyst til at spille?";
+      document.title = `Regnespil — ${kid.name}`;
+      for (const card of document.querySelectorAll("[data-for]")) {
+        card.hidden = !card.dataset.for.split(" ").includes(kidParam);
+      }
+
+      // Stjernehelten tæller op fra 0 til det samlede antal
+      document.getElementById("star-hero").hidden = false;
+      const total = totalStars(kidParam);
+      const totalEl = document.getElementById("star-total");
+      const countEl = document.getElementById("star-count");
+      document.getElementById("star-hero").setAttribute("aria-label", `${kid.name} har ${total} stjerner`);
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce || total === 0) {
+        totalEl.textContent = total;
+      } else {
+        const duration = Math.min(2200, 600 + total * 40);
+        const start = performance.now();
+        const tick = (now) => {
+          const t = Math.min(1, (now - start) / duration);
+          totalEl.textContent = Math.round(total * (1 - Math.pow(1 - t, 3)));
+          if (t < 1) requestAnimationFrame(tick);
+          else countEl.classList.add("pop");
+        };
+        requestAnimationFrame(tick);
+      }
+    }
   </script>
 </body>
 </html>
