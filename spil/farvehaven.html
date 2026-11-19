@@ -15,6 +15,7 @@
       --ink: #35523b;
       --green: #378753;
       --sun: #ffe27a;
+      --choice-h: clamp(100px, 19vh, 144px);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -124,12 +125,12 @@
       position: absolute;
       z-index: 1;
       right: 5%;
-      bottom: 20%;
+      bottom: 40%;
       left: 5%;
       display: flex;
       align-items: end;
       justify-content: space-between;
-      height: 16%;
+      height: 12%;
       pointer-events: none;
     }
     .decor span {
@@ -199,7 +200,7 @@
     .bunny {
       position: absolute;
       z-index: 4;
-      bottom: 31%;
+      bottom: 40%;
       left: 50%;
       width: clamp(100px, 23vmin, 174px);
       height: auto;
@@ -214,15 +215,21 @@
     .bunny .ear.right { animation-delay: -.6s; }
     .bunny .blink { transform-box: fill-box; transform-origin: center; animation: blink 4s infinite; }
     .bunny.dance { animation: bunnyDance .7s ease-in-out 2; }
+    .bunny .trowel, .bunny .watering-can, .bunny .water-drops { opacity: 0; }
+    .bunny.digging .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyDig .42s ease-in-out 2; }
+    .bunny.digging .trowel { opacity: 1; transform-box: fill-box; transform-origin: 20% 20%; animation: trowelDig .28s ease-in-out 3 alternate; }
+    .bunny.watering .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyWater .5s ease-in-out 2; }
+    .bunny.watering .watering-can { opacity: 1; transform-box: fill-box; transform-origin: 10% 70%; animation: canTip .55s ease-in-out 2; }
+    .bunny.watering .water-drops { opacity: 1; animation: waterSpark .65s ease-out 2; }
 
     .choices {
       position: absolute;
-      z-index: 5;
+      z-index: 6;
       right: 3%;
       bottom: 3%;
       left: 3%;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--choice-count, 3), minmax(0, 1fr));
       align-items: end;
       gap: clamp(6px, 2vw, 14px);
     }
@@ -232,7 +239,7 @@
       justify-items: center;
       gap: 2px;
       min-width: 0;
-      min-height: clamp(100px, 19vh, 144px);
+      min-height: var(--choice-h);
       padding: 6px 3px 8px;
       border: 4px solid #fff;
       border-radius: 24px;
@@ -244,7 +251,9 @@
     }
     .choice:active { transform: translateY(4px) scale(.97); box-shadow: 0 3px 0 #518e5c, 0 7px 12px #315d3833; }
     .choice:disabled { cursor: default; }
-    .choice .flower { width: clamp(48px, 13vmin, 82px); height: auto; overflow: visible; filter: drop-shadow(0 4px 2px #35523b22); }
+    .choice .flower { width: clamp(48px, 13vmin, 82px); height: auto; overflow: visible; filter: drop-shadow(0 4px 2px #35523b22); transform-origin: 50% 80%; animation: choiceFlower 2.4s ease-in-out infinite alternate; }
+    .choice:nth-child(2) .flower { animation-delay: -.8s; }
+    .choice:nth-child(3) .flower { animation-delay: -1.6s; }
     .choice .petal { transform-box: fill-box; transform-origin: center; transition: transform .25s; }
     .choice:hover .petal { transform: scale(1.07); }
     .choice-name { max-width: 100%; overflow: hidden; color: #385840; font-size: clamp(.86rem, 3.4vw, 1.2rem); font-weight: 900; text-overflow: ellipsis; text-transform: capitalize; }
@@ -266,7 +275,7 @@
     .voice-note {
       position: absolute;
       z-index: 7;
-      top: 17%;
+      top: calc(6% + 74px);
       left: 50%;
       width: max-content;
       max-width: 90%;
@@ -281,19 +290,53 @@
       text-align: center;
       transform: translateX(-50%);
     }
-    .garden-note {
+    .flower-bed {
       position: absolute;
-      z-index: 3;
-      right: 8%;
-      bottom: 20%;
-      left: 8%;
-      color: #356548;
-      font-size: clamp(.78rem, 2.8vw, 1rem);
-      font-weight: 900;
-      text-align: center;
-      text-shadow: 0 1px 2px #fff;
+      z-index: 5;
+      right: 7%;
+      bottom: calc(3% + var(--choice-h) + 12px);
+      left: 7%;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: end;
+      gap: clamp(4px, 2vw, 14px);
+      height: clamp(44px, 8vh, 64px);
       pointer-events: none;
     }
+    .plot { position: relative; display: grid; place-items: end center; min-width: 0; height: 100%; }
+    .plot::before {
+      content: "";
+      position: absolute;
+      bottom: 2px;
+      width: clamp(28px, 7vmin, 48px);
+      height: 13px;
+      border-radius: 50%;
+      background: linear-gradient(#a77a4a, #765034);
+      box-shadow: inset 0 3px 4px #57391f66, 0 2px 2px #315d3833;
+    }
+    .plot .seed {
+      position: absolute;
+      z-index: 1;
+      bottom: 9px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #e6c46c;
+      box-shadow: 0 0 0 2px #fff4bd88;
+    }
+    .planted-flower {
+      position: absolute;
+      z-index: 1;
+      bottom: 4px;
+      width: clamp(48px, 12vmin, 70px);
+      height: auto;
+      overflow: visible;
+      filter: drop-shadow(0 4px 2px #315d3840);
+    }
+    .planted-flower .stem { stroke-dasharray: 34; stroke-dashoffset: 34; animation: stemGrow .55s ease-out forwards; }
+    .planted-flower .leaf { transform-box: fill-box; transform-origin: 0 100%; animation: leafGrow .35s .25s cubic-bezier(.2, 1.5, .4, 1) both; }
+    .planted-flower .bloom { transform-box: fill-box; transform-origin: 50% 75%; animation: bloomPop .65s .35s cubic-bezier(.2, 1.5, .4, 1) both; }
+    .plot .sparkle { position: absolute; z-index: 2; top: 0; left: 50%; font-size: clamp(.8rem, 3vmin, 1.2rem); animation: sparkleBurst .8s ease-out both; }
     .reward {
       position: fixed;
       z-index: 75;
@@ -372,6 +415,16 @@
     @keyframes decorSway { from { transform: rotate(-5deg) translateY(0); } to { transform: rotate(5deg) translateY(-4px); } }
     @keyframes bunnyBob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(1deg); } }
     @keyframes bunnyDance { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-14px) rotate(6deg); } }
+    @keyframes bunnyDig { 0%, 100% { transform: translateY(0) rotate(0); } 45% { transform: translateY(7px) rotate(-7deg); } }
+    @keyframes bunnyWater { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(7deg) translateY(-2px); } }
+    @keyframes trowelDig { to { transform: rotate(-28deg) translateY(3px); } }
+    @keyframes canTip { 50% { transform: rotate(-24deg) translateY(-3px); } }
+    @keyframes waterSpark { 0% { opacity: 0; transform: translateY(-4px) scale(.5); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateY(16px) scale(1.1); } }
+    @keyframes stemGrow { to { stroke-dashoffset: 0; } }
+    @keyframes leafGrow { from { opacity: 0; transform: scale(.1) rotate(-20deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+    @keyframes bloomPop { 0% { opacity: 0; transform: scale(.1) rotate(-35deg); } 75% { opacity: 1; transform: scale(1.18) rotate(8deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+    @keyframes sparkleBurst { 0% { opacity: 0; transform: translate(-50%, 8px) scale(.3); } 35% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -22px) scale(1.2) rotate(30deg); } }
+    @keyframes choiceFlower { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-5px) rotate(3deg); } }
     @keyframes earWiggle { to { transform: rotate(7deg); } }
     @keyframes blink { 0%, 46%, 50%, 100% { transform: scaleY(1); } 48% { transform: scaleY(.1); } }
     @keyframes choiceWin { 40% { transform: translateY(-9px) scale(1.06); } 100% { transform: translateY(0) scale(1); } }
@@ -386,11 +439,12 @@
       .step { width: 23px; }
       .speech { top: 4%; min-height: 52px; padding: 5px 8px 5px 12px; }
       .repeat { width: 38px; height: 38px; }
-      .bunny { bottom: 31%; width: clamp(82px, 19vmin, 120px); margin-left: calc(clamp(82px, 19vmin, 120px) / -2); }
-      .choice { min-height: clamp(82px, 18vh, 106px); border-width: 3px; border-radius: 18px; }
+      :root { --choice-h: clamp(82px, 18vh, 106px); }
+      .bunny { bottom: 40%; width: clamp(82px, 19vmin, 120px); margin-left: calc(clamp(82px, 19vmin, 120px) / -2); }
+      .choice { border-width: 3px; border-radius: 18px; }
       .choice .flower { width: clamp(42px, 11vmin, 60px); }
-      .decor { bottom: 18%; }
     }
+    @media (min-height: 900px) { .bunny { bottom: 34%; } }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
@@ -410,7 +464,6 @@
       <div class="hill back" aria-hidden="true"></div>
       <div class="hill" aria-hidden="true"></div>
       <div class="decor" id="decor" aria-hidden="true"></div>
-      <p class="garden-note" id="gardenNote">Hjælp Pjuske med at finde farverne!</p>
 
       <div class="speech">
         <div class="message" id="message" aria-live="polite">Tryk start, så finder vi farver!</div>
@@ -418,6 +471,7 @@
       </div>
 
       <svg class="bunny" id="bunny" viewBox="0 0 180 190" aria-hidden="true">
+        <g class="bunny-body">
         <g class="ear">
           <path d="M56 77C35 52 28 8 44 5c20-4 30 43 29 69z" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
           <path d="M52 56C42 37 40 17 46 14c7 0 15 24 17 39z" fill="#f3a5b4"/>
@@ -440,8 +494,22 @@
         <circle cx="133" cy="137" r="13" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
         <path d="M119 54q10-12 21 0-11 12-21 0zm21 0q11-12 21 0-10 12-21 0z" fill="#f26f8b"/>
         <circle cx="140" cy="54" r="4" fill="#ffcf51"/>
+        <g class="trowel">
+          <path d="M126 119l14 20" fill="none" stroke="#8a603e" stroke-width="5" stroke-linecap="round"/>
+          <path d="M136 136q11 1 11 11-10 5-16-3z" fill="#b9dbe5" stroke="#7898a3" stroke-width="2"/>
+        </g>
+        <g class="watering-can">
+          <rect x="125" y="121" width="21" height="18" rx="4" fill="#61b8c5" stroke="#fff" stroke-width="2"/>
+          <path d="M125 125q-10-5-10 4v5m31-7h10l-7 5" fill="none" stroke="#4b9eaa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M130 120q5-9 12 0" fill="none" stroke="#4b9eaa" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <g class="water-drops" fill="#68c7f0">
+          <circle cx="158" cy="139" r="2.5"/><circle cx="166" cy="145" r="2"/><circle cx="155" cy="150" r="1.8"/>
+        </g>
+        </g>
       </svg>
 
+      <div class="flower-bed" id="flowerBed" role="img" aria-label="Pjuskes blomsterbed: 0 af 5 blomster plantet"></div>
       <div class="choices" id="choices" role="group" aria-label="Vælg en blomst"></div>
       <p class="voice-note" id="voiceNote" aria-live="polite" hidden>Oplæsningen virker ikke lige nu. Tryk på 🔊 for at prøve igen.</p>
       <p class="storage-note" id="storageNote" hidden></p>
@@ -508,6 +576,7 @@
       const DECOR_KEY = "farvehave-decor";
       const COLORS_KEY = "farvehave-colors";
       const steps = [];
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       let totalStars = 0;
       let sessionStars = 0;
       let round = 0;
@@ -526,6 +595,7 @@
       const message = $("message");
       const choices = $("choices");
       const bunny = $("bunny");
+      const flowerBed = $("flowerBed");
       const colorCount = $("colorCount");
       const reward = $("reward");
       const storageNote = $("storageNote");
@@ -579,7 +649,8 @@
       }
 
       function paintProgress() {
-        $("roundLabel").textContent = `Runde ${Math.min(round + 1, ROUNDS)} af ${ROUNDS}`;
+        $("roundLabel").textContent = `Blomster ${round} af ${ROUNDS}`;
+        flowerBed.setAttribute("aria-label", `Pjuskes blomsterbed: ${round} af ${ROUNDS} blomster plantet`);
         steps.forEach((step, index) => step.classList.toggle("done", index < round));
       }
 
@@ -595,9 +666,40 @@
           el.setAttribute("aria-label", item.name);
           garden.append(el);
         });
-        $("gardenNote").textContent = unlocked.length
-          ? `Pjuskes have har fået ${unlocked.length} ${unlocked.length === 1 ? "pynteting" : "pynteting"}!`
-          : "Hjælp Pjuske med at finde farverne!";
+      }
+
+      function resetFlowerBed() {
+        flowerBed.replaceChildren();
+        for (let i = 0; i < ROUNDS; i++) {
+          const plot = document.createElement("span");
+          plot.className = "plot";
+          plot.setAttribute("aria-hidden", "true");
+          plot.innerHTML = '<span class="seed"></span>';
+          flowerBed.append(plot);
+        }
+        flowerBed.setAttribute("aria-label", `Pjuskes blomsterbed: ${round} af ${ROUNDS} blomster plantet`);
+      }
+
+      function plantFlower(color, index) {
+        const plot = flowerBed.children[index];
+        if (!plot) return;
+        plot.classList.add("planted");
+        plot.innerHTML = `<svg class="planted-flower" viewBox="0 0 60 78" aria-hidden="true" focusable="false">
+          <path class="stem" d="M30 43v29" fill="none" stroke="#388653" stroke-width="4" stroke-linecap="round"/>
+          <path class="leaf" d="M30 61C14 47 10 60 28 66z" fill="#58ad62"/>
+          <path class="leaf" d="M30 55c15-16 22-4 3 6z" fill="#70c875"/>
+          <g class="bloom">
+            <g fill="${color.hex}" stroke="#fff" stroke-width="1.5">
+              <circle cx="30" cy="17" r="8"/><circle cx="39" cy="24" r="8"/>
+              <circle cx="35" cy="35" r="8"/><circle cx="25" cy="35" r="8"/>
+              <circle cx="21" cy="24" r="8"/>
+            </g>
+            <circle cx="30" cy="27" r="7" fill="#ffe17c"/>
+            <circle cx="28" cy="26" r="1" fill="#8a6930"/><circle cx="32" cy="26" r="1" fill="#8a6930"/>
+            <path d="M28 29q2 2 4 0" fill="none" stroke="#8a6930" stroke-width="1" stroke-linecap="round"/>
+          </g>
+        </svg><span class="sparkle" aria-hidden="true">✨</span>`;
+        flowerBed.setAttribute("aria-label", `Pjuskes blomsterbed: ${index + 1} af ${ROUNDS} blomster plantet`);
       }
 
       function flowerSvg(color) {
@@ -616,6 +718,7 @@
       function renderChoices() {
         const numberOfChoices = totalStars < 5 ? 2 : 3;
         const options = shuffle([target, ...shuffle(activeColors.filter((color) => color.id !== target.id)).slice(0, numberOfChoices - 1)]);
+        choices.style.setProperty("--choice-count", options.length);
         choices.replaceChildren();
         for (const color of options) {
           const button = document.createElement("button");
@@ -655,6 +758,7 @@
         lastTarget = "";
         bunny.classList.remove("dance");
         resetBunny();
+        resetFlowerBed();
         activeColors = COLORS.slice(0, Number(colorCount.value) || 4);
         $("finishScreen").hidden = true;
         $("startScreen").hidden = true;
@@ -676,7 +780,7 @@
           { transform: "translate(0, 0) scale(1)" },
           { transform: `translate(${dx * .5}px, ${dy * .5 - rise}px) scale(1.14)`, offset: .48 },
           { transform: `translate(${dx}px, ${dy}px) scale(.96)` }
-        ], { duration: 620, easing: "cubic-bezier(.2, 1.4, .4, 1)", fill: "forwards" });
+        ], { duration: reduceMotion ? 1 : 620, easing: "cubic-bezier(.2, 1.4, .4, 1)", fill: "forwards" });
         animation.onfinish = () => {
           bunny.style.animation = "";
         };
@@ -685,6 +789,56 @@
       function resetBunny() {
         bunny.getAnimations().forEach((animation) => animation.cancel());
         bunny.style.animation = "";
+        bunny.classList.remove("digging", "watering");
+      }
+
+      function animatePlanting(choice, plot) {
+        resetBunny();
+        const fieldRect = $("field").getBoundingClientRect();
+        const bunnyRect = bunny.getBoundingClientRect();
+        const choiceRect = choice.getBoundingClientRect();
+        const plotRect = plot.getBoundingClientRect();
+        const startX = bunnyRect.left + bunnyRect.width / 2;
+        const startY = bunnyRect.top + bunnyRect.height / 2;
+        const choiceX = choiceRect.left + choiceRect.width / 2;
+        const choiceY = choiceRect.top + choiceRect.height * .18;
+        const plotX = plotRect.left + plotRect.width / 2;
+        const plotY = plotRect.top - bunnyRect.height * .28;
+        const choiceDx = choiceX - startX;
+        const choiceDy = choiceY - startY;
+        const plotDx = plotX - startX;
+        const plotDy = plotY - startY;
+        const rise = Math.min(64, fieldRect.height * .14);
+        const animation = bunny.animate([
+          { transform: "translate(0, 0) scale(1)", offset: 0 },
+          { transform: `translate(${choiceDx * .45}px, ${choiceDy * .45 - rise}px) scale(1.12)`, offset: .19 },
+          { transform: `translate(${choiceDx}px, ${choiceDy}px) scale(.96)`, offset: .38 },
+          { transform: `translate(${choiceDx + (plotDx - choiceDx) * .45}px, ${choiceDy + (plotDy - choiceDy) * .45 - rise * .55}px) scale(1.12)`, offset: .59 },
+          { transform: `translate(${plotDx}px, ${plotDy}px) scale(.96)`, offset: .82 },
+          { transform: `translate(${plotDx}px, ${plotDy}px) scale(.96)`, offset: 1 }
+        ], { duration: reduceMotion ? 1 : 1300, easing: "cubic-bezier(.2, 1.4, .4, 1)", fill: "forwards" });
+        animation.onfinish = () => { bunny.style.animation = ""; };
+      }
+
+      function beginPlanting(color, index, choice, decoration) {
+        const plot = flowerBed.children[index];
+        if (!plot) return;
+        animatePlanting(choice, plot);
+        window.setTimeout(() => {
+          bunny.classList.add("digging");
+          message.textContent = `Pjuske graver et lille hul til den ${color.flower} blomst.`;
+        }, reduceMotion ? 0 : 850);
+        window.setTimeout(() => {
+          bunny.classList.remove("digging");
+          bunny.classList.add("watering");
+          message.textContent = `Nu vander Pjuske sin blomst!`;
+        }, reduceMotion ? 0 : 1400);
+        window.setTimeout(() => {
+          bunny.classList.remove("watering");
+          plantFlower(color, index);
+          message.textContent = `Se! Den ${color.flower} blomst vokser!`;
+        }, reduceMotion ? 0 : 1950);
+        if (decoration) window.setTimeout(() => showReward(decoration), reduceMotion ? 0 : 3050);
       }
 
       function awardStar() {
@@ -731,14 +885,14 @@
         }
 
         button.classList.add("correct");
-        hopTo(button);
+        const flowerIndex = round;
         const decoration = awardStar();
         round += 1;
         paintProgress();
-        message.textContent = `Ja, den ${target.flower} blomst! Flot fundet!`;
-        readOut(`Ja, den ${target.flower} blomst! Hvor er du dygtig!`);
-        showReward(decoration);
-        window.setTimeout(askQuestion, decoration ? 1550 : 1050);
+        message.textContent = `Ja! Pjuske planter en ${color.name} blomst!`;
+        readOut(`Ja! Nu planter Pjuske en ${color.name} blomst!`);
+        beginPlanting(color, flowerIndex, button, decoration);
+        window.setTimeout(askQuestion, reduceMotion ? 1100 : decoration ? 4400 : 3250);
       }
 
       function finishSession() {
@@ -749,7 +903,7 @@
         message.textContent = "Pjuske siger tusind tak!";
         bunny.classList.add("dance");
         $("finishStars").textContent = "⭐".repeat(sessionStars);
-        $("finishText").textContent = `Du hjalp Pjuske med ${sessionStars} farver. Kom og leg igen!`;
+        $("finishText").textContent = `Du hjalp Pjuske med at plante ${sessionStars} blomster. Kom og leg igen!`;
         $("finishScreen").hidden = false;
         readOut("Hvor er du dygtig! Tak for hjælpen, siger Pjuske.");
       }
@@ -839,12 +993,10 @@
 
       totalStars = readNumber(STAR_KEY, 0);
       unlocked = loadDecor();
+      resetFlowerBed();
       const savedColors = readNumber(COLORS_KEY, 4);
       colorCount.value = [4, 6, 8].includes(savedColors) ? String(savedColors) : "4";
       colorCount.addEventListener("change", () => saveValue(COLORS_KEY, colorCount.value));
-      colorCount.addEventListener("change", () => {
-        $("gardenNote").textContent = `Næste leg øver ${colorCount.value} farver.`;
-      });
 
       $("startBtn").addEventListener("click", beginSession);
       $("againBtn").addEventListener("click", beginSession);
