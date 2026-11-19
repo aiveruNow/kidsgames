@@ -27,6 +27,24 @@
   let sound = read("regnespil-lyd") !== "0";
   const soundOn = () => sound;
 
+  // ---------- Start altid på forsiden ----------
+  // Lægger man en side på hjemmeskærmen (især på iPhone), gemmes adressen på den side, man står på, fx et spil.
+  // Ved en frisk start af appen (ny session) sendes man derfor til forsiden. Inde i appen bliver man, hvor man er.
+  const standaloneApp = matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches || navigator.standalone === true;
+  let freshStart = false;
+  try {
+    freshStart = !sessionStorage.getItem("regnespil-startet");
+    sessionStorage.setItem("regnespil-startet", "1");
+  } catch { /* ingen lagring */ }
+  if (freshStart && standaloneApp && window.top === window) {
+    const inGame = /\/spil\//.test(location.pathname);
+    const childPage = /menu\.html$/.test(location.pathname) && location.search;
+    if (inGame || childPage) {
+      const front = inGame ? "../menu.html" : "menu.html";
+      location.replace(new URL(front, location.href).href);
+    }
+  }
+
   // ---------- Fuld skærm ----------
   // Manifestet bruger "standalone" (virker i alle browsere, uden adresselinje). Fuld skærm uden statuslinje kræver et tryk.
   // Siden ligger normalt i en ramme (index.html), så fuld skærm sættes på den ydre side og består, når man skifter spil.

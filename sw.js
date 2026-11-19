@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v1.15.0";
+const CACHE = "regnespil-v1.15.2";
 const FILES = [
   "./",
   "index.html",

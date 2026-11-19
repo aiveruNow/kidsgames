@@ -19,7 +19,7 @@
 </head>
 <body>
   <!-- Rammen holder siden i fuld skærm, når man skifter mellem spillene. Selve forsiden ligger i menu.html. -->
-  <p id="version">Version 1.15.0</p>
+  <p id="version">Version 1.15.2</p>
   <iframe id="app" title="Regnespil" allow="fullscreen" hidden></iframe>
   <noscript><p><a href="menu.html">Åbn Regnespil</a></p></noscript>
 
@@ -31,7 +31,13 @@
       const canFullscreen = Boolean(root.requestFullscreen || root.webkitRequestFullscreen);
       const direct = window.top !== window || !canFullscreen || navigator.standalone === true
         || new URLSearchParams(location.search).has("direkte");
-      const target = "menu.html" + location.search;
+      // Frisk start af en installeret app: altid forsiden, også hvis genvejen blev lavet fra en børneside
+      let freshApp = false;
+      try {
+        freshApp = !sessionStorage.getItem("regnespil-startet")
+          && (matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches);
+      } catch { /* ingen lagring */ }
+      const target = "menu.html" + (freshApp ? "" : location.search);
       if (direct) { location.replace(target); return; }
 
       // "Hent som app" kan kun fanges i det øverste dokument. Forsiden i rammen henter den herfra.
