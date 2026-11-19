@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f8ff">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Regnespil">
+  <title>Regnespil — vælg et spil</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: #17233c;
+      background: #f4f8ff;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 28px 18px 42px;
+      background:
+        radial-gradient(ellipse at 10% 0%, #fff 0, transparent 38%),
+        #f4f8ff;
+    }
+
+    .app {
+      width: min(100%, 900px);
+      margin: 0 auto;
+    }
+
+    header {
+      margin: 10px 0 28px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      color: #183976;
+      font-size: clamp(2rem, 7vw, 3rem);
+      letter-spacing: -.04em;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: #62718a;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      font-weight: 700;
+    }
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .game {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #e1e9f4;
+      border-radius: 28px;
+      background: #fff;
+      color: inherit;
+      text-decoration: none;
+      box-shadow: 0 16px 42px #233c6012;
+      transition: transform .18s, box-shadow .18s, border-color .18s;
+    }
+
+    .game:hover, .game:focus-visible {
+      transform: translateY(-6px);
+      border-color: #9ab8e9;
+      box-shadow: 0 22px 50px #233c6026;
+      outline: none;
+    }
+
+    .game:focus-visible { box-shadow: 0 0 0 4px #2764c555, 0 22px 50px #233c6026; }
+
+    .art {
+      display: block;
+      width: 100%;
+      aspect-ratio: 5 / 3.4;
+      height: auto;
+    }
+
+    .info {
+      display: grid;
+      gap: 6px;
+      padding: 18px 22px 22px;
+    }
+
+    .info h2 {
+      margin: 0;
+      color: #183976;
+      font-size: clamp(1.4rem, 4vw, 1.8rem);
+      letter-spacing: -.03em;
+    }
+
+    .info p {
+      margin: 0;
+      color: #62718a;
+      font-size: .98rem;
+    }
+
+    .info-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .play {
+      padding: 10px 20px;
+      border-radius: 13px;
+      background: #1b9a67;
+      color: #fff;
+      font-weight: 850;
+      box-shadow: 0 5px 12px #1b9a6730;
+    }
+
+    .game:hover .play { background: #147d52; }
+
+    .stars {
+      padding: 8px 12px;
+      border: 1px solid #f3dc9a;
+      border-radius: 14px;
+      background: #fff9e3;
+      color: #8a5a00;
+      font-size: .9rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .bounce { animation: bounce 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+    .bob { animation: bob 2.6s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+    .blink { animation: blink 4.5s infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+    .beacon { animation: beacon 1.2s ease-in-out infinite alternate; }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      45% { transform: translateY(-14px); }
+    }
+
+    @keyframes bob {
+      from { transform: rotate(-2deg); }
+      to { transform: rotate(2deg) translateY(-4px); }
+    }
+
+    @keyframes blink {
+      0%, 92%, 100% { transform: scaleY(1); }
+      96% { transform: scaleY(.1); }
+    }
+
+    @keyframes beacon {
+      from { fill: #ff6b6b; }
+      to { fill: #ffd54f; }
+    }
+
+    .footer-note {
+      margin: 26px 0 0;
+      text-align: center;
+      color: #8a96a9;
+      font-size: .85rem;
+    }
+
+    .download-wrap { margin: 18px 0 0; text-align: center; }
+    .offline-status { margin: 10px 0 0; text-align: center; font-size: .9rem; font-weight: 700; color: #62718a; }
+
+    .download {
+      display: inline-block;
+      padding: 14px 26px;
+      border: 0;
+      border-radius: 999px;
+      background: #2f6fed;
+      color: #fff;
+      font: inherit;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(47, 111, 237, .3);
+    }
+
+    .download[hidden] { display: none; }
+
+    dialog {
+      max-width: min(92vw, 420px);
+      padding: 22px;
+      border: 0;
+      border-radius: 20px;
+      color: #17233c;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .3);
+    }
+
+    dialog h2 { margin: 0 0 10px; color: #183976; }
+    dialog p { margin: 0 0 16px; line-height: 1.45; }
+    dialog::backdrop { background: rgba(23, 35, 60, .45); }
+
+    .download:active { transform: translateY(1px); }
+
+    @media (max-width: 640px) {
+      body { padding: 16px 12px 28px; }
+      header { margin: 4px 0 18px; }
+      .games { grid-template-columns: 1fr; gap: 16px; }
+      .art { aspect-ratio: 5 / 2.6; }
+      .info { padding: 14px 16px 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Regnespil</h1>
+      <p class="subtitle">Hvad har du lyst til at øve i dag?</p>
+    </header>
+
+    <nav class="games" aria-label="Vælg spil">
+      <a class="game" href="spil/plus-minus.html">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#bfe6ff"/>
+              <stop offset="1" stop-color="#eaf8ff"/>
+            </linearGradient>
+            <radialGradient id="ball" cx=".32" cy=".28" r=".75">
+              <stop offset="0" stop-color="#ffb35a"/>
+              <stop offset=".62" stop-color="#ed741f"/>
+              <stop offset="1" stop-color="#d85517"/>
+            </radialGradient>
+          </defs>
+          <rect width="500" height="340" fill="url(#sky)"/>
+          <circle cx="430" cy="60" r="30" fill="#ffd86b"/>
+          <circle cx="430" cy="60" r="42" fill="#ffd86b" opacity=".25"/>
+          <path d="M60 70q12-20 34-14 10-17 32-10 20 3 22 20 17 1 17 16H46q-2-11 14-12z" fill="#fff" opacity=".9"/>
+          <path d="M0 232q80-46 170-10t190-14 140 10v120H0z" fill="#a5d98f"/>
+          <ellipse cx="250" cy="286" rx="250" ry="70" fill="#5fae52"/>
+          <ellipse cx="250" cy="290" rx="190" ry="40" fill="#7fd0f7" stroke="#2a78b0" stroke-width="3"/>
+          <path d="M150 292q10-7 20 0t20 0M310 296q10-7 20 0t20 0" fill="none" stroke="#e8f7ff" stroke-width="3" stroke-linecap="round"/>
+          <path d="M250 110V288" stroke="#53647b" stroke-width="10" stroke-linecap="round"/>
+          <rect x="190" y="26" width="120" height="76" rx="5" fill="#fff" stroke="#60728a" stroke-width="5"/>
+          <rect x="223" y="58" width="54" height="36" fill="none" stroke="#e36b35" stroke-width="4"/>
+          <path d="M208 108a42 11 0 0 1 84 0" fill="none" stroke="#b9461c" stroke-width="6" stroke-linecap="round"/>
+          <g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round">
+            <path d="M212 112 228 162M232 116 240 166M250 118V168M268 116 260 166M288 112 272 162"/>
+            <path d="M216 128q34 14 68 0M222 144q28 12 56 0M230 158q20 9 40 0"/>
+          </g>
+          <path class="rim" d="M208 108a42 11 0 0 0 84 0" fill="none" stroke="#e0541f" stroke-width="7" stroke-linecap="round"/>
+          <g class="bounce">
+            <circle cx="380" cy="214" r="46" fill="url(#ball)" stroke="#9d421c" stroke-width="3.5"/>
+            <path d="M334 214h92M380 168v92M347 181q33 33 66 0M347 247q33-33 66 0" fill="none" stroke="#39251d" stroke-width="3.5"/>
+          </g>
+          <ellipse cx="380" cy="268" rx="32" ry="7" fill="#26496b" opacity=".25"/>
+          <g font-family="Trebuchet MS, sans-serif" font-weight="900" fill="#183976" text-anchor="middle">
+            <text x="90" y="215" font-size="54">+</text>
+            <text x="140" y="262" font-size="46" fill="#2672bd">−</text>
+          </g>
+        </svg>
+        <div class="info">
+          <h2>Talbasket</h2>
+          <p>Plus og minus. Træk bolden tilbage og skyd den i kurven.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="talbasket-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
+
+      <a class="game" href="spil/tabeller.html">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <rect width="500" height="340" fill="#e3effc"/>
+          <g fill="#c4d6ee">
+            <circle cx="30" cy="30" r="3"/><circle cx="110" cy="30" r="3"/><circle cx="190" cy="30" r="3"/><circle cx="270" cy="30" r="3"/><circle cx="350" cy="30" r="3"/><circle cx="430" cy="30" r="3"/>
+            <circle cx="70" cy="90" r="3"/><circle cx="150" cy="90" r="3"/><circle cx="230" cy="90" r="3"/><circle cx="310" cy="90" r="3"/><circle cx="390" cy="90" r="3"/><circle cx="470" cy="90" r="3"/>
+            <circle cx="30" cy="150" r="3"/><circle cx="110" cy="150" r="3"/><circle cx="350" cy="150" r="3"/><circle cx="430" cy="150" r="3"/>
+            <circle cx="70" cy="210" r="3"/><circle cx="470" cy="210" r="3"/>
+          </g>
+          <rect x="-100" y="288" width="700" height="80" fill="#c6d2e3"/>
+          <rect x="-100" y="288" width="700" height="5" fill="#a9b9d0"/>
+          <ellipse cx="250" cy="292" rx="105" ry="8" fill="#26496b" opacity=".22"/>
+          <g fill="none" stroke="#b7c6dc" stroke-linecap="round">
+            <circle cx="76" cy="240" r="32" stroke-width="12" stroke-dasharray="9 9"/>
+            <circle cx="76" cy="240" r="23" stroke-width="6"/>
+          </g>
+          <g class="bob">
+            <rect x="174" y="144" width="24" height="74" rx="12" fill="#2f6fd1" stroke="#1f3556" stroke-width="3"/>
+            <rect x="302" y="144" width="24" height="74" rx="12" fill="#2f6fd1" stroke="#1f3556" stroke-width="3"/>
+            <circle cx="186" cy="230" r="15" fill="#9fb0c8" stroke="#1f3556" stroke-width="3"/>
+            <circle cx="314" cy="230" r="15" fill="#9fb0c8" stroke="#1f3556" stroke-width="3"/>
+            <rect x="233" y="228" width="16" height="48" rx="5" fill="#9fb0c8" stroke="#1f3556" stroke-width="3"/>
+            <rect x="251" y="228" width="16" height="48" rx="5" fill="#9fb0c8" stroke="#1f3556" stroke-width="3"/>
+            <rect x="218" y="268" width="46" height="16" rx="8" fill="#9fb0c8" stroke="#1f3556" stroke-width="3"/>
+            <rect x="236" y="268" width="46" height="16" rx="8" fill="#9fb0c8" stroke="#1f3556" stroke-width="3"/>
+            <rect x="200" y="134" width="100" height="100" rx="20" fill="#4f9dff" stroke="#1f3556" stroke-width="3"/>
+            <rect x="222" y="152" width="56" height="52" rx="10" fill="#27344d" stroke="#1f3556" stroke-width="3"/>
+            <circle cx="238" cy="168" r="6" fill="#ff6b6b"/>
+            <circle cx="250" cy="168" r="6" fill="#ffd54f"/>
+            <circle cx="262" cy="168" r="6" fill="#5be39a"/>
+            <rect x="234" y="184" width="32" height="9" rx="4.5" fill="#5bd3ff"/>
+            <rect x="244" y="116" width="12" height="22" rx="4" fill="#9fb0c8" stroke="#1f3556" stroke-width="3"/>
+            <rect x="190" y="68" width="14" height="30" rx="6" fill="#2f6fd1" stroke="#1f3556" stroke-width="3"/>
+            <rect x="296" y="68" width="14" height="30" rx="6" fill="#2f6fd1" stroke="#1f3556" stroke-width="3"/>
+            <rect x="202" y="40" width="96" height="84" rx="24" fill="#4f9dff" stroke="#1f3556" stroke-width="3"/>
+            <circle cx="226" cy="76" r="16" fill="#fff" stroke="#1f3556" stroke-width="3"/>
+            <circle cx="274" cy="76" r="16" fill="#fff" stroke="#1f3556" stroke-width="3"/>
+            <circle class="blink" cx="228" cy="78" r="7.5" fill="#27344d"/>
+            <circle class="blink" cx="276" cy="78" r="7.5" fill="#27344d"/>
+            <circle cx="231" cy="74" r="2.6" fill="#fff"/>
+            <circle cx="279" cy="74" r="2.6" fill="#fff"/>
+            <circle cx="208" cy="102" r="6" fill="#ff9fb8" opacity=".7"/>
+            <circle cx="292" cy="102" r="6" fill="#ff9fb8" opacity=".7"/>
+            <rect x="228" y="98" width="44" height="12" rx="6" fill="#27344d" stroke="#1f3556" stroke-width="3"/>
+            <path d="M239 98v12M250 98v12M261 98v12" stroke="#fff" stroke-width="2"/>
+            <rect x="247" y="14" width="6" height="28" rx="2" fill="#9fb0c8" stroke="#1f3556" stroke-width="3"/>
+            <circle class="beacon" cx="250" cy="12" r="10" fill="#ff6b6b" stroke="#1f3556" stroke-width="3"/>
+          </g>
+          <g font-family="Trebuchet MS, sans-serif" font-weight="900" text-anchor="middle">
+            <text x="390" y="190" font-size="62" fill="#2672bd">×</text>
+          </g>
+          <g transform="translate(372 224) rotate(-8)">
+            <rect width="78" height="46" rx="11" fill="#2fbf74" stroke="#1d7a4d" stroke-width="3.5"/>
+            <rect x="78" y="14" width="8" height="18" rx="4" fill="#1d7a4d"/>
+            <text x="39" y="34" font-family="Trebuchet MS, sans-serif" font-size="28" font-weight="900" fill="#fff" text-anchor="middle">42</text>
+          </g>
+        </svg>
+        <div class="info">
+          <h2>Tabbi: robotværkstedet</h2>
+          <p>Gangetabellerne 0 til 10. Giv Tabbi de rigtige batterier, og byg en robot.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="tabbi-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
+      <a class="game" href="spil/loeven-leo.html">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <rect width="500" height="340" fill="#d9f2c4"/>
+          <circle cx="430" cy="60" r="30" fill="#ffd86b"/>
+          <path d="M0 250q120-50 250-10t250-20v120H0z" fill="#8fcf72"/>
+          <g class="bob">
+            <g transform="translate(250 170) scale(1.25) translate(-100 -108)">
+              <circle cx="100" cy="108" r="62" fill="#c9741f"/>
+              <g fill="#d9822b" stroke="#8f4d12" stroke-width="2.5">
+                <circle cx="150" cy="108" r="24"/><circle cx="146" cy="127" r="24" fill="#b8651b"/><circle cx="135" cy="143" r="24"/><circle cx="119" cy="154" r="24" fill="#b8651b"/>
+                <circle cx="100" cy="158" r="24"/><circle cx="81" cy="154" r="24" fill="#b8651b"/><circle cx="65" cy="143" r="24"/><circle cx="54" cy="127" r="24" fill="#b8651b"/>
+                <circle cx="50" cy="108" r="24"/><circle cx="54" cy="89" r="24" fill="#b8651b"/><circle cx="65" cy="73" r="24"/><circle cx="81" cy="62" r="24" fill="#b8651b"/>
+                <circle cx="100" cy="58" r="24"/><circle cx="119" cy="62" r="24" fill="#b8651b"/><circle cx="135" cy="73" r="24"/><circle cx="146" cy="89" r="24" fill="#b8651b"/>
+              </g>
+              <circle cx="58" cy="66" r="16" fill="#e9a43c" stroke="#a8641a" stroke-width="3"/>
+              <circle cx="142" cy="66" r="16" fill="#e9a43c" stroke="#a8641a" stroke-width="3"/>
+              <circle cx="100" cy="108" r="47" fill="#f6c453" stroke="#a8641a" stroke-width="3"/>
+              <ellipse cx="100" cy="128" rx="26" ry="19" fill="#fff1c9"/>
+              <circle class="blink" cx="81" cy="100" r="8" fill="#27344d"/>
+              <circle class="blink" cx="119" cy="100" r="8" fill="#27344d"/>
+              <path d="M92 116h16l-8 9z" fill="#7a3b1c" stroke="#7a3b1c" stroke-width="3" stroke-linejoin="round"/>
+              <path d="M100 125v6M100 131q-9 8-18 0M100 131q9 8 18 0" fill="none" stroke="#7a3b1c" stroke-width="3" stroke-linecap="round"/>
+              <path d="M68 52l6-30 16 18 10-26 10 26 16-18 6 30z" fill="#ffd54f" stroke="#b8860b" stroke-width="3.5" stroke-linejoin="round"/>
+            </g>
+          </g>
+          <g font-family="Trebuchet MS, sans-serif" font-weight="900" fill="#183976" text-anchor="middle">
+            <text x="80" y="90" font-size="44" transform="rotate(-8 80 90)">SOL</text>
+            <text x="420" y="300" font-size="44" transform="rotate(6 420 300)">☀️</text>
+          </g>
+        </svg>
+        <div class="info">
+          <h2>Løven Leo læser</h2>
+          <p>Træk billedet til Leo, klæk æg og saml junglevenner.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="leo-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
+      <a class="game" href="spil/leos-maal.html">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <rect width="500" height="340" fill="#4aa845"/>
+          <path d="M0 220H500V250H0zM0 280H500V310H0z" fill="#58bd52"/>
+          <rect width="500" height="92" fill="#3a3f8f"/>
+          <g fill="#ffd54f"><circle cx="40" cy="60" r="9"/><circle cx="120" cy="66" r="9" fill="#e8453c"/><circle cx="380" cy="62" r="9" fill="#fff"/><circle cx="460" cy="58" r="9" fill="#4f9dff"/><circle cx="80" cy="30" r="9" fill="#fff"/><circle cx="420" cy="28" r="9" fill="#e8453c"/></g>
+          <rect x="130" y="30" width="240" height="64" rx="12" fill="#0d1736" stroke="#3b4a7e" stroke-width="6"/>
+          <text x="250" y="76" font-size="42" text-anchor="middle">🦁</text>
+          <rect x="95" y="100" width="310" height="130" fill="#245f31"/>
+          <path d="M95 230V104h310V230" fill="none" stroke="#fff" stroke-width="9" stroke-linejoin="round"/>
+          <g stroke="#ffffff55" stroke-width="2"><path d="M95 130l310 100M95 160l240 70M95 190l120 40M405 130L95 230M405 160l-240 70M405 190l-120 40"/></g>
+          <g class="bob">
+            <g transform="translate(250 176) scale(.62) translate(-100 -108)">
+              <circle cx="100" cy="108" r="62" fill="#c9741f"/>
+              <g fill="#d9822b" stroke="#8f4d12" stroke-width="2.5">
+                <circle cx="150" cy="108" r="24"/><circle cx="135" cy="143" r="24" fill="#b8651b"/><circle cx="100" cy="158" r="24"/><circle cx="65" cy="143" r="24" fill="#b8651b"/>
+                <circle cx="50" cy="108" r="24"/><circle cx="65" cy="73" r="24" fill="#b8651b"/><circle cx="100" cy="58" r="24"/><circle cx="135" cy="73" r="24" fill="#b8651b"/>
+              </g>
+              <circle cx="100" cy="108" r="47" fill="#f6c453" stroke="#a8641a" stroke-width="3"/>
+              <ellipse cx="100" cy="128" rx="26" ry="19" fill="#fff1c9"/>
+              <circle class="blink" cx="81" cy="100" r="8" fill="#27344d"/>
+              <circle class="blink" cx="119" cy="100" r="8" fill="#27344d"/>
+              <path d="M92 116h16l-8 9z" fill="#7a3b1c"/>
+              <path d="M100 125v6M100 131q-9 8-18 0M100 131q9 8 18 0" fill="none" stroke="#7a3b1c" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <circle cx="208" cy="214" r="13" fill="#ff7a1a" stroke="#b34a00" stroke-width="3"/>
+            <circle cx="292" cy="214" r="13" fill="#ff7a1a" stroke="#b34a00" stroke-width="3"/>
+          </g>
+          <g font-family="Trebuchet MS, sans-serif" font-weight="900" font-size="26" fill="#fff" text-anchor="middle">
+            <g class="bounce"><circle cx="110" cy="282" r="30" fill="#fff" stroke="#2b2f3a" stroke-width="3"/><circle cx="110" cy="282" r="19" fill="#e8453c"/><text x="110" y="291">L</text></g>
+            <g><circle cx="190" cy="288" r="30" fill="#fff" stroke="#2b2f3a" stroke-width="3"/><circle cx="190" cy="288" r="19" fill="#2f7de1"/><text x="190" y="297">Ø</text></g>
+            <g><circle cx="310" cy="288" r="30" fill="#fff" stroke="#2b2f3a" stroke-width="3"/><circle cx="310" cy="288" r="19" fill="#f39c12"/><text x="310" y="297">V</text></g>
+            <g><circle cx="390" cy="282" r="30" fill="#fff" stroke="#2b2f3a" stroke-width="3"/><circle cx="390" cy="282" r="19" fill="#8e44ad"/><text x="390" y="291">E</text></g>
+          </g>
+        </svg>
+        <div class="info">
+          <h2>Leos mål</h2>
+          <p>Skyd fodboldene i mål i den rigtige rækkefølge og stav billedet.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="maal-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
+      <a class="game" href="spil/prinsesse-tal.html">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="pk" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#ffd6ec"/>
+              <stop offset="1" stop-color="#d8c4ff"/>
+            </linearGradient>
+          </defs>
+          <rect width="500" height="340" fill="url(#pk)"/>
+          <g font-size="34"><text x="40" y="60">✨</text><text x="440" y="70">✨</text><text x="420" y="300">💖</text><text x="30" y="300">💖</text></g>
+          <g class="bob"><text x="250" y="200" font-size="130" text-anchor="middle">👸</text></g>
+          <g font-size="36" text-anchor="middle"><text class="bounce" x="95" y="130">💎</text><text x="405" y="130">💄</text><text x="110" y="215">🎀</text><text x="395" y="215">💍</text></g>
+          <g font-family="Trebuchet MS, sans-serif" font-weight="900" font-size="38" fill="#fff" text-anchor="middle">
+            <g class="bounce"><rect x="130" y="244" width="64" height="64" rx="16" fill="#ec4899"/><text x="162" y="291">1</text></g>
+            <g><rect x="218" y="244" width="64" height="64" rx="16" fill="#f97316"/><text x="250" y="291">2</text></g>
+            <g><rect x="306" y="244" width="64" height="64" rx="16" fill="#22a653"/><text x="338" y="291">3</text></g>
+          </g>
+        </svg>
+        <div class="info">
+          <h2>Prinsesse Lilje</h2>
+          <p>Lær tallene 0–10: tæl smykker, find tal og vind prinsesseting.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="prinsesse-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
+    </nav>
+    <p class="footer-note">Vælg et spil og optjen stjerner.</p>
+    <p class="download-wrap"><button class="download" id="install" type="button">📲 Hent som app</button></p>
+    <p class="offline-status" id="offline-status" aria-live="polite"></p>
+  </main>
+
+  <dialog id="help">
+    <h2>Sådan gemmer du spillene</h2>
+    <p id="help-text"></p>
+    <button type="button" class="download" id="help-close">Luk</button>
+  </dialog>
+
+  <script>
+    const installBtn = document.getElementById("install");
+    const help = document.getElementById("help");
+    const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    let installEvent = null;
+
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+
+    // Skjules kun når siden allerede kører som app
+    if (standalone) installBtn.hidden = true;
+
+    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvent = e; });
+    window.addEventListener("appinstalled", () => { installBtn.hidden = true; });
+
+    installBtn.addEventListener("click", async () => {
+      if (installEvent) {
+        installEvent.prompt();
+        await installEvent.userChoice;
+        installEvent = null;
+        return;
+      }
+      const text = !location.protocol.startsWith("http")
+        ? "Knappen virker, når spillene ligger på din hjemmeside. Upload mappen med FTP, åbn adressen på telefonen eller tabletten, og tryk på knappen igen."
+        : isIOS
+        ? "Tryk på Del-knappen (firkanten med pil op) i Safari, og vælg “Føj til hjemmeskærm”."
+        : "Åbn browserens menu (⋮) og vælg “Installer app” eller “Føj til startskærm”.";
+      document.getElementById("help-text").textContent = text;
+      help.showModal();
+    });
+    const statusEl = document.getElementById("offline-status");
+    async function showOfflineStatus() {
+      if (!location.protocol.startsWith("http")) {
+        statusEl.textContent = "Offline kræver, at spillene åbnes fra din hjemmeside.";
+      } else if (!("serviceWorker" in navigator)) {
+        statusEl.textContent = "Offline virker kun over https. Åbn siden med https://.";
+      } else {
+        try {
+          await navigator.serviceWorker.ready;
+          const keys = (await caches.keys()).sort();
+          const cached = keys.length ? (await (await caches.open(keys[keys.length - 1])).keys()).length : 0;
+          statusEl.textContent = cached >= 11
+            ? "✅ Klar til at spille uden net."
+            : `⚠️ Kun ${cached} af 11 filer er gemt. Tjek, at alle filer er uploadet, og genindlæs siden.`;
+        } catch {
+          statusEl.textContent = "⚠️ Kunne ikke gøre klar til offline.";
+        }
+      }
+    }
+    showOfflineStatus();
+
+    document.getElementById("help-close").addEventListener("click", () => help.close());
+  </script>
+  <script>
+    for (const badge of document.querySelectorAll(".stars")) {
+      let count = 0;
+      try { count = Number(localStorage.getItem(badge.dataset.store)) || 0; } catch { count = 0; }
+      badge.querySelector("span").textContent = count;
+      badge.setAttribute("aria-label", `Stjerner: ${count}`);
+    }
+  </script>
+</body>
+</html>
