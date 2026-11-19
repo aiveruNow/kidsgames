@@ -201,6 +201,84 @@
 
     @keyframes popup-fade { from { opacity: 0; } }
 
+    /* Regnestykket vises stort i starten af hvert spørgsmål */
+    .problem-popup {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      display: grid;
+      width: 100%;
+      margin: 0;
+      padding: 16px;
+      border: 0;
+      place-items: center;
+      background: #12254aeb;
+      color: #183976;
+      cursor: pointer;
+      font: inherit;
+      animation: popup-fade .25s ease-out;
+    }
+
+    .problem-popup[hidden] { display: none; }
+
+    .problem-card {
+      display: grid;
+      max-width: 100%;
+      justify-items: center;
+      gap: clamp(10px, 2.6vmin, 26px);
+      padding: clamp(18px, 4vmin, 42px) clamp(18px, 5vmin, 56px);
+      border-radius: 36px;
+      background: linear-gradient(180deg, #fffdf2, #fff1c2);
+      box-shadow: 0 0 0 6px #ffd54f, 0 24px 60px #0008;
+      animation: card-pop .6s cubic-bezier(.2, 1.4, .4, 1);
+    }
+
+    .problem-label {
+      color: #8a5a00;
+      font-size: clamp(1.1rem, 3.6vmin, 1.9rem);
+      font-weight: 900;
+    }
+
+    .problem-eq {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(5px, 1.6vmin, 20px);
+      font-size: min(11vw, 16vmin);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.04em;
+      white-space: nowrap;
+    }
+
+    .problem-eq .n {
+      min-width: 1.25em;
+      padding: .1em .16em;
+      border-radius: .24em;
+      background: #e7f2ff;
+      box-shadow: 0 .06em 0 #b6cdf0;
+      text-align: center;
+    }
+
+    .problem-eq .op, .problem-eq .eqs { color: #e0541f; }
+
+    .problem-eq .q {
+      background: #ffe66d;
+      color: #8a5a00;
+      box-shadow: 0 .06em 0 #e0b400;
+      animation: q-bounce .9s ease-in-out infinite alternate;
+    }
+
+    .problem-tap {
+      color: #a08a50;
+      font-size: clamp(.95rem, 2.7vmin, 1.35rem);
+      font-weight: 800;
+      animation: tap-pulse 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes q-bounce { to { transform: translateY(-.08em) scale(1.06); } }
+    @keyframes tap-pulse { from { opacity: .55; } to { opacity: 1; } }
+
     @keyframes card-pop {
       from { opacity: 0; transform: scale(.3) translateY(60px); }
     }
@@ -1001,6 +1079,14 @@
     <p class="footer-note">Øv plus og minus med basketballsvar.</p>
   </main>
 
+  <button class="problem-popup" id="problemPopup" type="button" hidden>
+    <span class="problem-card">
+      <span class="problem-label">Regn det ud!</span>
+      <span class="problem-eq" id="problemEq"></span>
+      <span class="problem-tap">Tryk for at starte</span>
+    </span>
+  </button>
+
   <div class="star-popup" id="starPopup" role="alert" hidden>
     <div class="star-popup-card">
       <svg class="star-big" viewBox="0 0 100 96" aria-hidden="true">
@@ -1040,6 +1126,85 @@
     const hoop = document.querySelector("#hoop");
     const lake = document.querySelector("#lake");
 
+    // ---------- Lydeffekter (Web Audio, ingen lydfiler) ----------
+    let audioCtx = null;
+    let soundOn = Topbar.soundOn();
+    window.addEventListener("topbar:sound", event => { soundOn = event.detail.on; });
+
+    function audioReady() {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+        return audioCtx.state === "running";
+      } catch { return false; }
+    }
+
+    function tone(freq, dur = .2, type = "sine", vol = .15, delay = 0, slideTo = 0) {
+      if (!soundOn || !audioReady()) return;
+      try {
+        const t = audioCtx.currentTime + delay;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol, t + .01);
+        gain.gain.exponentialRampToValueAtTime(.001, t + dur);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + dur + .02);
+      } catch { /* ingen lyd */ }
+    }
+
+    // Støj gennem et filter: bruges til sus, plask og net
+    function noise(dur = .3, vol = .12, delay = 0, filterType = "bandpass", from = 1200, to = 0) {
+      if (!soundOn || !audioReady()) return;
+      try {
+        const t = audioCtx.currentTime + delay;
+        const buffer = audioCtx.createBuffer(1, Math.max(1, Math.floor(audioCtx.sampleRate * dur)), audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = filterType;
+        filter.frequency.setValueAtTime(from, t);
+        if (to) filter.frequency.exponentialRampToValueAtTime(to, t + dur);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol, t + .02);
+        gain.gain.exponentialRampToValueAtTime(.001, t + dur);
+        source.connect(filter).connect(gain).connect(audioCtx.destination);
+        source.start(t);
+      } catch { /* ingen lyd */ }
+    }
+
+    const sfx = {
+      click() { tone(760, .05, "triangle", .08); },
+      // Regnestykket springer frem
+      pop() { tone(420, .12, "triangle", .14, 0, 840); tone(1050, .1, "sine", .06, .09); },
+      // Bolden trækkes tilbage: højere tone, jo længere træk
+      stretch(p) { tone(170 + p * 380, .07, "triangle", .06); },
+      // Bolden skydes afsted
+      kick(p = .6) { noise(.22, .13, 0, "bandpass", 500 + p * 800, 2600); tone(150, .12, "sine", .16, 0, 70); },
+      // Bolden rammer ringen
+      clang() { tone(660, .35, "triangle", .13); tone(990, .28, "sine", .07, .02); noise(.08, .09, 0, "highpass", 3000); },
+      // Rigtigt svar: net og klokker
+      swish() {
+        noise(.5, .14, 0, "highpass", 2500, 900);
+        [523, 659, 784, 1047].forEach((f, i) => tone(f, .32, "triangle", .13, .1 + i * .08));
+      },
+      splash() { noise(.5, .2, 0, "lowpass", 1800, 250); tone(260, .22, "sine", .1, 0, 90); },
+      // Krokodillen æder bolden
+      chomp() {
+        [0, .16, .32].forEach(d => { tone(120, .1, "square", .1, d, 60); noise(.06, .08, d, "lowpass", 900); });
+        tone(300, .3, "sawtooth", .06, .5, 110);
+      },
+      streak(n) { tone(440 + (n % 10) * 55, .16, "triangle", .1); tone(880 + (n % 10) * 110, .12, "sine", .05, .06); },
+      fanfare() { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .5, "triangle", .15, i * .11)); tone(2093, .6, "sine", .06, .6); }
+    };
+
     let operation = "add";
     // Niveauet stiger automatisk med 10 for hver optjent stjerne (op til 100), men kan låses i menuen
     const LEVEL_STEP = 10;
@@ -1065,6 +1230,8 @@
     const streakDisplay = document.querySelector("#streak");
     const streakDots = streakDisplay.querySelector(".streak-dots");
     const starPopup = document.querySelector("#starPopup");
+    const problemPopup = document.querySelector("#problemPopup");
+    const problemEq = document.querySelector("#problemEq");
     let popupTimer = null;
     let levelUpMessage = "";
     let advanceTimer = null;
@@ -1113,6 +1280,7 @@
       starPopup.hidden = false;
       clearTimeout(popupTimer);
       popupTimer = setTimeout(hideStarPopup, 4200);
+      sfx.fanfare();
       Topbar.refreshStars(true);
     }
 
@@ -1135,6 +1303,7 @@
     starPopup.addEventListener("click", hideStarPopup);
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && !starPopup.hidden) hideStarPopup();
+      if (event.key === "Escape" && !problemPopup.hidden) hideProblemPopup();
     });
     updateStreak();
     let round = 1;
@@ -1202,6 +1371,24 @@
         ${hand}`;
     }
 
+    function showProblemPopup() {
+      Topbar.closeMenu();
+      const sign = operation === "add" ? "+" : "−";
+      problemEq.innerHTML = `<span class="n">${first}</span><span class="op">${sign}</span><span class="n">${second}</span><span class="eqs">=</span><span class="n q">?</span>`;
+      problemPopup.setAttribute("aria-label", `Regnestykke: ${first} ${operation === "add" ? "plus" : "minus"} ${second}. Tryk for at starte.`);
+      problemPopup.hidden = false;
+      problemPopup.focus({ preventScroll: true });
+      sfx.pop();
+    }
+
+    function hideProblemPopup() {
+      if (problemPopup.hidden) return;
+      problemPopup.hidden = true;
+      sfx.click();
+    }
+
+    problemPopup.addEventListener("click", hideProblemPopup);
+
     function startRound() {
       clearTimeout(advanceTimer);
       advanceAfterPopup = false;
@@ -1234,6 +1421,7 @@
         });
         answerContainer.append(button);
       }
+      showProblemPopup();
     }
 
     function clearShots() {
@@ -1252,6 +1440,8 @@
     }
 
     function animateShot(source, isCorrect) {
+      audioReady();
+      sfx.kick(.6);
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const ballSource = source.querySelector(".ball");
       if (!ballSource) return;
@@ -1467,6 +1657,7 @@
     }
 
     function showScored() {
+      sfx.swish();
       hoop.classList.remove("scored");
       void hoop.getBoundingClientRect();
       hoop.classList.add("scored");
@@ -1483,6 +1674,7 @@
     }
 
     function showSplash(clientX, clientY) {
+      sfx.splash();
       const local = clientToSvg(clientX, clientY);
       splashAtSvg(local.x, local.y);
     }
@@ -1593,6 +1785,7 @@
 
     // En krokodille dukker op af søen og æder bolden
     function playCroc(clientX, clientY, label, radius) {
+      sfx.splash();
       const spot = clientToSvg(clientX, clientY);
       splashAtSvg(spot.x, spot.y);
       if (prefersReducedMotion()) return;
@@ -1647,6 +1840,7 @@
       ], { duration: total });
 
       later(() => {
+        sfx.chomp();
         splashAtSvg(spot.x, spot.y + 6);
         popText(spot.x, spot.y - 54 * scale, "NAM!", "#2e9e44");
       }, total * .35);
@@ -1655,10 +1849,11 @@
     function buildShot(start, velocity, geo, isCorrect) {
       const trajectory = simulate(start, velocity, geo);
       const points = trajectory.points;
-      const shot = { points, kind: "miss", splash: null };
+      const shot = { points, kind: "miss", splash: null, hitIndex: -1 };
 
       if (trajectory.hit) {
         const hit = points[points.length - 1];
+        shot.hitIndex = points.length - 1;
         if (isCorrect) {
           shot.kind = "basket";
         } else {
@@ -1696,6 +1891,7 @@
     }
 
     function playFlight(drag, shot) {
+      sfx.kick(Math.hypot(drag.pull.x, drag.pull.y) / drag.maxPull);
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reducedMotion) {
         finishFlight(drag, shot);
@@ -1711,6 +1907,11 @@
       const step = now => {
         const elapsed = (now - startTime) / 1000;
         const index = Math.min(shot.points.length - 1, Math.floor(elapsed / SIM_STEP));
+        // Forkert bold: ringen klinger, når bolden rammer den (kun én gang)
+        if (shot.kind === "bounce" && !shot.clanged && index >= shot.hitIndex) {
+          shot.clanged = true;
+          sfx.clang();
+        }
         const point = shot.points[index];
         const shrinkIn = Math.min(1, elapsed / .15);
         const scale = (1 - (1 - flightScale) * shrinkIn) * (point.shrink || 1);
@@ -1734,6 +1935,7 @@
           event.clientY < bounds.top || event.clientY > bounds.bottom) return;
 
       event.preventDefault();
+      audioReady();
       button.focus();
       const ball = ballSource.cloneNode(true);
       ball.classList.add("dragged-ball");
@@ -1785,6 +1987,11 @@
         pullY *= drag.maxPull / length;
       }
       drag.pull = { x: pullX, y: pullY };
+      const pullRatio = Math.min(1, Math.hypot(pullX, pullY) / drag.maxPull);
+      if (Math.abs(pullRatio - (drag.lastTick ?? 0)) > .12) {
+        drag.lastTick = pullRatio;
+        sfx.stretch(pullRatio);
+      }
       drag.ball.style.left = `${drag.start.x + pullX - drag.size / 2}px`;
       drag.ball.style.top = `${drag.start.y + pullY - drag.size / 2}px`;
       drawAim(drag);
@@ -1851,6 +2058,7 @@
           awardStar();
           advanceAfterPopup = true;
         } else {
+          sfx.streak(streak);
           advanceTimer = setTimeout(goToNextQuestion, 1700);
         }
       } else {
