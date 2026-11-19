@@ -116,74 +116,83 @@
     }
 
     .who-stars {
-      padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
       border-radius: 99px;
-      background: #ffffffd9;
-      color: #8a5a00;
-      font-size: 1.2rem;
-      font-weight: 900;
+      background: #ffffffe6;
       box-shadow: 0 4px 10px #0002;
     }
 
-    /* Stjernehelt: samlet antal stjerner øverst på barnets side */
+    .who-stars .mini-row { display: flex; gap: 2px; }
+    .who-stars .trophy { color: #8a5a00; font-weight: 900; font-size: 1.05rem; }
+
+    /* Fysiske stjerner: grå indtil de er optjent, så tændes de en efter en */
+    .s { width: 100%; height: auto; overflow: visible; }
+    .s .grey { fill: #d7dce6; stroke: #fff; stroke-width: 5; stroke-linejoin: round; }
+    .s .gold { opacity: 0; stroke: #fff; stroke-width: 5; stroke-linejoin: round; transition: opacity .25s; }
+    .s .gloss { opacity: 0; fill: #fff; }
+    .s.on .gold { opacity: 1; }
+    .s.on .gloss { opacity: .32; }
+    .s.mini { width: 19px; }
+    .s.mini.on { filter: drop-shadow(0 1px 2px #e0900088); }
+
     .star-hero {
       position: relative;
-      display: flex;
-      width: min(100%, 360px);
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      display: grid;
+      width: min(100%, 580px);
+      justify-items: center;
+      gap: 8px;
       margin: 14px auto 6px;
-      padding: 10px 18px 10px 8px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #fff7d6, #ffe9a3);
+      padding: 16px 16px 14px;
+      border-radius: 30px;
+      background: linear-gradient(160deg, #fffbe8, #ffeeb3);
       border: 3px solid #ffd54a;
       box-shadow: 0 10px 28px #f0a60033, inset 0 2px 0 #fff;
-      animation: hero-pulse 2.8s ease-in-out infinite;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .star-glow {
-      position: absolute;
-      left: 8px;
-      top: 50%;
-      width: 130px;
-      height: 130px;
-      margin-top: -65px;
-      border-radius: 50%;
-      background: repeating-conic-gradient(from 0deg, #fff3b0aa 0 10deg, #fff3b000 10deg 30deg);
-      -webkit-mask: radial-gradient(circle, #000 25%, transparent 70%);
-      mask: radial-gradient(circle, #000 25%, transparent 70%);
-      animation: spin 9s linear infinite;
-      pointer-events: none;
-    }
-
-    .big-star {
+    .star-row {
       position: relative;
-      z-index: 1;
-      width: 86px;
-      height: auto;
-      flex: none;
-      filter: drop-shadow(0 5px 8px #e0900066);
-      animation: star-bob 2.2s ease-in-out infinite;
-    }
-
-    .star-count {
-      position: relative;
-      z-index: 1;
       display: grid;
-      line-height: 1;
-      color: #a05a00;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      width: 100%;
     }
 
-    .star-count b {
-      font-size: clamp(3rem, 14vw, 4.4rem);
+    .star-row .s { filter: drop-shadow(0 2px 3px #0000001f); }
+
+    .star-row .s.on {
+      filter: drop-shadow(0 3px 7px #f0a600aa);
+      animation: star-in .8s cubic-bezier(.2, 1.4, .4, 1), star-twinkle 2.8s ease-in-out .9s infinite;
+      animation-delay: 0s, calc(.9s + var(--i, 0) * .22s);
+    }
+
+    .star-row .s.on .gloss { animation: gloss-shine 2.8s ease-in-out infinite; animation-delay: calc(.9s + var(--i, 0) * .22s); }
+
+    .star-hint { margin: 0; color: #b9770e; font-size: .85rem; font-weight: 800; }
+
+    .trophies {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #8a5a00;
+      font-size: 1.5rem;
       font-weight: 900;
-      letter-spacing: -.03em;
-      text-shadow: 0 3px 0 #fff, 0 6px 0 #f7c94b66;
+      animation: trophy-bob 2.4s ease-in-out infinite;
     }
 
-    .star-count small { font-size: 1.1rem; font-weight: 800; color: #b9770e; }
-    .star-count.pop b { animation: count-pop .6s ease-out; }
+    .burst {
+      position: absolute;
+      z-index: 3;
+      margin: -.6em 0 0 -.6em;
+      font-size: 1.2rem;
+      line-height: 1;
+      pointer-events: none;
+      animation: burst .75s ease-out forwards;
+    }
 
     .twinkle {
       position: absolute;
@@ -193,16 +202,26 @@
       animation: twinkle 2.4s ease-in-out infinite;
     }
 
-    .twinkle.t1 { left: 4px; top: -10px; }
+    .twinkle.t1 { left: 8px; top: -10px; }
     .twinkle.t2 { right: 14px; top: -14px; animation-delay: -.8s; }
-    .twinkle.t3 { right: -6px; bottom: 8px; animation-delay: -1.5s; }
-    .twinkle.t4 { left: 62px; bottom: -12px; animation-delay: -.4s; }
+    .twinkle.t3 { right: -6px; bottom: 10px; animation-delay: -1.5s; }
+    .twinkle.t4 { left: 22px; bottom: -12px; animation-delay: -.4s; }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes star-bob { 0%, 100% { transform: translateY(0) rotate(-6deg) scale(1); } 50% { transform: translateY(-5px) rotate(6deg) scale(1.06); } }
-    @keyframes hero-pulse { 0%, 100% { box-shadow: 0 10px 28px #f0a60033, inset 0 2px 0 #fff; } 50% { box-shadow: 0 12px 38px #f0a60066, 0 0 0 6px #ffe08a55, inset 0 2px 0 #fff; } }
+    @keyframes star-in {
+      0% { transform: scale(0) rotate(-200deg); opacity: 0; }
+      60% { transform: scale(1.5) rotate(15deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0); }
+    }
+    @keyframes star-twinkle { 0%, 70%, 100% { transform: scale(1); filter: drop-shadow(0 3px 7px #f0a600aa); } 85% { transform: scale(1.18) rotate(-6deg); filter: drop-shadow(0 0 12px #ffd54a) brightness(1.15); } }
+    @keyframes gloss-shine { 0%, 70%, 100% { opacity: .32; } 85% { opacity: .85; } }
+    @keyframes trophy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px) rotate(-4deg); } }
+    @keyframes burst { from { transform: translate(0, 0) scale(.4); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(1.1); opacity: 0; } }
     @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); } 50% { opacity: 1; transform: scale(1.15) rotate(25deg); } }
-    @keyframes count-pop { 0% { transform: scale(1); } 45% { transform: scale(1.25); } 100% { transform: scale(1); } }
+
+    @media (max-width: 560px) {
+      .star-row { grid-template-columns: repeat(5, 1fr); gap: 8px 6px; }
+      .star-row .s { max-width: 70px; justify-self: center; }
+    }
 
     .games {
       display: grid;
@@ -433,24 +452,22 @@
   </style>
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="hero-star-fill" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0" stop-color="#fff3a0"/>
+        <stop offset=".55" stop-color="#ffc928"/>
+        <stop offset="1" stop-color="#f29a00"/>
+      </linearGradient>
+    </defs>
+  </svg>
   <main class="app">
     <a class="home-link" id="home-link" href="index.html" hidden>🏠 Hjem</a>
     <header>
       <h1 id="page-title">Regnespil</h1>
-      <div class="star-hero" id="star-hero" role="status" hidden>
-        <div class="star-glow" aria-hidden="true"></div>
-        <svg class="big-star" viewBox="0 0 100 96" aria-hidden="true" focusable="false">
-          <defs>
-            <linearGradient id="star-fill" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#fff3a0"/>
-              <stop offset=".55" stop-color="#ffc928"/>
-              <stop offset="1" stop-color="#f29a00"/>
-            </linearGradient>
-          </defs>
-          <polygon points="50,3 62,35 97,36 69,57 79,91 50,71 21,91 31,57 3,36 38,35" fill="url(#star-fill)" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
-          <polygon points="50,14 58,36 80,37 63,50 69,72 50,59 31,72 37,50 20,37 42,36" fill="#fff" opacity=".28"/>
-        </svg>
-        <div class="star-count" id="star-count"><b id="star-total">0</b><small>stjerner</small></div>
+      <div class="star-hero" id="star-hero" role="button" tabindex="0" title="Tryk for at høre stjernerne igen" hidden>
+        <div class="star-row" id="star-row"></div>
+        <div class="trophies" id="trophies" hidden></div>
         <span class="twinkle t1" aria-hidden="true">✨</span>
         <span class="twinkle t2" aria-hidden="true">✨</span>
         <span class="twinkle t3" aria-hidden="true">⭐</span>
@@ -460,8 +477,8 @@
     </header>
 
     <nav class="choose" id="choose" aria-label="Vælg hvem der skal spille">
-      <a class="who who-ari" href="?barn=ari"><span class="who-icon" aria-hidden="true">🦁</span><span class="who-name">Ari</span><span class="who-stars" data-kid="ari">⭐ <b>0</b></span></a>
-      <a class="who who-riyana" href="?barn=riyana"><span class="who-icon" aria-hidden="true">👸</span><span class="who-name">Riyana</span><span class="who-stars" data-kid="riyana">⭐ <b>0</b></span></a>
+      <a class="who who-ari" href="?barn=ari"><span class="who-icon" aria-hidden="true">🦁</span><span class="who-name">Ari</span><span class="who-stars" data-kid="ari"></span></a>
+      <a class="who who-riyana" href="?barn=riyana"><span class="who-icon" aria-hidden="true">👸</span><span class="who-name">Riyana</span><span class="who-stars" data-kid="riyana"></span></a>
     </nav>
 
     <nav class="games" id="games" aria-label="Vælg spil" hidden>
@@ -768,9 +785,10 @@
     <div class="settings-menu" id="settings-menu" hidden>
       <button class="menu-item" id="upgrade" type="button">🔄 Opgrader</button>
       <button class="menu-item" id="install" type="button">📲 Hent som app</button>
+      <button class="menu-item" id="sound-toggle" type="button">🔊 Lyd: til</button>
       <button class="menu-item danger" id="reset" type="button">🗑️ Nulstil stjerner</button>
       <p class="offline-status" id="offline-status" aria-live="polite"></p>
-      <p class="version" id="version">Version 1.8.0</p>
+      <p class="version" id="version">Version 1.9.0</p>
     </div>
   </div>
 
@@ -950,20 +968,114 @@
       }
       return sum;
     }
-    for (const chip of document.querySelectorAll(".who-stars")) {
-      chip.querySelector("b").textContent = totalStars(chip.dataset.kid);
+    // Fysiske stjerner: op til 10 i en række, grå indtil de er optjent. Hver fulde ti giver en 🏆.
+    const STAR_POINTS = "50,3 62,35 97,36 69,57 79,91 50,71 21,91 31,57 3,36 38,35";
+    const GLOSS_POINTS = "50,14 58,36 80,37 63,50 69,72 50,59 31,72 37,50 20,37 42,36";
+    const starSvg = (cls, i) => `<svg class="s ${cls}" style="--i:${i}" viewBox="0 0 100 96" aria-hidden="true" focusable="false"><polygon class="grey" points="${STAR_POINTS}"/><polygon class="gold" points="${STAR_POINTS}" fill="url(#hero-star-fill)"/><polygon class="gloss" points="${GLOSS_POINTS}"/></svg>`;
+    function starLayout(total) {
+      return { lit: total > 0 ? ((total - 1) % 10) + 1 : 0, tens: total > 0 ? Math.floor((total - 1) / 10) : 0 };
     }
 
-    // Bruges efter nulstilling, så totalerne følger med
-    function refreshTotals() {
-      for (const chip of document.querySelectorAll(".who-stars")) {
-        chip.querySelector("b").textContent = totalStars(chip.dataset.kid);
-      }
-      const heroKid = new URLSearchParams(location.search).get("barn");
-      if (Object.prototype.hasOwnProperty.call(STAR_KEYS, heroKid)) {
-        document.getElementById("star-total").textContent = totalStars(heroKid);
+    function renderChip(chip) {
+      const { lit, tens } = starLayout(totalStars(chip.dataset.kid));
+      chip.innerHTML = `<span class="mini-row">${Array.from({ length: 10 }, (_, i) => starSvg(i < lit ? "mini on" : "mini", i)).join("")}</span>${tens ? `<span class="trophy">🏆×${tens}</span>` : ""}`;
+    }
+    for (const chip of document.querySelectorAll(".who-stars")) renderChip(chip);
+
+    // Lyd med Web Audio. Kan slås fra i ⚙️-menuen (huskes uden for spillenes data).
+    let soundOn = true;
+    try { soundOn = localStorage.getItem("regnespil-lyd") !== "0"; } catch { /* ingen lagring */ }
+    let audioCtx = null;
+    function ensureAudio() {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+      } catch { /* ingen lyd */ }
+    }
+    function tone(freq, dur = .3, type = "triangle", vol = .16, delay = 0) {
+      // Kun hvis browseren har tilladt lyd; ellers springes den over i stedet for at komme forsinket
+      if (!soundOn || !audioCtx || audioCtx.state !== "running") return;
+      try {
+        const t = audioCtx.currentTime + delay, osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol, t + .02);
+        gain.gain.exponentialRampToValueAtTime(.001, t + dur);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(t); osc.stop(t + dur + .02);
+      } catch { /* ingen lyd */ }
+    }
+    const STAR_NOTES = [523, 587, 659, 784, 880, 1047, 1175, 1319, 1568, 1760];
+    const chime = (i) => { tone(STAR_NOTES[i], .38); tone(STAR_NOTES[i] * 2, .2, "sine", .06, .07); };
+    const fanfare = () => [523, 659, 784, 1047, 1319].forEach((f, k) => tone(f, .45, "triangle", .15, k * .1));
+
+    const heroEl = document.getElementById("star-hero");
+    const rowEl = document.getElementById("star-row");
+    const trophyEl = document.getElementById("trophies");
+    let heroRun = 0;
+
+    function burst(star) {
+      for (let k = 0; k < 7; k++) {
+        const spark = document.createElement("span");
+        const angle = (k / 7) * Math.PI * 2 + Math.random() * .4;
+        const dist = 26 + Math.random() * 26;
+        spark.className = "burst";
+        spark.textContent = k % 2 ? "✨" : "⭐";
+        spark.style.left = `${star.offsetLeft + star.offsetWidth / 2}px`;
+        spark.style.top = `${star.offsetTop + star.offsetHeight / 2}px`;
+        spark.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+        spark.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+        rowEl.append(spark);
+        setTimeout(() => spark.remove(), 900);
       }
     }
+
+    // Tænder barnets stjerner en efter en med glimt og lyd (eller med det samme uden animation)
+    function renderHero(total, animate) {
+      const run = ++heroRun;
+      const { lit, tens } = starLayout(total);
+      rowEl.innerHTML = Array.from({ length: 10 }, (_, i) => starSvg("", i)).join("");
+      trophyEl.hidden = true;
+      trophyEl.innerHTML = tens ? `🏆 <span>×${tens}</span>` : "";
+      const stars = [...rowEl.querySelectorAll(".s")];
+      if (!animate) {
+        stars.slice(0, lit).forEach((s) => s.classList.add("on"));
+        trophyEl.hidden = !tens;
+        return;
+      }
+      ensureAudio();
+      const first = 550, step = 380;
+      stars.slice(0, lit).forEach((s, i) => {
+        setTimeout(() => {
+          if (run !== heroRun) return;
+          s.classList.add("on");
+          burst(s);
+          chime(i);
+        }, first + i * step);
+      });
+      const done = first + lit * step;
+      setTimeout(() => {
+        if (run !== heroRun) return;
+        if (tens) { trophyEl.hidden = false; chime(9); }
+        if (lit === 10) fanfare();
+      }, done + 100);
+    }
+
+    // Bruges efter nulstilling, så stjernerne følger med
+    function refreshTotals() {
+      for (const chip of document.querySelectorAll(".who-stars")) renderChip(chip);
+      if (Object.prototype.hasOwnProperty.call(STAR_KEYS, kidParam)) renderHero(totalStars(kidParam), false);
+    }
+
+    const soundToggle = document.getElementById("sound-toggle");
+    const paintSound = () => { soundToggle.textContent = soundOn ? "🔊 Lyd: til" : "🔇 Lyd: fra"; };
+    paintSound();
+    soundToggle.addEventListener("click", () => {
+      soundOn = !soundOn;
+      try { localStorage.setItem("regnespil-lyd", soundOn ? "1" : "0"); } catch { /* ingen lagring */ }
+      paintSound();
+      if (soundOn) { ensureAudio(); tone(784, .25); }
+    });
 
     // To visninger i samme side: valg af barn (uden parameter) og barnets spil (?barn=ari eller ?barn=riyana)
     const KIDS = { ari: { name: "Ari", icon: "🦁" }, riyana: { name: "Riyana", icon: "👸" } };
@@ -981,26 +1093,17 @@
         card.hidden = !card.dataset.for.split(" ").includes(kidParam);
       }
 
-      // Stjernehelten tæller op fra 0 til det samlede antal
-      document.getElementById("star-hero").hidden = false;
+      // Stjernerne tændes en efter en. Tryk på dem for at se og høre det igen.
       const total = totalStars(kidParam);
-      const totalEl = document.getElementById("star-total");
-      const countEl = document.getElementById("star-count");
-      document.getElementById("star-hero").setAttribute("aria-label", `${kid.name} har ${total} stjerner`);
+      heroEl.hidden = false;
+      heroEl.setAttribute("aria-label", `${kid.name} har ${total} stjerner. Tryk for at høre dem igen.`);
       const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce || total === 0) {
-        totalEl.textContent = total;
-      } else {
-        const duration = Math.min(2200, 600 + total * 40);
-        const start = performance.now();
-        const tick = (now) => {
-          const t = Math.min(1, (now - start) / duration);
-          totalEl.textContent = Math.round(total * (1 - Math.pow(1 - t, 3)));
-          if (t < 1) requestAnimationFrame(tick);
-          else countEl.classList.add("pop");
-        };
-        requestAnimationFrame(tick);
-      }
+      renderHero(total, !reduce);
+      const replay = () => renderHero(totalStars(kidParam), !reduce);
+      heroEl.addEventListener("click", replay);
+      heroEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); replay(); }
+      });
     }
   </script>
 </body>
