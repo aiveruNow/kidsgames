@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd6ec">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Prinsesse Lilje">
+  <title>Prinsesse Lilje lærer tallene 0–10</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: #5b2a63;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 10px 12px 24px;
+      background:
+        radial-gradient(circle at 15% 0%, #fff 0, transparent 40%),
+        linear-gradient(160deg, #ffd6ec 0%, #e9d5ff 55%, #cfe8ff 100%) fixed;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+    .app { width: min(100%, 560px); margin: 0 auto; }
+
+    /* ---------- Topbjælke ---------- */
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .back {
+      padding: 10px 16px; border-radius: 16px; background: #ffffffd0; color: #8a2f7d;
+      font-size: 1.1rem; font-weight: 900; text-decoration: none; box-shadow: 0 3px 10px #8a2f7d22;
+    }
+    .stats { display: flex; align-items: center; gap: 8px; }
+    .chip {
+      padding: 8px 14px; border-radius: 16px; background: #fff9e3; border: 2px solid #f3dc9a;
+      color: #8a5a00; font-weight: 900; font-size: 1.1rem;
+    }
+    .mute { width: 44px; height: 44px; border-radius: 16px; background: #ffffffd0; font-size: 1.4rem; box-shadow: 0 3px 10px #8a2f7d22; }
+
+    /* ---------- Talfarver ---------- */
+    .c0  { --a: #c4b5fd; --b: #8b5cf6; }
+    .c1  { --a: #ff9ec4; --b: #ec4899; }
+    .c2  { --a: #ffb87a; --b: #f97316; }
+    .c3  { --a: #ffe27a; --b: #d9a406; }
+    .c4  { --a: #8ee6a0; --b: #22a653; }
+    .c5  { --a: #7ee0e0; --b: #0aa5c0; }
+    .c6  { --a: #93c5fd; --b: #3b82f6; }
+    .c7  { --a: #d8a7ff; --b: #a855f7; }
+    .c8  { --a: #ff9aa2; --b: #ef4444; }
+    .c9  { --a: #a5f3c9; --b: #10a878; }
+    .c10 { --a: #fda4af; --b: #e11d48; }
+
+    /* ---------- Forside ---------- */
+    .hub { display: grid; gap: 14px; justify-items: center; text-align: center; }
+    .hero { position: relative; width: min(100%, 330px); height: 250px; }
+    .princess {
+      position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%);
+      font-size: 9rem; line-height: 1; animation: sway 3s ease-in-out infinite alternate; cursor: pointer;
+      filter: drop-shadow(0 8px 12px #8a2f7d33);
+    }
+    .acc { position: absolute; font-size: 2.6rem; line-height: 1; animation: float 2.8s ease-in-out infinite alternate; }
+    .acc.locked { filter: grayscale(1) brightness(1.6); opacity: .3; animation: none; }
+    h1 { margin: 0; color: #a3267f; font-size: clamp(1.7rem, 7vw, 2.3rem); letter-spacing: -.02em; }
+    .prog { width: min(80%, 260px); height: 16px; border-radius: 99px; background: #ffffffa0; border: 2px solid #f9a8d4; overflow: hidden; }
+    .prog i { display: block; height: 100%; background: linear-gradient(90deg, #ffb703, #ff6fb5); border-radius: 99px; transition: width .4s; }
+
+    .menu { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .m {
+      display: grid; place-items: center; align-content: center; gap: 4px; min-height: 150px; padding: 12px;
+      border-radius: 28px; color: #fff; font-weight: 900; font-size: 1.15rem;
+      background: linear-gradient(160deg, var(--a), var(--b));
+      box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000), 0 14px 24px #8a2f7d26;
+      transition: transform .12s;
+      text-shadow: 0 2px 0 #00000026;
+    }
+    .m:active { transform: translateY(5px); box-shadow: 0 3px 0 color-mix(in srgb, var(--b) 70%, #000); }
+    .m .mi { font-size: 3.8rem; line-height: 1; filter: drop-shadow(0 4px 4px #0003); }
+
+    .parent { display: flex; align-items: center; gap: 8px; color: #8a6b99; font-size: .85rem; font-weight: 800; margin-top: 6px; }
+    .parent button { width: 34px; height: 34px; border-radius: 10px; background: #ffffffb0; font-size: 1.2rem; font-weight: 900; }
+
+    /* ---------- Aktiviteter ---------- */
+    .act { display: grid; gap: 14px; }
+    .ask { display: flex; align-items: center; gap: 10px; }
+    .avatar { font-size: 4.2rem; line-height: 1; flex: none; }
+    .avatar.cheer { animation: bounce .7s; }
+    .bubble {
+      position: relative; flex: 1; display: flex; align-items: center; gap: 10px; text-align: left;
+      padding: 14px 16px; border-radius: 22px; background: #fff; border: 3px solid #f9a8d4;
+      font-size: clamp(1.3rem, 6vw, 1.7rem); font-weight: 900; color: #a3267f; box-shadow: 0 6px 14px #8a2f7d1f;
+    }
+    .bubble::before {
+      content: ""; position: absolute; left: -11px; top: 50%; width: 18px; height: 18px; background: #fff;
+      border-left: 3px solid #f9a8d4; border-bottom: 3px solid #f9a8d4; transform: translateY(-50%) rotate(45deg);
+    }
+    .spk { font-size: 1.6rem; }
+    .stage { display: grid; gap: 16px; justify-items: center; }
+
+    /* 10-ramme */
+    .frame {
+      position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: min(100%, 400px);
+      padding: 10px; background: #ffffffa8; border: 3px dashed #f9a8d4; border-radius: 22px;
+    }
+    .cell {
+      aspect-ratio: 1; display: grid; place-items: center; background: #fff; border-radius: 16px;
+      box-shadow: inset 0 0 0 2px #fbcfe8;
+    }
+    .it { position: relative; font-size: clamp(1.9rem, 9vw, 2.9rem); line-height: 1; transition: transform .2s; }
+    .it.hid { opacity: 0; transform: scale(.2); }
+    .it.pop { animation: pop .45s; }
+    .it.counted { filter: drop-shadow(0 0 7px #ec4899); }
+    .it i {
+      position: absolute; right: -8px; bottom: -8px; min-width: 1.5em; height: 1.5em; padding: 0 3px; border-radius: 99px;
+      display: grid; place-items: center; background: #ec4899; color: #fff; font-size: .75rem; font-style: normal; font-weight: 900;
+      animation: pop .3s;
+    }
+    .frame.none::after {
+      content: "🚫"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 4.5rem;
+      background: #fffc; border-radius: 20px;
+    }
+    .frame.tappable .it { cursor: pointer; }
+
+    /* Smykkeskrin */
+    .target {
+      display: grid; place-items: center; width: 130px; height: 130px; border-radius: 32px;
+      background: linear-gradient(160deg, var(--a), var(--b)); box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000);
+    }
+    .target b, .bignum, .card { color: #fff; font-weight: 900; text-shadow: 0 4px 0 #0003; }
+    .target b { font-size: 5.2rem; line-height: 1; }
+    .tray {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: min(100%, 400px); min-height: 90px;
+      padding: 12px; border-radius: 24px; background: linear-gradient(#fff, #ffe4f1); box-shadow: 0 6px 14px #8a2f7d1f;
+    }
+    .gem { font-size: clamp(2.4rem, 12vw, 3.6rem); line-height: 1; padding: 4px; animation: float 2.4s ease-in-out infinite alternate; }
+    .gem:nth-child(even) { animation-delay: -1.2s; }
+    .gem.gone { visibility: hidden; }
+
+    /* Talkort */
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
+    .card {
+      aspect-ratio: .85; display: grid; place-items: center; border-radius: 28px; font-size: clamp(3.6rem, 19vw, 6.4rem); line-height: 1;
+      background: linear-gradient(160deg, var(--a), var(--b)); box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000), 0 14px 22px #8a2f7d22;
+      transition: transform .12s;
+    }
+    .card:active { transform: translateY(5px); }
+    .card.shake { animation: shake .45s; }
+    .card.hint, .card.win { animation: glow .8s ease-in-out infinite alternate; }
+    .card.win { transform: scale(1.08); }
+    .card:disabled { cursor: default; }
+    .fwrap { min-height: 130px; width: 100%; display: grid; justify-items: center; }
+
+    /* Lær tallene */
+    .strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; width: 100%; }
+    .nb {
+      aspect-ratio: 1; border-radius: 18px; color: #fff; font-weight: 900; font-size: clamp(1.7rem, 8vw, 2.4rem); text-shadow: 0 2px 0 #0003;
+      background: linear-gradient(160deg, var(--a), var(--b)); box-shadow: 0 5px 0 color-mix(in srgb, var(--b) 70%, #000);
+    }
+    .nb:active { transform: translateY(3px); }
+    .nb.on { outline: 5px solid #fff; box-shadow: 0 0 0 8px var(--b), 0 5px 0 #0002; transform: scale(1.06); }
+    .show { display: grid; gap: 6px; justify-items: center; width: 100%; min-height: 330px; }
+    .bignum { font-size: 7.5rem; line-height: 1; color: var(--b); text-shadow: 0 4px 0 #fff, 0 8px 0 #0002; }
+    .word { font-size: 1.8rem; font-weight: 900; color: var(--b); text-transform: capitalize; }
+    .hand { font-size: 5rem; animation: float 1.2s ease-in-out infinite alternate; }
+
+    /* Overlay */
+    #pop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: #ffffffb0; backdrop-filter: blur(4px); }
+    .popbox { display: grid; gap: 8px; justify-items: center; padding: 28px 36px; border-radius: 34px; background: #fff; border: 4px solid #f9a8d4; box-shadow: 0 20px 50px #8a2f7d44; animation: pop .5s; }
+    .popbig { font-size: 7rem; line-height: 1; }
+    .poptext { font-size: 1.6rem; font-weight: 900; color: #a3267f; text-align: center; }
+
+    #fx { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+    .conf { position: absolute; top: -10%; animation: fall linear forwards; }
+
+    @keyframes sway { from { transform: translate(-50%, -50%) rotate(-3deg); } to { transform: translate(-50%, -54%) rotate(3deg); } }
+    @keyframes float { from { transform: translateY(0); } to { transform: translateY(-7px); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-22px) scale(1.1); } }
+    @keyframes pop { 0% { transform: scale(.2); opacity: 0; } 70% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-12px); } 40% { transform: translateX(12px); } 60% { transform: translateX(-8px); } 80% { transform: translateX(8px); } }
+    @keyframes glow { from { box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000), 0 0 0 0 #fff; } to { box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000), 0 0 0 10px #fff, 0 0 30px 12px #ffe27a; } }
+    @keyframes fall { to { transform: translateY(115vh) rotate(360deg); } }
+
+    @media (max-width: 420px) {
+      .princess { font-size: 7.5rem; }
+      .hero { height: 215px; }
+      .m { min-height: 130px; }
+      .avatar { font-size: 3.4rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topline">
+      <a class="back" id="back" href="../index.html" aria-label="Tilbage">←</a>
+      <div class="stats">
+        <button class="mute" id="mute" type="button" aria-label="Lyd til/fra">🔊</button>
+        <span class="chip">⭐ <span id="starN">0</span></span>
+      </div>
+    </div>
+    <main id="view"></main>
+  </div>
+  <div id="pop" hidden></div>
+  <div id="fx" aria-hidden="true"></div>
+
+  <script>
+    const W = ["nul", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni", "ti"];
+    const THINGS = [
+      { e: "💎", sg: "diamant", pl: "diamanter", art: "en", where: "i smykkeskrinet" },
+      { e: "🎀", sg: "sløjfe", pl: "sløjfer", art: "en", where: "i prinsessens hår" },
+      { e: "💄", sg: "læbestift", pl: "læbestifter", art: "en", where: "i makeup-tasken" },
+      { e: "💍", sg: "ring", pl: "ringe", art: "en", where: "på puden" },
+      { e: "👑", sg: "krone", pl: "kroner", art: "en", where: "på hylden" },
+      { e: "🌸", sg: "blomst", pl: "blomster", art: "en", where: "i prinsessens hår" },
+      { e: "🦋", sg: "sommerfugl", pl: "sommerfugle", art: "en", where: "i haven" },
+      { e: "💖", sg: "hjerte", pl: "hjerter", art: "et", where: "i skrinet" },
+      { e: "⭐", sg: "stjerne", pl: "stjerner", art: "en", where: "på kjolen" }
+    ];
+    const ACC = [
+      { e: "🎀", name: "sløjfe", x: 6, y: 8 }, { e: "💍", name: "ring", x: 82, y: 6 },
+      { e: "💄", name: "læbestift", x: 0, y: 46 }, { e: "💎", name: "diamant", x: 88, y: 44 },
+      { e: "🦄", name: "enhjørning", x: 4, y: 80 }, { e: "🌸", name: "blomst", x: 84, y: 80 },
+      { e: "🦋", name: "sommerfugl", x: 28, y: -2 }, { e: "👑", name: "krone", x: 60, y: -2 }
+    ];
+    const PRAISE = ["Flot!", "Dygtig!", "Super!", "Hurra!", "Sådan!", "Fantastisk!"];
+
+    const $ = (s, r = document) => r.querySelector(s);
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const rnd = a => a[Math.floor(Math.random() * a.length)];
+    const store = {
+      get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+      set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ingen lagring */ } }
+    };
+
+    const S = {
+      stars: Number(store.get("prinsesse-stars", 0)) || 0,
+      max: Math.min(10, Math.max(2, Number(store.get("prinsesse-max", 3)) || 3)),
+      muted: !!store.get("prinsesse-mute", false),
+      streak: 0,
+      last: -1
+    };
+    const view = $("#view");
+    let ver = 0;            // bruges til at afbryde igangværende forløb ved skærmskift
+    let screen = "hub";
+    let askSpeech = "";
+
+    /* ---------- Lyd ---------- */
+    let ac;
+    function tone(f, d = .18, type = "sine", vol = .18, delay = 0) {
+      if (S.muted) return;
+      try {
+        ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+        if (ac.state === "suspended") ac.resume();
+        const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+        o.type = type; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol, t + .02);
+        g.gain.exponentialRampToValueAtTime(.001, t + d);
+        o.connect(g); g.connect(ac.destination);
+        o.start(t); o.stop(t + d + .02);
+      } catch { /* ingen lyd */ }
+    }
+    const SCALE = [262, 294, 330, 392, 440, 523, 587, 659, 784, 880, 1047];
+    const popSound = n => tone(SCALE[Math.min(n, 10)], .22, "triangle");
+    const winSound = () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .28, "triangle", .16, i * .1));
+    const oopsSound = () => { tone(300, .2, "sine", .14); tone(240, .25, "sine", .14, .12); };
+
+    let daVoice = null;
+    function findVoice() {
+      if (!("speechSynthesis" in window)) return;
+      daVoice = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith("da")) || null;
+    }
+    findVoice();
+    if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", findVoice);
+
+    // Uden dansk stemme på enheden hentes oplæsningen online (kun selve teksten sendes).
+    const clips = new Map();
+    let curClip = null;
+    function stopSpeech() {
+      try { speechSynthesis.cancel(); } catch { /* ingen tale */ }
+      if (curClip) { curClip.pause(); curClip = null; }
+    }
+
+    function speak(text) {
+      return new Promise(res => {
+        if (S.muted) { setTimeout(res, 450); return; }
+        let done = false;
+        const fin = () => { if (!done) { done = true; res(); } };
+        setTimeout(fin, 1500 + text.length * 110);
+        stopSpeech();
+        if (daVoice) {
+          const u = new SpeechSynthesisUtterance(text);
+          u.voice = daVoice; u.lang = daVoice.lang; u.rate = .85; u.pitch = 1.2;
+          u.onend = fin; u.onerror = fin;
+          speechSynthesis.speak(u);
+          return;
+        }
+        const key = text.toLowerCase();
+        if (!clips.has(key)) {
+          const a = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=da&q=${encodeURIComponent(key)}`);
+          a.preload = "auto";
+          clips.set(key, a);
+        }
+        const a = clips.get(key);
+        curClip = a;
+        a.onended = fin; a.onerror = fin;
+        a.currentTime = 0;
+        a.play().catch(fin);
+      });
+    }
+
+    /* ---------- Hjælpere ---------- */
+    const phrase = (n, t) => n === 0 ? `ingen ${t.pl}` : n === 1 ? `${t.art} ${t.sg}` : `${W[n]} ${t.pl}`;
+
+    function pick(minN) {
+      const p = [];
+      for (let i = minN; i <= S.max; i++) if (i !== S.last) p.push(i);
+      return (S.last = rnd(p));
+    }
+
+    function choices(n) {
+      const all = [];
+      for (let i = 0; i <= S.max; i++) if (i !== n) all.push(i);
+      const s = [n];
+      while (s.length < 3 && all.length) s.push(all.splice(Math.floor(Math.random() * all.length), 1)[0]);
+      return s.sort(() => Math.random() - .5);
+    }
+
+    function frame(n, t, { hide = false, tappable = false } = {}) {
+      const f = document.createElement("div");
+      f.className = "frame" + (n === 0 ? " none" : "") + (tappable ? " tappable" : "");
+      for (let i = 0; i < 10; i++) {
+        const c = document.createElement("div");
+        c.className = "cell";
+        if (i < n) {
+          const s = document.createElement("span");
+          s.className = "it" + (hide ? " hid" : "");
+          s.textContent = t.e;
+          c.append(s);
+        }
+        f.append(c);
+      }
+      return f;
+    }
+
+    function confetti() {
+      const fx = $("#fx"), E = ["💖", "✨", "⭐", "👑", "💎", "🎀", "🌸"];
+      for (let i = 0; i < 22; i++) {
+        const s = document.createElement("span");
+        s.className = "conf";
+        s.textContent = rnd(E);
+        s.style.left = Math.random() * 100 + "%";
+        s.style.fontSize = 1.2 + Math.random() * 1.4 + "rem";
+        s.style.animationDuration = 1.4 + Math.random() * 1.2 + "s";
+        s.style.animationDelay = Math.random() * .3 + "s";
+        fx.append(s);
+        setTimeout(() => s.remove(), 3200);
+      }
+    }
+
+    function showPop(big, text) {
+      return new Promise(res => {
+        const p = $("#pop");
+        p.innerHTML = `<div class="popbox"><div class="popbig">${big}</div><div class="poptext">${text}</div></div>`;
+        p.hidden = false;
+        confetti();
+        let done = false;
+        const end = () => { if (!done) { done = true; p.hidden = true; res(); } };
+        p.onclick = end;
+        speak(text).then(() => setTimeout(end, 500));
+        setTimeout(end, 4500);
+      });
+    }
+
+    function cheer() {
+      const a = $("#av");
+      if (!a) return;
+      a.classList.remove("cheer");
+      void a.offsetWidth;
+      a.classList.add("cheer");
+    }
+
+    async function reward(v, first, line) {
+      cheer(); confetti(); winSound();
+      S.stars++;
+      const unlock = S.stars % 3 === 0 && S.stars / 3 <= ACC.length ? ACC[S.stars / 3 - 1] : null;
+      let levelUp = false;
+      if (first) {
+        if (++S.streak >= 3 && S.max < 10) { S.max++; S.streak = 0; levelUp = true; }
+      } else S.streak = 0;
+      store.set("prinsesse-stars", S.stars);
+      store.set("prinsesse-max", S.max);
+      $("#starN").textContent = S.stars;
+      await speak(line);
+      if (v !== ver) return false;
+      if (unlock) { await showPop(unlock.e, `Du fik en ${unlock.name}!`); if (v !== ver) return false; }
+      if (levelUp) { await showPop(S.max, "Nu kan vi øve flere tal!"); if (v !== ver) return false; }
+      return true;
+    }
+
+    async function countAloud(v, f) {
+      let i = 0;
+      for (const el of f.querySelectorAll(".it")) {
+        i++;
+        el.classList.remove("hid");
+        el.classList.add("pop");
+        popSound(i);
+        await speak(W[i]);
+        if (v !== ver) return false;
+        await sleep(120);
+      }
+      return true;
+    }
+
+    /* ---------- Navigation ---------- */
+    function go(name) {
+      ver++;
+      screen = name;
+      stopSpeech();
+      $("#pop").hidden = true;
+      $("#back").setAttribute("href", name === "hub" ? "../index.html" : "#");
+      ({ hub: hubView, learn: learnView, make: makeRound, find: findRound, count: countRound })[name]();
+    }
+
+    $("#back").addEventListener("click", e => {
+      if (screen !== "hub") { e.preventDefault(); go("hub"); }
+    });
+
+    function paintMute() { $("#mute").textContent = S.muted ? "🔇" : "🔊"; }
+    $("#mute").addEventListener("click", () => {
+      S.muted = !S.muted;
+      store.set("prinsesse-mute", S.muted);
+      if (S.muted) stopSpeech();
+      paintMute();
+    });
+
+    function scaffold() {
+      view.innerHTML = `
+        <section class="act">
+          <div class="ask">
+            <div class="avatar" id="av">👸</div>
+            <button class="bubble" id="again" type="button"><span class="spk">🔊</span><span id="askText"></span></button>
+          </div>
+          <div class="stage" id="stage"></div>
+        </section>`;
+      $("#again").addEventListener("click", () => speak(askSpeech));
+      return $("#stage");
+    }
+
+    function ask(text, speech) {
+      $("#askText").textContent = text;
+      askSpeech = speech;
+      return speak(speech);
+    }
+
+    /* ---------- Forside ---------- */
+    function hubView() {
+      const got = Math.min(ACC.length, Math.floor(S.stars / 3));
+      const full = got >= ACC.length;
+      view.innerHTML = `
+        <section class="hub">
+          <div class="hero">
+            ${ACC.map((a, i) => `<span class="acc${i < got ? "" : " locked"}" style="left:${a.x}%;top:${a.y}%;animation-delay:${-i * .35}s">${a.e}</span>`).join("")}
+            <div class="princess" id="princess">👸</div>
+          </div>
+          <h1>Prinsesse Lilje</h1>
+          ${full ? "" : `<div class="prog" aria-hidden="true"><i style="width:${(S.stars % 3) / 3 * 100}%"></i></div>`}
+          <nav class="menu" aria-label="Vælg leg">
+            <button class="m c1" data-go="learn" type="button"><span class="mi">🔢</span>Lær tallene</button>
+            <button class="m c4" data-go="make" type="button"><span class="mi">💎</span>Smykkeskrinet</button>
+            <button class="m c6" data-go="find" type="button"><span class="mi">🔍</span>Find tallet</button>
+            <button class="m c7" data-go="count" type="button"><span class="mi">💄</span>Hvor mange?</button>
+          </nav>
+          <div class="parent">Tal: 0–${S.max}
+            <button id="lvlDown" type="button" aria-label="Færre tal">−</button>
+            <button id="lvlUp" type="button" aria-label="Flere tal">+</button>
+          </div>
+        </section>`;
+      view.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+      $("#princess").addEventListener("click", e => {
+        const el = e.currentTarget;
+        speak("Hej! Jeg er prinsesse Lilje. Skal vi lege med tallene?");
+        confetti();
+        el.style.animation = "bounce .7s";
+        setTimeout(() => (el.style.animation = ""), 750);
+      });
+      const setMax = d => {
+        S.max = Math.min(10, Math.max(2, S.max + d));
+        S.streak = 0;
+        store.set("prinsesse-max", S.max);
+        hubView();
+      };
+      $("#lvlDown").addEventListener("click", () => setMax(-1));
+      $("#lvlUp").addEventListener("click", () => setMax(1));
+    }
+
+    /* ---------- Lær tallene ---------- */
+    function learnView() {
+      const stage = scaffold();
+      ask("Tryk på et tal", "Tryk på et tal");
+      stage.innerHTML = `
+        <div class="strip">${W.map((_, i) => `<button class="nb c${i}" data-n="${i}" type="button">${i}</button>`).join("")}</div>
+        <div class="show" id="show"><div class="hand">👆</div></div>`;
+      let current = -1;
+      stage.querySelector(".strip").addEventListener("click", e => {
+        const b = e.target.closest(".nb");
+        if (b) learnPlay(Number(b.dataset.n));
+      });
+      stage.addEventListener("click", e => {
+        if (e.target.closest(".frame") && current >= 0) learnPlay(current, true);
+      });
+
+      async function learnPlay(n, same) {
+        current = n;
+        const v = ++ver;
+        stage.querySelectorAll(".nb").forEach(b => b.classList.toggle("on", Number(b.dataset.n) === n));
+        const t = rnd(THINGS);
+        const show = $("#show");
+        const f = frame(n, t, { hide: true, tappable: true });
+        show.innerHTML = `<div class="bignum c${n}">${n}</div><div class="word c${n}">${W[n]}</div>`;
+        show.append(f);
+        if (n === 0) { await speak("nul. Der er ingen " + t.pl); return; }
+        if (!(await countAloud(v, f))) return;
+        await speak(phrase(n, t));
+      }
+    }
+
+    /* ---------- Smykkeskrinet: læg det rigtige antal ---------- */
+    function makeRound() {
+      const v = ver, n = pick(1), t = rnd(THINGS);
+      const stage = scaffold();
+      ask(`Læg ${n} ${t.e}`, `Læg ${phrase(n, t)} ${t.where}`);
+      const trayCount = Math.min(10, n + 2);
+      stage.innerHTML = `
+        <div class="target c${n}"><b>${n}</b></div>
+        <div class="frame" id="board">${'<div class="cell"></div>'.repeat(10)}</div>
+        <div class="tray" id="tray">${Array.from({ length: trayCount }, (_, i) =>
+          `<button class="gem" type="button" style="rotate:${(i * 37 % 21) - 10}deg">${t.e}</button>`).join("")}</div>`;
+      const cells = [...stage.querySelectorAll(".cell")];
+      let k = 0, busy = false;
+      $("#tray").addEventListener("click", async e => {
+        const b = e.target.closest(".gem");
+        if (!b || busy || b.classList.contains("gone")) return;
+        b.classList.add("gone");
+        const s = document.createElement("span");
+        s.className = "it pop";
+        s.textContent = t.e;
+        cells[k++].append(s);
+        popSound(k);
+        speak(W[k]);
+        if (k === n) {
+          busy = true;
+          await sleep(900);
+          if (v !== ver) return;
+          if (await reward(v, true, `${phrase(n, t)}. ${rnd(PRAISE)}`)) makeRound();
+        }
+      });
+    }
+
+    /* ---------- Find tallet ---------- */
+    function findRound() {
+      const v = ver, n = pick(0), t = rnd(THINGS), opts = choices(n);
+      const stage = scaffold();
+      ask("Find tallet", `Find tallet ${W[n]}`);
+      stage.innerHTML = `
+        <div class="cards">${opts.map(o => `<button class="card c${o}" data-n="${o}" type="button">${o}</button>`).join("")}</div>
+        <div class="fwrap" id="fwrap"></div>`;
+      let wrong = 0, locked = false;
+      stage.querySelector(".cards").addEventListener("click", async e => {
+        const b = e.target.closest(".card");
+        if (!b || locked) return;
+        const m = Number(b.dataset.n);
+        if (m !== n) {
+          wrong++;
+          oopsSound();
+          b.classList.remove("shake");
+          void b.offsetWidth;
+          b.classList.add("shake");
+          speak(`Det er ${W[m]}. Find ${W[n]}`);
+          if (wrong >= 2) stage.querySelector(`.card[data-n="${n}"]`).classList.add("hint");
+          return;
+        }
+        locked = true;
+        stage.querySelectorAll(".card").forEach(c => c.classList.remove("hint"));
+        b.classList.add("win");
+        const f = frame(n, t, { hide: true });
+        $("#fwrap").append(f);
+        if (n > 0) { if (!(await countAloud(v, f))) return; }
+        if (await reward(v, wrong === 0, `${n === 0 ? "nul" : phrase(n, t)}. ${rnd(PRAISE)}`)) findRound();
+      });
+    }
+
+    /* ---------- Hvor mange? ---------- */
+    function countRound() {
+      const v = ver, n = pick(0), t = rnd(THINGS), opts = choices(n);
+      const stage = scaffold();
+      ask(`Hvor mange ${t.e}?`, `Hvor mange ${t.pl} er der? Tæl med!`);
+      const f = frame(n, t, { tappable: true });
+      stage.append(f);
+      stage.insertAdjacentHTML("beforeend",
+        `<div class="cards">${opts.map(o => `<button class="card c${o}" data-n="${o}" type="button">${o}</button>`).join("")}</div>`);
+      let counted = 0, wrong = 0, busy = false;
+
+      const mark = (el, i) => {
+        el.classList.add("counted");
+        el.dataset.c = i;
+        el.insertAdjacentHTML("beforeend", `<i>${i}</i>`);
+      };
+
+      f.addEventListener("click", e => {
+        const el = e.target.closest(".it");
+        if (!el || busy || el.dataset.c) return;
+        mark(el, ++counted);
+        popSound(counted);
+        speak(W[counted]);
+      });
+
+      async function autoCount() {
+        f.querySelectorAll(".it").forEach(el => { el.classList.remove("counted"); delete el.dataset.c; el.querySelector("i")?.remove(); });
+        counted = 0;
+        if (n === 0) { await speak("Der er ingen"); return v === ver; }
+        for (const el of f.querySelectorAll(".it")) {
+          mark(el, ++counted);
+          popSound(counted);
+          await speak(W[counted]);
+          if (v !== ver) return false;
+          await sleep(120);
+        }
+        return true;
+      }
+
+      stage.querySelector(".cards").addEventListener("click", async e => {
+        const b = e.target.closest(".card");
+        if (!b || busy) return;
+        const m = Number(b.dataset.n);
+        if (m !== n) {
+          wrong++;
+          oopsSound();
+          b.classList.remove("shake");
+          void b.offsetWidth;
+          b.classList.add("shake");
+          if (wrong === 1) {
+            busy = true;
+            await speak(`Det er ikke ${W[m]}. Lad os tælle sammen!`);
+            if (v !== ver || !(await autoCount())) return;
+            busy = false;
+          } else {
+            speak(`Det er ikke ${W[m]}. Prøv igen`);
+            stage.querySelector(`.card[data-n="${n}"]`).classList.add("hint");
+          }
+          return;
+        }
+        busy = true;
+        stage.querySelectorAll(".card").forEach(c => c.classList.remove("hint"));
+        b.classList.add("win");
+        if (counted < n && !(await autoCount())) return;
+        if (await reward(v, wrong === 0, `${phrase(n, t)}. ${rnd(PRAISE)}`)) countRound();
+      });
+    }
+
+    paintMute();
+    $("#starN").textContent = S.stars;
+    hubView();
+  </script>
+</body>
+</html>
