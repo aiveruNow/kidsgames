@@ -27,7 +27,7 @@
       height: 100vh;
       height: 100dvh;
       margin: 0;
-      padding: 28px 18px 42px;
+      padding: calc(var(--tb-h, 54px) + 16px) 18px 42px;
       overflow-x: hidden;
       overflow-y: auto;
       overscroll-behavior: none;
@@ -42,22 +42,6 @@
       width: min(100%, 900px);
       margin: 0 auto;
     }
-
-    .back {
-      display: inline-block;
-      margin-bottom: 14px;
-      padding: 9px 13px;
-      border: 1px solid #dfe7f3;
-      border-radius: 13px;
-      background: #ffffffcc;
-      color: #27426f;
-      font-size: .9rem;
-      font-weight: 800;
-      text-decoration: none;
-      box-shadow: 0 3px 10px #243a5a14;
-    }
-
-    .back:hover, .back:focus-visible { border-color: #9ab8e9; background: #fff; outline: none; }
 
     .topline {
       display: flex;
@@ -113,20 +97,6 @@
       align-items: center;
       gap: 8px;
     }
-
-    .stars {
-      padding: 10px 13px;
-      border: 1px solid #f3dc9a;
-      border-radius: 14px;
-      background: #fff9e3;
-      color: #8a5a00;
-      font-size: .95rem;
-      font-weight: 900;
-      white-space: nowrap;
-      box-shadow: 0 3px 10px #b8860b14;
-    }
-
-    .stars.bump { animation: stars-bump .7s ease-out; }
 
     @keyframes stars-bump {
       30% { transform: scale(1.3) rotate(-6deg); }
@@ -255,46 +225,7 @@
       box-shadow: 0 16px 42px #233c6012;
     }
 
-    .menu { position: relative; }
-
-    .menu-button {
-      display: flex;
-      min-height: 40px;
-      align-items: center;
-      gap: 7px;
-      padding: 6px 13px;
-      border: 1px solid #dfe7f3;
-      border-radius: 12px;
-      background: #fff;
-      color: #27426f;
-      cursor: pointer;
-      font-size: .9rem;
-      font-weight: 800;
-      white-space: nowrap;
-      box-shadow: 0 3px 10px #243a5a0a;
-    }
-
-    .menu-button[aria-expanded="true"] { border-color: #2764c5; background: #f1f6ff; }
-    .menu-caret { font-size: .7rem; transition: transform .15s; }
-    .menu-button[aria-expanded="true"] .menu-caret { transform: rotate(180deg); }
-
-    .menu-panel {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      z-index: 70;
-      display: grid;
-      width: min(340px, calc(100vw - 16px));
-      gap: 8px;
-      padding: 14px;
-      border: 1px solid #dce5f1;
-      border-radius: 16px;
-      background: #fff;
-      box-shadow: 0 16px 40px #1a2c4c33;
-    }
-
-    .menu-panel[hidden] { display: none; }
-
+    .settings { display: grid; gap: 8px; }
     .menu-label {
       margin: 4px 0 0;
       color: #728099;
@@ -781,7 +712,6 @@
       .brand-icon { width: 40px; height: 40px; border-radius: 12px; font-size: 23px; }
       .subtitle { max-width: 190px; font-size: .8rem; }
       .score { padding: 8px 10px; font-size: .8rem; }
-      .stars { padding: 8px 10px; font-size: .8rem; }
       .stats { flex-direction: column; align-items: flex-end; gap: 5px; }
       .streak > span:first-child { display: none; }
       .streak-dots i { width: 9px; height: 9px; }
@@ -801,24 +731,6 @@
       .bubble { font-size: .8rem; padding: 6px 9px; }
     }
 
-    .fullscreen-button {
-      display: grid;
-      width: 40px;
-      height: 40px;
-      place-items: center;
-      padding: 0;
-      border: 1px solid #dfe7f3;
-      border-radius: 12px;
-      background: #fff;
-      color: #27426f;
-      cursor: pointer;
-      font-size: 1.15rem;
-      font-weight: 900;
-      box-shadow: 0 3px 10px #243a5a0a;
-    }
-
-    .fullscreen-button[hidden] { display: none; }
-
     @media (max-width: 700px), (max-height: 1100px), (orientation: portrait) and (max-width: 1100px) {
       html, body {
         height: 100%;
@@ -831,7 +743,7 @@
         min-height: 0;
         height: 100vh;
         height: 100dvh;
-        padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+        padding: calc(var(--tb-h, 54px) + 4px) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
         -webkit-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
@@ -850,22 +762,17 @@
 
       .brand, .prompt, .hint, .footer-note, .next-row { display: none; }
 
-      .back { align-self: flex-start; margin-bottom: 5px; padding: 5px 10px; border-radius: 10px; font-size: .8rem; }
-
       .topline { margin-bottom: 6px; }
 
       .stats {
         width: 100%;
         flex-direction: row;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 6px;
       }
 
-      .fullscreen-button { width: 34px; height: 34px; border-radius: 10px; }
-      .stars, .score { padding: 7px 10px; font-size: .8rem; }
-      .stars { margin-left: auto; }
-      .menu-button { min-height: 34px; padding: 4px 10px; font-size: .8rem; }
+      .score { padding: 7px 10px; font-size: .8rem; }
 
       .game-card {
         display: flex;
@@ -922,9 +829,7 @@
 
     @media (orientation: landscape) and (max-height: 520px) {
       .topline { margin-bottom: 4px; }
-      .stars, .score { padding: 5px 9px; }
-      .fullscreen-button { width: 30px; height: 30px; }
-      .menu-button { min-height: 30px; padding: 4px 10px; }
+      .score { padding: 5px 9px; }
 
       .game-body {
         display: grid;
@@ -952,14 +857,13 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
       .scene #robot, .part.pop, .pupil, .gear, .gauge-fill, .part-9.on .glow, .bubble.pop, .spark { animation: none !important; }
-      .stars.bump, .star-big, .star-popup-card, .sparkle { animation: none !important; }
+      .star-big, .star-popup-card, .sparkle { animation: none !important; }
       .sparkle { display: none; }
     }
   </style>
 </head>
 <body>
   <main class="app">
-    <a class="back" href="../index.html" aria-label="Alle spil">🏠 Alle spil</a>
     <header class="topline">
       <div class="brand">
         <div class="brand-icon" aria-hidden="true">🤖</div>
@@ -969,30 +873,22 @@
         </div>
       </div>
       <div class="stats">
-        <div class="menu" id="menu">
-          <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="menuPanel">
-            <span aria-hidden="true">☰</span>
-            <span id="menuLabel">2-tabellen</span>
-            <span class="menu-caret" aria-hidden="true">▼</span>
-          </button>
-          <div class="menu-panel" id="menuPanel" hidden>
-            <p class="menu-label">Vælg tabeller</p>
-            <div class="control-group" role="group" aria-label="Vælg tabeller" id="tableButtons"></div>
-            <div class="control-group" role="group" aria-label="Genveje">
-              <button class="control" type="button" id="allTables">Alle 0–10</button>
-              <button class="control" type="button" id="easyTables">Nemme: 0, 1, 2, 5, 10</button>
-            </div>
-            <p class="menu-note">⭐ betyder, at du har bygget Ari med den tabel.</p>
-            <div class="menu-footer">
-              <span class="round-label" id="round">Runde 1</span>
-            </div>
-          </div>
-        </div>
-        <button class="fullscreen-button" id="fullscreenButton" type="button" aria-label="Fuld skærm" title="Fuld skærm" hidden>⛶</button>
-        <div class="stars" id="stars" aria-label="Stjerner: 0">⭐ <span id="starCount">0</span></div>
         <div class="score" id="score" aria-live="polite">Rigtige: 0 / 0</div>
       </div>
     </header>
+
+    <div class="settings" id="settings" hidden>
+      <p class="menu-label">Vælg tabeller</p>
+      <div class="control-group" role="group" aria-label="Vælg tabeller" id="tableButtons"></div>
+      <div class="control-group" role="group" aria-label="Genveje">
+        <button class="control" type="button" id="allTables">Alle 0–10</button>
+        <button class="control" type="button" id="easyTables">Nemme: 0, 1, 2, 5, 10</button>
+      </div>
+      <p class="menu-note">⭐ betyder, at du har bygget Ari med den tabel.</p>
+      <div class="menu-footer">
+        <span class="round-label" id="round">Runde 1</span>
+      </div>
+    </div>
 
     <section class="game-card" aria-label="Tabelspil">
       <div class="game-body">
@@ -1121,6 +1017,7 @@
     </div>
   </div>
 
+  <script src="../topbar.js"></script>
   <script>
     const PARTS = 10;
     const PART_NAMES = ["fødder", "ben", "en krop", "et brystpanel", "arme", "hænder", "et hoved", "øjne", "en mund", "en antenne"];
@@ -1152,10 +1049,7 @@
     const answerContainer = document.querySelector("#answers");
     const scoreDisplay = document.querySelector("#score");
     const roundDisplay = document.querySelector("#round");
-    const menu = document.querySelector("#menu");
-    const menuButton = document.querySelector("#menuButton");
-    const menuPanel = document.querySelector("#menuPanel");
-    const menuLabel = document.querySelector("#menuLabel");
+    const settings = document.querySelector("#settings");
     const tableButtonBox = document.querySelector("#tableButtons");
     const feedback = document.querySelector("#feedback");
     const nextButton = document.querySelector("#next");
@@ -1168,8 +1062,6 @@
     const robot = document.querySelector("#robot");
     const target = document.querySelector("#target");
     const parts = [...robot.querySelectorAll(".part")].sort((a, b) => a.dataset.part - b.dataset.part);
-    const starsDisplay = document.querySelector("#stars");
-    const starCount = document.querySelector("#starCount");
     const streakDisplay = document.querySelector("#streak");
     const streakDots = streakDisplay.querySelector(".streak-dots");
     const starPopup = document.querySelector("#starPopup");
@@ -1196,11 +1088,6 @@
     const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     for (let index = 0; index < PARTS; index++) streakDots.append(document.createElement("i"));
-
-    function updateStars() {
-      starCount.textContent = stars;
-      starsDisplay.setAttribute("aria-label", `Stjerner: ${stars}`);
-    }
 
     function updateProgress() {
       streakDots.querySelectorAll("i").forEach((dot, index) => dot.classList.toggle("on", index < built));
@@ -1254,9 +1141,7 @@
       starPopup.hidden = false;
       clearTimeout(popupTimer);
       popupTimer = setTimeout(hideStarPopup, 4200);
-      starsDisplay.classList.remove("bump");
-      void starsDisplay.getBoundingClientRect();
-      starsDisplay.classList.add("bump");
+      Topbar.refreshStars(true);
     }
 
     function awardStar() {
@@ -1268,30 +1153,7 @@
         try { localStorage.setItem("tabbi-done", JSON.stringify(completed)); } catch { /* ingen lagring */ }
         renderTableButtons();
       }
-      updateStars();
       setTimeout(showStarPopup, reducedMotion() ? 0 : 1500);
-    }
-
-    const fullscreenButton = document.querySelector("#fullscreenButton");
-    const fullscreenRoot = document.documentElement;
-    const requestFullscreen = fullscreenRoot.requestFullscreen || fullscreenRoot.webkitRequestFullscreen;
-    const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
-
-    if (requestFullscreen) {
-      fullscreenButton.hidden = false;
-      fullscreenButton.addEventListener("click", async () => {
-        try {
-          if (document.fullscreenElement || document.webkitFullscreenElement) await exitFullscreen.call(document);
-          else await requestFullscreen.call(fullscreenRoot);
-        } catch { /* fuld skærm blev afvist */ }
-      });
-      const syncFullscreen = () => {
-        const isFull = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-        fullscreenButton.textContent = isFull ? "✕" : "⛶";
-        fullscreenButton.setAttribute("aria-label", isFull ? "Afslut fuld skærm" : "Fuld skærm");
-      };
-      document.addEventListener("fullscreenchange", syncFullscreen);
-      document.addEventListener("webkitfullscreenchange", syncFullscreen);
     }
 
     starPopup.addEventListener("click", hideStarPopup);
@@ -1639,13 +1501,6 @@
       if (isOpening) updateHint();
     });
 
-    function updateMenuLabel() {
-      const list = [...selected].sort((a, b) => a - b);
-      if (list.length === 11) menuLabel.textContent = "Alle tabeller";
-      else if (list.length === 1) menuLabel.textContent = `${list[0]}-tabellen`;
-      else menuLabel.textContent = `Tabeller: ${list.join(", ")}`;
-    }
-
     function renderTableButtons() {
       tableButtonBox.replaceChildren();
       for (let table = 0; table <= 10; table++) {
@@ -1678,21 +1533,7 @@
     document.querySelector("#allTables").addEventListener("click", () => setTables([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
     document.querySelector("#easyTables").addEventListener("click", () => setTables([0, 1, 2, 5, 10]));
 
-    function setMenuOpen(isOpen) {
-      menuPanel.hidden = !isOpen;
-      menuButton.setAttribute("aria-expanded", String(isOpen));
-    }
-
-    menuButton.addEventListener("click", () => setMenuOpen(menuPanel.hidden));
-    document.addEventListener("pointerdown", event => {
-      if (!menuPanel.hidden && !menu.contains(event.target)) setMenuOpen(false);
-    });
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && !menuPanel.hidden) {
-        setMenuOpen(false);
-        menuButton.focus();
-      }
-    });
+    Topbar.init({ kid: "ari", controls: [settings] });
 
     function resetGame() {
       clearTimeout(advanceTimer);
@@ -1706,7 +1547,6 @@
       misses = {};
       lastKey = "";
       updateProgress();
-      updateMenuLabel();
       scoreDisplay.textContent = "Rigtige: 0 / 0";
       startRound();
     }
@@ -1721,7 +1561,6 @@
 
     robotNumber = stars % PALETTES.length;
     applyPalette();
-    updateStars();
     renderTableButtons();
     resetGame();
   </script>

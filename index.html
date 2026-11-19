@@ -799,7 +799,7 @@
       <button class="menu-item" id="sound-toggle" type="button">🔊 Lyd: til</button>
       <button class="menu-item danger" id="reset" type="button">🗑️ Nulstil stjerner</button>
       <p class="offline-status" id="offline-status" aria-live="polite"></p>
-      <p class="version" id="version">Version 1.12.1</p>
+      <p class="version" id="version">Version 1.13.0</p>
     </div>
   </div>
 
@@ -818,6 +818,7 @@
     <button type="button" class="download" id="help-close">Luk</button>
   </dialog>
 
+  <script src="topbar.js"></script>
   <script>
     const installBtn = document.getElementById("install");
     const help = document.getElementById("help");
@@ -861,9 +862,9 @@
           await navigator.serviceWorker.ready;
           const keys = (await caches.keys()).sort();
           const cached = keys.length ? (await (await caches.open(keys[keys.length - 1])).keys()).length : 0;
-          statusEl.textContent = cached >= 11
+          statusEl.textContent = cached >= 12
             ? "✅ Klar til at spille uden net."
-            : `⚠️ Kun ${cached} af 11 filer er gemt. Tjek, at alle filer er uploadet, og genindlæs siden.`;
+            : `⚠️ Kun ${cached} af 12 filer er gemt. Tjek, at alle filer er uploadet, og genindlæs siden.`;
         } catch {
           statusEl.textContent = "⚠️ Kunne ikke gøre klar til offline.";
         }
@@ -967,11 +968,8 @@
     }
     refreshStars();
 
-    // Samlet antal stjerner pr. barn. Nye spil skal tilføje deres stjernenøgle her.
-    const STAR_KEYS = {
-      ari: ["talbasket-stars", "tabbi-stars", "leo-stars", "maal-stars"],
-      riyana: ["prinsesse-stars", "prinsesse-make-stars", "prinsesse-find-stars", "prinsesse-count-stars"]
-    };
+    // Samlet antal stjerner pr. barn. Nøglerne ligger i topbar.js (ét sted for forside og spil).
+    const STAR_KEYS = Topbar.STAR_KEYS;
     function totalStars(barn) {
       let sum = 0;
       for (const key of STAR_KEYS[barn]) {

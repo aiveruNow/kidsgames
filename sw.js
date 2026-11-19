@@ -1,7 +1,8 @@
-const CACHE = "regnespil-v1.12.1";
+const CACHE = "regnespil-v1.13.0";
 const FILES = [
   "./",
   "index.html",
+  "topbar.js",
   "manifest.webmanifest",
   "icon-192.png",
   "icon-512.png",

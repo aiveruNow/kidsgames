@@ -26,7 +26,7 @@
       height: 100vh;
       height: 100dvh;
       margin: 0;
-      padding: 12px 12px 14px;
+      padding: calc(var(--tb-h, 54px) + 10px) 12px 14px;
       background: radial-gradient(ellipse at 15% 0%, #f4fde9 0, #d3f0c2 100%) fixed;
       user-select: none;
       -webkit-user-select: none;
@@ -45,21 +45,7 @@
       .pic { font-size: clamp(2.6rem, 6vw, 4.6rem); }
     }
 
-    .topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-
-    .back {
-      border: 1px solid #dfe7f3;
-      padding: 9px 13px;
-      border-radius: 13px;
-      background: #ffffffcc;
-      color: #27426f;
-      font-size: .9rem;
-      font-weight: 800;
-      text-decoration: none;
-      box-shadow: 0 3px 10px #243a5a14;
-    }
-
-    .back:hover, .back:focus-visible { border-color: #9ab8e9; background: #fff; outline: none; }
+    .topline { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-bottom: 8px; }
 
     .stats { display: flex; align-items: center; gap: 8px; }
 
@@ -78,22 +64,11 @@
     button.chip { border-color: #bfe3b4; background: #f0fbe9; color: #2b6d3c; }
     .chip.bump { animation: bump .7s ease-out; }
 
-    .mute {
-      width: 40px;
-      height: 40px;
-      border: 0;
-      border-radius: 13px;
-      background: #ffffffcc;
-      font-size: 1.15rem;
-      box-shadow: 0 3px 10px #243a5a14;
-    }
-
     .sizes {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-bottom: 8px;
       color: #27426f;
       font-size: .95rem;
       font-weight: 800;
@@ -114,6 +89,7 @@
     .size small { display: block; font-size: .7rem; color: #a56d00; }
     .size[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: #fff; }
     .size[aria-pressed="true"] small { color: #fff6c9; }
+    .tb-panel .size:not([aria-pressed="true"]) { border-color: #d3e8c8; background: #f3faee; }
 
     /* ---------- Scene ---------- */
     .scene-card {
@@ -485,11 +461,8 @@
 <body>
   <main class="app">
     <div class="topline">
-      <a class="back" href="../index.html" aria-label="Alle spil">🏠 Alle spil</a>
       <div class="stats">
         <button class="chip" id="bookBtn" type="button" aria-label="Åbn junglebogen">📖 <span id="friendCount">0</span></button>
-        <div class="chip" id="stars" aria-label="Stjerner: 0">⭐ <span id="starCount">0</span></div>
-        <button class="mute" id="muteBtn" type="button" aria-label="Lyd til eller fra">🔊</button>
       </div>
     </div>
 
@@ -688,6 +661,7 @@
     </div>
   </div>
 
+  <script src="../topbar.js"></script>
   <script>
     const WORD_SETS = {
       3: [
@@ -766,7 +740,7 @@
     let delivered = load("leo-delivered", 0);
     let progress = Math.min(load("leo-progress", 0), GOAL - 1);
     let eggFriendId = load("leo-egg", "");
-    let muted = load("leo-muted", 0) === 1;
+    let muted = !Topbar.soundOn();
     let streak = 0;
     let target = null;
     let choices = [];
@@ -1045,21 +1019,12 @@
     }
 
     function updateStats() {
-      $("starCount").textContent = stars;
       $("friendCount").textContent = `${distinct()}/${FRIENDS.length}`;
-      $("stars").setAttribute("aria-label", `Stjerner: ${stars}`);
       for (const btn of document.querySelectorAll(".size")) {
         const n = Number(btn.dataset.size);
         btn.querySelector("small").textContent = eggs[n] ? `🥚 ${eggs[n]}` : "\u00a0";
         btn.setAttribute("aria-pressed", n === size);
       }
-    }
-
-    function bumpChip(id) {
-      const chip = $(id);
-      chip.classList.remove("bump");
-      void chip.offsetWidth;
-      chip.classList.add("bump");
     }
 
     function confetti(count = 36) {
@@ -1352,7 +1317,7 @@
       if (gain) {
         stars += gain;
         save("leo-stars", stars);
-        bumpChip("stars");
+        Topbar.refreshStars(true);
       }
       updateStats();
       bubble(message);
@@ -1430,7 +1395,7 @@
       $("kingNote").hidden = !king;
       $("hatch").hidden = false;
       updateStats();
-      bumpChip("stars");
+      Topbar.refreshStars(true);
       say(friend.name);
       if (king) setTimeout(() => leoRoar(true), 1200);
       $("hatch").dataset.friend = friend.id;
@@ -1497,12 +1462,10 @@
       newWord();
     }
 
-    function toggleMute() {
-      muted = !muted;
-      save("leo-muted", muted ? 1 : 0);
-      $("muteBtn").textContent = muted ? "🔇" : "🔊";
+    window.addEventListener("topbar:sound", e => {
+      muted = !e.detail.on;
       if (muted && "speechSynthesis" in window) speechSynthesis.cancel();
-    }
+    });
 
     document.querySelector(".sizes").addEventListener("click", e => {
       const btn = e.target.closest(".size");
@@ -1510,7 +1473,6 @@
     });
     $("readBtn").addEventListener("click", () => { audio(); readWord(); });
     $("letters").addEventListener("click", () => { audio(); readWord(); });
-    $("muteBtn").addEventListener("click", toggleMute);
     $("bookBtn").addEventListener("click", () => showBook());
     $("bookClose").addEventListener("click", () => { $("book").hidden = true; });
     $("book").addEventListener("click", e => { if (e.target === $("book")) $("book").hidden = true; });
@@ -1523,11 +1485,11 @@
     if (!friendOf(eggFriendId)) pickEggFriend();
     setEggColor();
     setEgg(progress, false);
-    $("muteBtn").textContent = muted ? "🔇" : "🔊";
     updatePath();
     renderFriends();
     updateLeo();
     updateStats();
+    Topbar.init({ kid: "ari", controls: [document.querySelector(".sizes")] });
     newWord();
   </script>
 </body>

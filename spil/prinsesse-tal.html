@@ -26,7 +26,7 @@
       height: 100vh;
       height: 100dvh;
       margin: 0;
-      padding: 10px 12px 14px;
+      padding: calc(var(--tb-h, 54px) + 10px) 12px 14px;
       background:
         radial-gradient(circle at 15% 0%, #fff 0, transparent 40%),
         linear-gradient(160deg, #ffd6ec 0%, #e9d5ff 55%, #cfe8ff 100%) fixed;
@@ -41,19 +41,12 @@
     button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
     .app { width: min(100%, 560px); margin: 0 auto; }
 
-    /* ---------- Topbjælke ---------- */
-    .topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-    .nav { display: flex; align-items: center; gap: 8px; }
+    /* ---------- Undervisning: kun "tilbage" på den gamle forside ---------- */
+    .topline { display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 8px; }
     .back {
       padding: 10px 16px; border-radius: 16px; background: #ffffffd0; color: #8a2f7d;
       font-size: 1.1rem; font-weight: 900; text-decoration: none; box-shadow: 0 3px 10px #8a2f7d22;
     }
-    .stats { display: flex; align-items: center; gap: 8px; }
-    .chip {
-      padding: 8px 14px; border-radius: 16px; background: #fff9e3; border: 2px solid #f3dc9a;
-      color: #8a5a00; font-weight: 900; font-size: 1.1rem;
-    }
-    .mute { width: 44px; height: 44px; border-radius: 16px; background: #ffffffd0; font-size: 1.4rem; box-shadow: 0 3px 10px #8a2f7d22; }
 
     /* ---------- Talfarver ---------- */
     .c0  { --a: #c4b5fd; --b: #8b5cf6; }
@@ -101,6 +94,8 @@
     .collect { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-size: 1.7rem; line-height: 1; }
     .collect .locked { filter: grayscale(1) brightness(1.6); opacity: .3; }
     .act .parent { justify-content: center; }
+    .tb-panel .parent { margin-top: 0; justify-content: center; font-size: 1.1rem; }
+    .tb-panel .parent button { width: 48px; height: 48px; background: #f3e8ff; }
 
     /* ---------- Aktiviteter ---------- */
     .act { display: grid; gap: 14px; }
@@ -216,21 +211,21 @@
 </head>
 <body>
   <div class="app">
-    <div class="topline">
-      <div class="nav">
-        <a class="back" href="../index.html" aria-label="Alle spil">🏠</a>
-        <a class="back" id="back" href="#" aria-label="Tilbage" hidden>←</a>
-      </div>
-      <div class="stats">
-        <button class="mute" id="mute" type="button" aria-label="Lyd til/fra">🔊</button>
-        <span class="chip">⭐ <span id="starN">0</span></span>
-      </div>
+    <div class="topline" id="subbar" hidden>
+      <a class="back" id="back" href="#" aria-label="Tilbage">←</a>
     </div>
     <main id="view"></main>
+  </div>
+  <div class="settings" id="settings" hidden>
+    <div class="parent" id="rangeBox">Tal: 0–<span id="maxN">3</span>
+      <button id="sMaxDown" type="button" aria-label="Færre tal">−</button>
+      <button id="sMaxUp" type="button" aria-label="Flere tal">+</button>
+    </div>
   </div>
   <div id="pop" hidden></div>
   <div id="fx" aria-hidden="true"></div>
 
+  <script src="../topbar.js"></script>
   <script>
     const W = ["nul", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni", "ti"];
     const THINGS = [
@@ -270,7 +265,7 @@
     const S = {
       stars: Number(store.get(STAR_KEY, 0)) || 0,
       max: Math.min(10, Math.max(2, Number(store.get("prinsesse-max", 3)) || 3)),
-      muted: !!store.get("prinsesse-mute", false),
+      muted: !Topbar.soundOn(),
       streak: 0,
       last: -1
     };
@@ -425,7 +420,7 @@
       } else S.streak = 0;
       store.set(STAR_KEY, S.stars);
       store.set("prinsesse-max", S.max);
-      $("#starN").textContent = S.stars;
+      Topbar.refreshStars(true);
       await speak(line);
       if (v !== ver) return false;
       if (unlock) { await showPop(unlock.e, `Du fik en ${unlock.name}!`); if (v !== ver) return false; }
@@ -453,7 +448,7 @@
       screen = name;
       stopSpeech();
       $("#pop").hidden = true;
-      $("#back").hidden = name === "hub" || !!MODE;
+      $("#subbar").hidden = name === "hub" || !!MODE;
       ({ hub: hubView, learn: learnView, make: makeRound, find: findRound, count: countRound })[name]();
     }
 
@@ -462,25 +457,29 @@
       go("hub");
     });
 
-    function paintMute() { $("#mute").textContent = S.muted ? "🔇" : "🔊"; }
-    $("#mute").addEventListener("click", () => {
-      S.muted = !S.muted;
-      store.set("prinsesse-mute", S.muted);
+    window.addEventListener("topbar:sound", e => {
+      S.muted = !e.detail.on;
       if (S.muted) stopSpeech();
-      paintMute();
     });
+
+    // Talområdet vælges i ⚙️-menuen i de enkelte lege (undtagen "Lær tallene", som viser alle tal)
+    const paintMax = () => { $("#maxN").textContent = S.max; };
+    const stepMax = d => {
+      S.max = Math.min(10, Math.max(2, S.max + d));
+      S.streak = 0;
+      store.set("prinsesse-max", S.max);
+      paintMax();
+      go(MODE);
+    };
+    $("#sMaxDown").addEventListener("click", () => stepMax(-1));
+    $("#sMaxUp").addEventListener("click", () => stepMax(1));
+    paintMax();
 
     function scaffold() {
       const got = Math.min(ACC.length, Math.floor(S.stars / 3));
-      // Egne spil viser samlingen af prinsessting og et valg af talområde (forsiden gør det ellers)
+      // Egne spil viser samlingen af prinssting
       const collect = MODE && MODE !== "learn"
         ? `<div class="collect" aria-label="Dine prinsessting">${ACC.map((a, i) => `<span class="${i < got ? "" : "locked"}">${a.e}</span>`).join("")}</div>`
-        : "";
-      const range = MODE && MODE !== "learn"
-        ? `<div class="parent">Tal: 0–${S.max}
-            <button id="lvlDown" type="button" aria-label="Færre tal">−</button>
-            <button id="lvlUp" type="button" aria-label="Flere tal">+</button>
-          </div>`
         : "";
       view.innerHTML = `
         <section class="act">
@@ -490,19 +489,8 @@
           </div>
           ${collect}
           <div class="stage" id="stage"></div>
-          ${range}
         </section>`;
       $("#again").addEventListener("click", () => speak(askSpeech));
-      if (range) {
-        const setMax = d => {
-          S.max = Math.min(10, Math.max(2, S.max + d));
-          S.streak = 0;
-          store.set("prinsesse-max", S.max);
-          go(MODE);
-        };
-        $("#lvlDown").addEventListener("click", () => setMax(-1));
-        $("#lvlUp").addEventListener("click", () => setMax(1));
-      }
       return $("#stage");
     }
 
@@ -717,8 +705,8 @@
       });
     }
 
-    paintMute();
-    $("#starN").textContent = S.stars;
+    const range = MODE && MODE !== "learn" ? $("#settings") : null;
+    Topbar.init({ kid: "riyana", controls: range ? [range] : [] });
     if (MODE) go(MODE);
     else hubView();
   </script>

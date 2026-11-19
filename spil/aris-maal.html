@@ -34,9 +34,9 @@
 
     /* Hele skærmen er banen. Mål og skærm måles i cqmin/cqh (procent af scenens mindste side/højde). */
     .stage {
-      --board-top: 8cqh;
+      --board-top: calc(var(--tb-h, 54px) + 1cqh);
       --board-h: 21cqh;
-      --goal-top: 31cqh;
+      --goal-top: calc(var(--tb-h, 54px) + 24cqh);
       --goal-h: 21cqh;
       --ball: min(14cqh, 21cqw);
       --ball-y: 80%;
@@ -117,89 +117,24 @@
       border-radius: 0 0 50% 50% / 0 0 100% 100%;
     }
 
-    /* ---------- Topbjælke ---------- */
-    .hud {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      z-index: 40;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-      padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));
-      pointer-events: none;
-    }
-
-    .hud > * { pointer-events: auto; }
-
-    .back {
-      padding: 10px 15px;
-      border: 1px solid #dfe7f3;
-      border-radius: 14px;
-      background: #ffffffd9;
-      color: #27426f;
-      font-size: .95rem;
-      font-weight: 800;
-      text-decoration: none;
-      box-shadow: 0 3px 10px #0003;
-    }
-
-    .stats { display: flex; align-items: center; gap: 7px; }
-
-    .chip {
-      padding: 8px 12px;
-      border: 1px solid #f3dc9a;
-      border-radius: 14px;
-      background: #fff9e3;
-      color: #8a5a00;
-      font-size: 1rem;
-      font-weight: 900;
-      white-space: nowrap;
-      box-shadow: 0 3px 10px #0003;
-    }
-
-    .chip.bump { animation: bump .7s ease-out; }
-    @keyframes bump { 30% { transform: scale(1.35) rotate(-6deg); } 60% { transform: scale(.95) rotate(3deg); } }
-
-    .icon-btn {
-      width: 42px;
-      height: 42px;
-      border: 0;
-      border-radius: 14px;
-      background: #ffffffd9;
-      font-size: 1.2rem;
-      box-shadow: 0 3px 10px #0003;
-    }
-
-    .modes {
-      position: absolute;
-      left: max(10px, env(safe-area-inset-left));
-      top: calc(max(8px, env(safe-area-inset-top)) + 56px);
-      z-index: 40;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    @media (orientation: portrait) {
-      .modes { left: 50%; top: calc(max(8px, env(safe-area-inset-top)) + 54px); flex-direction: row; transform: translateX(-50%); }
-    }
+    /* ---------- Sværhedsgrad i ⚙️-menuen ---------- */
+    .modes { display: flex; flex-direction: row; gap: 8px; }
 
     .mode {
+      flex: 1;
+      min-height: 48px;
       padding: 7px 13px;
-      border: 3px solid #fff;
+      border: 3px solid #d7e4f5;
       border-radius: 14px;
-      background: #ffffffb3;
+      background: #f3f8ff;
       color: #27426f;
-      font-size: .9rem;
+      font-size: 1rem;
       font-weight: 900;
-      box-shadow: 0 3px 10px #0003;
       white-space: nowrap;
     }
 
     .mode[aria-pressed="true"] { border-color: #1b9a67; background: #1b9a67; color: #fff; }
+    @keyframes bump { 30% { transform: scale(1.35) rotate(-6deg); } 60% { transform: scale(.95) rotate(3deg); } }
 
     /* ---------- Storskærm med billede ---------- */
     .screen {
@@ -775,16 +710,7 @@
     <div class="fx" id="fx"></div>
     <div class="banner" id="banner" aria-hidden="true"></div>
 
-    <div class="hud">
-      <a class="back" href="../index.html" aria-label="Alle spil">🏠</a>
-      <div class="stats">
-        <div class="chip" id="starChip" aria-label="Stjerner: 0">⭐ <span id="starCount">0</span></div>
-        <button class="icon-btn" id="fullBtn" type="button" aria-label="Fuld skærm" hidden>⛶</button>
-        <button class="icon-btn" id="muteBtn" type="button" aria-label="Lyd til eller fra">🔊</button>
-      </div>
-    </div>
-
-    <div class="modes" role="group" aria-label="Vælg sværhedsgrad">
+    <div class="modes" id="modes" role="group" aria-label="Vælg sværhedsgrad">
       <button class="mode" type="button" data-mode="ord" aria-pressed="false">🔤 Ord</button>
       <button class="mode" type="button" data-mode="hard" aria-pressed="false">🧠 Svær</button>
     </div>
@@ -816,6 +742,7 @@
 
   <canvas id="confetti" aria-hidden="true"></canvas>
 
+  <script src="../topbar.js"></script>
   <script>
     const WORDS = [
       ["LØVE", "🦁"], ["HUND", "🐶"], ["KAGE", "🍰"], ["BOLD", "⚽"], ["MÅNE", "🌙"], ["FISK", "🐟"],
@@ -859,7 +786,7 @@
     };
 
     let stars = Number(store.get("maal-stars")) || 0;
-    let muted = store.get("maal-muted") === "1";
+    let muted = !Topbar.soundOn();
     let mode = ["ord", "hard"].includes(store.get("maal-mode", "ord")) ? store.get("maal-mode", "ord") : "ord";
     let progress = 0;
     let round = null;
@@ -1415,15 +1342,7 @@
       }
     }
 
-    function updateChips(bumpStar) {
-      $("starCount").textContent = stars;
-      $("starChip").setAttribute("aria-label", `Stjerner: ${stars}`);
-      if (bumpStar) {
-        $("starChip").classList.remove("bump");
-        void $("starChip").offsetWidth;
-        $("starChip").classList.add("bump");
-      }
-    }
+    function updateChips(bumpStar) { Topbar.refreshStars(bumpStar); }
 
     function applyMode() {
       for (const b of document.querySelectorAll(".mode")) b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
@@ -1965,29 +1884,10 @@
       });
     }
 
-    function updateMute() {
-      $("muteBtn").textContent = muted ? "🔇" : "🔊";
-      $("muteBtn").setAttribute("aria-pressed", String(muted));
-    }
-    $("muteBtn").addEventListener("click", () => {
-      muted = !muted;
-      store.set("maal-muted", muted ? "1" : "0");
+    window.addEventListener("topbar:sound", e => {
+      muted = !e.detail.on;
       if (muted && "speechSynthesis" in window) speechSynthesis.cancel();
-      updateMute();
     });
-
-    // Fuld skærm, hvor browseren tillader det
-    const fsRoot = document.documentElement;
-    const reqFull = fsRoot.requestFullscreen || fsRoot.webkitRequestFullscreen;
-    if (reqFull) {
-      $("fullBtn").hidden = false;
-      $("fullBtn").addEventListener("click", async () => {
-        try {
-          if (document.fullscreenElement || document.webkitFullscreenElement) await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-          else await reqFull.call(fsRoot);
-        } catch { /* fuld skærm blev afvist */ }
-      });
-    }
 
     let resizeTimer = 0;
     addEventListener("resize", () => {
@@ -1999,8 +1899,7 @@
 
     buildCrowd();
     applyMode();
-    updateMute();
-    updateChips(false);
+    Topbar.init({ kid: "ari", controls: [$("modes")] });
     updateDots();
     slotsEl.innerHTML = [0, 1, 2, 3].map(() => '<div class="slot"><span class="g">?</span></div>').join("");
     picEl.textContent = "🦁";
