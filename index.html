@@ -117,8 +117,11 @@
 
     .who-stars {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 4px 8px;
+      max-width: 100%;
       padding: 8px 14px;
       border-radius: 99px;
       background: #ffffffe6;
@@ -128,6 +131,14 @@
     .who-stars .mini-row { display: flex; gap: 2px; }
     .who-stars .trophy { color: #8a5a00; font-weight: 900; font-size: 1.05rem; }
 
+    @media (max-width: 640px) {
+      body { padding-left: 12px; padding-right: 12px; }
+      .choose { grid-template-columns: 1fr; gap: 16px; }
+      .who { min-height: 0; gap: 4px; padding: 20px 16px 22px; border-radius: 30px; }
+      .who-icon { font-size: 6rem; }
+      .who-name { font-size: 2.4rem; }
+    }
+
     /* Fysiske stjerner: grå indtil de er optjent, så tændes de en efter en */
     .s { width: 100%; height: auto; overflow: visible; }
     .s .grey { fill: #d7dce6; stroke: #fff; stroke-width: 5; stroke-linejoin: round; }
@@ -135,7 +146,7 @@
     .s .gloss { opacity: 0; fill: #fff; }
     .s.on .gold { opacity: 1; }
     .s.on .gloss { opacity: .32; }
-    .s.mini { width: 19px; }
+    .s.mini { width: clamp(14px, 4.2vw, 19px); flex: none; }
     .s.mini.on { filter: drop-shadow(0 1px 2px #e0900088); }
 
     .star-hero {
@@ -788,7 +799,7 @@
       <button class="menu-item" id="sound-toggle" type="button">🔊 Lyd: til</button>
       <button class="menu-item danger" id="reset" type="button">🗑️ Nulstil stjerner</button>
       <p class="offline-status" id="offline-status" aria-live="polite"></p>
-      <p class="version" id="version">Version 1.9.0</p>
+      <p class="version" id="version">Version 1.9.1</p>
     </div>
   </div>
 
