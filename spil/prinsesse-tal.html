@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#ffd6ec">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Prinsesse Lilje">
-  <title>Prinsesse Lilje lærer tallene 0–10</title>
+  <meta name="apple-mobile-web-app-title" content="Prinsesse Riyana">
+  <title>Prinsesse Riyana lærer tallene 0–10</title>
   <style>
     :root {
       color-scheme: light;
@@ -482,7 +482,7 @@
             ${ACC.map((a, i) => `<span class="acc${i < got ? "" : " locked"}" style="left:${a.x}%;top:${a.y}%;animation-delay:${-i * .35}s">${a.e}</span>`).join("")}
             <div class="princess" id="princess">👸</div>
           </div>
-          <h1>Prinsesse Lilje</h1>
+          <h1>Prinsesse Riyana</h1>
           ${full ? "" : `<div class="prog" aria-hidden="true"><i style="width:${(S.stars % 3) / 3 * 100}%"></i></div>`}
           <nav class="menu" aria-label="Vælg leg">
             <button class="m c1" data-go="learn" type="button"><span class="mi">🔢</span>Lær tallene</button>
@@ -498,7 +498,7 @@
       view.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
       $("#princess").addEventListener("click", e => {
         const el = e.currentTarget;
-        speak("Hej! Jeg er prinsesse Lilje. Skal vi lege med tallene?");
+        speak("Hej! Jeg er prinsesse Riyana. Skal vi lege med tallene?");
         confetti();
         el.style.animation = "bounce .7s";
         setTimeout(() => (el.style.animation = ""), 750);

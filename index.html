@@ -97,6 +97,14 @@
       padding: 18px 22px 22px;
     }
 
+    .group {
+      grid-column: 1 / -1;
+      margin: 8px 0 -6px;
+      color: #183976;
+      font-size: 1.5rem;
+      letter-spacing: -.02em;
+    }
+
     .info h2 {
       margin: 0;
       color: #183976;
@@ -232,6 +240,7 @@
     </header>
 
     <nav class="games" aria-label="Vælg spil">
+      <h2 class="group">Til alle</h2>
       <a class="game" href="spil/plus-minus.html">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <defs>
@@ -282,6 +291,7 @@
         </div>
       </a>
 
+      <h2 class="group">Ari</h2>
       <a class="game" href="spil/tabeller.html">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <rect width="500" height="340" fill="#e3effc"/>
@@ -340,8 +350,8 @@
           </g>
         </svg>
         <div class="info">
-          <h2>Tabbi: robotværkstedet</h2>
-          <p>Gangetabellerne 0 til 10. Giv Tabbi de rigtige batterier, og byg en robot.</p>
+          <h2>Ari: robotværkstedet</h2>
+          <p>Gangetabellerne 0 til 10. Giv Ari de rigtige batterier, og byg en robot.</p>
           <div class="info-foot">
             <span class="play">Spil nu →</span>
             <span class="stars" data-store="tabbi-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
@@ -379,8 +389,8 @@
           </g>
         </svg>
         <div class="info">
-          <h2>Løven Leo læser</h2>
-          <p>Træk billedet til Leo, klæk æg og saml junglevenner.</p>
+          <h2>Løven Ari læser</h2>
+          <p>Træk billedet til Ari, klæk æg og saml junglevenner.</p>
           <div class="info-foot">
             <span class="play">Spil nu →</span>
             <span class="stars" data-store="leo-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
@@ -423,7 +433,7 @@
           </g>
         </svg>
         <div class="info">
-          <h2>Leos mål</h2>
+          <h2>Aris mål</h2>
           <p>Skyd fodboldene i mål i den rigtige rækkefølge og stav billedet.</p>
           <div class="info-foot">
             <span class="play">Spil nu →</span>
@@ -431,6 +441,7 @@
           </div>
         </div>
       </a>
+      <h2 class="group">Riyana</h2>
       <a class="game" href="spil/prinsesse-tal.html">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <defs>
@@ -450,7 +461,7 @@
           </g>
         </svg>
         <div class="info">
-          <h2>Prinsesse Lilje</h2>
+          <h2>Prinsesse Riyana</h2>
           <p>Lær tallene 0–10: tæl smykker, find tal og vind prinsesseting.</p>
           <div class="info-foot">
             <span class="play">Spil nu →</span>
@@ -465,7 +476,7 @@
       <button class="download secondary" id="upgrade" type="button">🔄 Opgrader</button>
     </p>
     <p class="offline-status" id="offline-status" aria-live="polite"></p>
-    <p class="version" id="version">Version 1.1.1</p>
+    <p class="version" id="version">Version 1.2.0</p>
   </main>
 
   <dialog id="help">

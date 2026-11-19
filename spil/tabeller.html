@@ -7,8 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Tabbi">
-  <title>Tabbi — robotværkstedet med tabeller</title>
+  <meta name="apple-mobile-web-app-title" content="Ari">
+  <title>Ari — robotværkstedet med tabeller</title>
   <style>
     :root {
       color-scheme: light;
@@ -956,8 +956,8 @@
       <div class="brand">
         <div class="brand-icon" aria-hidden="true">🤖</div>
         <div>
-          <h1>Tabbi: robotværkstedet</h1>
-          <p class="subtitle">Regn tabellen ud, og giv Tabbi det rigtige batteri</p>
+          <h1>Ari: robotværkstedet</h1>
+          <p class="subtitle">Regn tabellen ud, og giv Ari det rigtige batteri</p>
         </div>
       </div>
       <div class="stats">
@@ -974,7 +974,7 @@
               <button class="control" type="button" id="allTables">Alle 0–10</button>
               <button class="control" type="button" id="easyTables">Nemme: 0, 1, 2, 5, 10</button>
             </div>
-            <p class="menu-note">⭐ betyder, at du har bygget en Tabbi med den tabel.</p>
+            <p class="menu-note">⭐ betyder, at du har bygget Ari med den tabel.</p>
             <div class="menu-footer">
               <span class="round-label" id="round">Runde 1</span>
             </div>
@@ -989,7 +989,7 @@
     <section class="game-card" aria-label="Tabelspil">
       <div class="game-body">
         <p class="prompt">Hvad giver regnestykket?</p>
-        <p class="hint" id="dragInstructions">Træk et batteri hen til Tabbi, eller tryk på det. Rigtigt svar bygger en ny del på robotten. Med tastatur: vælg et batteri og tryk Enter.</p>
+        <p class="hint" id="dragInstructions">Træk et batteri hen til Ari, eller tryk på det. Rigtigt svar bygger en ny del på robotten. Med tastatur: vælg et batteri og tryk Enter.</p>
         <div class="equation" aria-label="Regnestykke">
           <span class="operand" id="first"></span>
           <span class="operator" aria-hidden="true">×</span>
@@ -1084,7 +1084,7 @@
           <p id="hintText"></p>
           <svg id="dotGrid" viewBox="0 0 640 150" role="img"></svg>
         </div>
-        <p class="answers-title">Træk et batteri hen til Tabbi</p>
+        <p class="answers-title">Træk et batteri hen til Ari</p>
         <div class="answers" id="answers" aria-label="Mulige svar"></div>
         <p class="feedback" id="feedback" aria-live="polite"></p>
         <div class="next-row">
@@ -1108,7 +1108,7 @@
         <path d="M50 16 59 38M30 40 40 41" stroke="#fff8c9" stroke-width="4" stroke-linecap="round" opacity=".8"/>
       </svg>
       <h2 id="starTitle">Du fik en stjerne!</h2>
-      <p>Tabbi er færdigbygget 🤖</p>
+      <p>Ari er færdigbygget 🤖</p>
       <small>Tryk for at fortsætte</small>
     </div>
   </div>
@@ -1393,7 +1393,7 @@
       mathHint.hidden = true;
       hintToggle.setAttribute("aria-expanded", "false");
       hintToggle.textContent = "💡 Vis regnehjælp";
-      if (built === 0) say("Hej! Jeg er Tabbi. Giv mig de rigtige batterier, så bygger du mig!");
+      if (built === 0) say("Hej! Jeg er Ari. Giv mig de rigtige batterier, så bygger du mig!");
       else bubble.hidden = true;
       makeProblem();
       answerContainer.replaceChildren();
@@ -1403,7 +1403,7 @@
         button.type = "button";
         button.className = "answer";
         button.dataset.choice = choice;
-        button.setAttribute("aria-label", `Svar ${choice}. Træk batteriet hen til Tabbi, eller tryk Enter.`);
+        button.setAttribute("aria-label", `Svar ${choice}. Træk batteriet hen til Ari, eller tryk Enter.`);
         button.setAttribute("aria-describedby", "dragInstructions");
         button.innerHTML = `<span class="battery" aria-hidden="true"><span class="answer-number">${choice}</span></span>`;
         button.addEventListener("pointerdown", event => beginDrag(event, button, choice));
@@ -1489,7 +1489,7 @@
       } else {
         endDrag();
         feedback.className = "feedback";
-        feedback.textContent = "Slip batteriet oppe ved Tabbi.";
+        feedback.textContent = "Slip batteriet oppe ved Ari.";
       }
     });
 
@@ -1599,12 +1599,12 @@
         if (built >= PARTS) {
           scene.classList.add("dance");
           say(`${equation}! Jeg er færdig!`, "good");
-          feedback.textContent = `Rigtigt! ${equation}. Tabbi er færdigbygget!`;
+          feedback.textContent = `Rigtigt! ${equation}. Ari er færdigbygget!`;
           awardStar();
           advanceAfterPopup = true;
         } else {
           say(`Rigtigt! ${equation}`, "good");
-          feedback.textContent = `Rigtigt! ${equation}. Tabbi fik ${PART_NAMES[partIndex]}.`;
+          feedback.textContent = `Rigtigt! ${equation}. Ari fik ${PART_NAMES[partIndex]}.`;
           advanceTimer = setTimeout(goToNextQuestion, 1900);
         }
         feedback.classList.add("good");
