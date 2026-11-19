@@ -28,35 +28,36 @@
   const soundOn = () => sound;
 
   // ---------- Fuld skærm ----------
-  // Manifestet bruger "standalone" (virker i alle browsere, uden adresselinje). Fuld skærm uden statuslinje kræver et tryk,
-  // så første tryk på hver side starter den, også i den installerede app, medmindre man selv har afsluttet den.
-  const root = document.documentElement;
-  const requestFs = root.requestFullscreen || root.webkitRequestFullscreen;
-  const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
-  const isFull = () => Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+  // Manifestet bruger "standalone" (virker i alle browsere, uden adresselinje). Fuld skærm uden statuslinje kræver et tryk.
+  // Siden ligger normalt i en ramme (index.html), så fuld skærm sættes på den ydre side og består, når man skifter spil.
+  // Første tryk starter den, medmindre man selv har afsluttet den (⚙️ → Afslut fuld skærm, eller Esc/gesten i samme side).
+  let host = window;
+  try { if (window.parent !== window && window.parent.document) host = window.parent; } catch { /* anden oprindelse */ }
+  const hdoc = host.document;
+  const hroot = hdoc.documentElement;
+  const requestFs = hroot.requestFullscreen || hroot.webkitRequestFullscreen;
+  const exitFs = hdoc.exitFullscreen || hdoc.webkitExitFullscreen;
+  const isFull = () => Boolean(hdoc.fullscreenElement || hdoc.webkitFullscreenElement);
   const alreadyFullscreen = matchMedia("(display-mode: fullscreen)").matches;
 
   function enterFs() {
     try {
-      const p = requestFs.call(root);
+      const p = requestFs.call(hroot);
       if (p && p.catch) p.catch(() => { /* afvist */ });
     } catch { /* afvist */ }
   }
 
-  let wasFull = false;
-  function onFsChange() {
-    const now = isFull();
-    // Hvis barnet selv afslutter fuld skærm, tvinger vi den ikke ind igen på de næste sider
-    if (wasFull && !now && document.visibilityState === "visible") write("regnespil-fuldskaerm", "0");
-    if (now) write("regnespil-fuldskaerm", "1");
-    wasFull = now;
-  }
-
   if (requestFs && !alreadyFullscreen) {
-    document.addEventListener("fullscreenchange", onFsChange);
-    document.addEventListener("webkitfullscreenchange", onFsChange);
+    const onChange = () => {
+      if (isFull()) return;
+      // Uden ramme forsvinder fuld skærm også, når man skifter side. Her er det kun en afslutning, hvis siden stadig er der lidt efter.
+      if (host !== window) host.__fsLeft = true;
+      else setTimeout(() => { host.__fsLeft = true; }, 400);
+    };
+    hdoc.addEventListener("fullscreenchange", onChange);
+    hdoc.addEventListener("webkitfullscreenchange", onChange);
     document.addEventListener("pointerup", () => {
-      if (read("regnespil-fuldskaerm") !== "0" && !isFull()) enterFs();
+      if (read("regnespil-fuldskaerm") !== "0" && !host.__fsLeft && !isFull()) enterFs();
     }, true);
   }
 
@@ -208,7 +209,7 @@
       <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
         <linearGradient id="tb-gold" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe66d"/><stop offset="1" stop-color="#ffb300"/></linearGradient>
       </defs></svg>
-      <a class="tb-btn tb-home" href="${opts && opts.home ? opts.home : "../index.html"}?barn=${kid}" aria-label="Alle spil" title="Alle spil">🏠</a>
+      <a class="tb-btn tb-home" href="${opts && opts.home ? opts.home : "../menu.html"}?barn=${kid}" aria-label="Alle spil" title="Alle spil">🏠</a>
       <div class="tb-stars" role="img" aria-label="Stjerner i alt">${Array.from({ length: 10 }, starSvg).join("")}</div>
       <button class="tb-btn tb-gear" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Indstillinger" title="Indstillinger">⚙️</button>
       <div class="tb-panel" role="dialog" aria-label="Indstillinger" hidden>
@@ -244,13 +245,20 @@
       const sync = () => { fsBtn.textContent = isFull() ? "✕  Afslut fuld skærm" : "⛶  Fuld skærm"; };
       fsBtn.addEventListener("click", async () => {
         try {
-          if (isFull()) await exitFs.call(document);
-          else enterFs();
+          if (isFull()) {
+            host.__fsLeft = true;
+            write("regnespil-fuldskaerm", "0");
+            await exitFs.call(hdoc);
+          } else {
+            host.__fsLeft = false;
+            write("regnespil-fuldskaerm", "1");
+            enterFs();
+          }
         } catch { /* fuld skærm blev afvist */ }
         closeMenu();
       });
-      document.addEventListener("fullscreenchange", sync);
-      document.addEventListener("webkitfullscreenchange", sync);
+      hdoc.addEventListener("fullscreenchange", sync);
+      hdoc.addEventListener("webkitfullscreenchange", sync);
       sync();
     }
 
