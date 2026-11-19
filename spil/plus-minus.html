@@ -202,6 +202,16 @@
       font-weight: 800;
     }
 
+    .star-popup .level-up {
+      margin-top: 8px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: #fff;
+      color: #2764c5;
+      font-weight: 900;
+      box-shadow: 0 3px 10px #8a5a0026;
+    }
+
     .star-popup small {
       margin-top: 12px;
       color: #a08a50;
@@ -970,7 +980,8 @@
             </div>
             <p class="menu-label">Største tal</p>
             <div class="control-group" role="group" aria-label="Vælg største svar">
-              <button class="control difficulty" type="button" data-max="10" aria-pressed="true">Op til 10</button>
+              <button class="control difficulty" type="button" data-max="auto" aria-pressed="true" title="Bliver sværere for hver stjerne">Automatisk ↑</button>
+              <button class="control difficulty" type="button" data-max="10" aria-pressed="false">Op til 10</button>
               <button class="control difficulty" type="button" data-max="20" aria-pressed="false">Op til 20</button>
               <button class="control difficulty" type="button" data-max="50" aria-pressed="false">Op til 50</button>
               <button class="control difficulty" type="button" data-max="100" aria-pressed="false">Op til 100</button>
@@ -1108,6 +1119,7 @@
       </svg>
       <h2 id="starTitle">Du fik en stjerne!</h2>
       <p>10 rigtige i streg 🏀</p>
+      <p class="level-up" id="levelUp" hidden></p>
       <small>Tryk for at fortsætte</small>
     </div>
   </div>
@@ -1135,7 +1147,19 @@
     const lake = document.querySelector("#lake");
 
     let operation = "add";
-    let maximum = 10;
+    // Niveauet stiger automatisk med 10 for hver optjent stjerne (op til 100), men kan låses i menuen
+    const LEVEL_STEP = 10;
+    const LEVEL_CAP = 100;
+    let levelSteps = 0;
+    let autoLevel = true;
+    let maximum = LEVEL_STEP;
+    try { levelSteps = Number(localStorage.getItem("talbasket-trin")) || 0; } catch { levelSteps = 0; }
+    const autoMaximum = () => Math.min(LEVEL_CAP, LEVEL_STEP * (levelSteps + 1));
+    try {
+      const saved = Number(localStorage.getItem("talbasket-niveau"));
+      if ([10, 20, 50, 100].includes(saved)) { autoLevel = false; maximum = saved; }
+    } catch { /* ingen lagring */ }
+    if (autoLevel) maximum = autoMaximum();
     let first = 0;
     let second = 0;
     let answer = 0;
@@ -1150,6 +1174,7 @@
     const streakDots = streakDisplay.querySelector(".streak-dots");
     const starPopup = document.querySelector("#starPopup");
     let popupTimer = null;
+    let levelUpMessage = "";
     let advanceTimer = null;
     let advanceAfterPopup = false;
 
@@ -1195,6 +1220,9 @@
         card.append(sparkle);
       }
       document.querySelector("#starTitle").textContent = stars > 1 ? `Stjerne nummer ${stars}!` : "Du fik en stjerne!";
+      const levelUpEl = document.querySelector("#levelUp");
+      levelUpEl.textContent = levelUpMessage;
+      levelUpEl.hidden = !levelUpMessage;
       starPopup.hidden = false;
       clearTimeout(popupTimer);
       popupTimer = setTimeout(hideStarPopup, 4200);
@@ -1207,6 +1235,15 @@
       stars++;
       try { localStorage.setItem("talbasket-stars", String(stars)); } catch { /* ingen lagring */ }
       updateStars();
+      levelUpMessage = "";
+      if (autoLevel) {
+        const before = maximum;
+        levelSteps++;
+        try { localStorage.setItem("talbasket-trin", String(levelSteps)); } catch { /* ingen lagring */ }
+        maximum = autoMaximum();
+        updateMenuLabel();
+        if (maximum > before) levelUpMessage = `Nu bliver det lidt sværere: tal op til ${maximum} 🚀`;
+      }
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       setTimeout(showStarPopup, reducedMotion ? 0 : 1600);
     }
@@ -1976,6 +2013,10 @@
 
     function updateMenuLabel() {
       menuLabel.textContent = `${operation === "add" ? "Plus" : "Minus"} · Op til ${maximum}`;
+      for (const option of difficultyButtons) {
+        const pressed = autoLevel ? option.dataset.max === "auto" : Number(option.dataset.max) === maximum;
+        option.setAttribute("aria-pressed", String(pressed));
+      }
     }
 
     function setMenuOpen(isOpen) {
@@ -2017,10 +2058,12 @@
 
     for (const button of difficultyButtons) {
       button.addEventListener("click", () => {
-        maximum = Number(button.dataset.max);
-        for (const option of difficultyButtons) {
-          option.setAttribute("aria-pressed", String(option === button));
-        }
+        autoLevel = button.dataset.max === "auto";
+        maximum = autoLevel ? autoMaximum() : Number(button.dataset.max);
+        try {
+          if (autoLevel) localStorage.removeItem("talbasket-niveau");
+          else localStorage.setItem("talbasket-niveau", String(maximum));
+        } catch { /* ingen lagring */ }
         resetGame();
       });
     }
@@ -2030,6 +2073,7 @@
       answerContainer.querySelector(".answer")?.focus();
     });
 
+    updateMenuLabel();
     startRound();
   </script>
 </body>
