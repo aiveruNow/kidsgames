@@ -38,6 +38,7 @@
 
     /* ---------- Topbjælke ---------- */
     .topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .nav { display: flex; align-items: center; gap: 8px; }
     .back {
       padding: 10px 16px; border-radius: 16px; background: #ffffffd0; color: #8a2f7d;
       font-size: 1.1rem; font-weight: 900; text-decoration: none; box-shadow: 0 3px 10px #8a2f7d22;
@@ -206,7 +207,10 @@
 <body>
   <div class="app">
     <div class="topline">
-      <a class="back" id="back" href="../index.html" aria-label="Tilbage">←</a>
+      <div class="nav">
+        <a class="back" href="../index.html" aria-label="Alle spil">🏠</a>
+        <a class="back" id="back" href="#" aria-label="Tilbage" hidden>←</a>
+      </div>
       <div class="stats">
         <button class="mute" id="mute" type="button" aria-label="Lyd til/fra">🔊</button>
         <span class="chip">⭐ <span id="starN">0</span></span>
@@ -432,12 +436,13 @@
       screen = name;
       stopSpeech();
       $("#pop").hidden = true;
-      $("#back").setAttribute("href", name === "hub" ? "../index.html" : "#");
+      $("#back").hidden = name === "hub";
       ({ hub: hubView, learn: learnView, make: makeRound, find: findRound, count: countRound })[name]();
     }
 
     $("#back").addEventListener("click", e => {
-      if (screen !== "hub") { e.preventDefault(); go("hub"); }
+      e.preventDefault();
+      go("hub");
     });
 
     function paintMute() { $("#mute").textContent = S.muted ? "🔇" : "🔊"; }
