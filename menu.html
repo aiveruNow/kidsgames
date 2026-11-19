@@ -731,6 +731,33 @@
           </div>
         </div>
       </a>
+      <a class="game" data-for="riyana" href="spil/farvehaven.html">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="fhSky" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#b9ebff"/>
+              <stop offset="1" stop-color="#d8f5c2"/>
+            </linearGradient>
+          </defs>
+          <rect width="500" height="340" fill="url(#fhSky)"/>
+          <circle cx="410" cy="62" r="36" fill="#ffe27a"/>
+          <path d="M0 235q95-65 190-17t160-27 150 8v141H0z" fill="#83d17a"/>
+          <g font-size="48" text-anchor="middle">
+            <text x="72" y="214">🌷</text><text x="420" y="223">🌼</text>
+            <text x="130" y="278">🌸</text><text x="365" y="286">🌻</text>
+          </g>
+          <g class="bob"><text x="250" y="190" font-size="130" text-anchor="middle">🐰</text></g>
+          <g font-size="32"><text x="55" y="72">✨</text><text x="335" y="118">🦋</text></g>
+        </svg>
+        <div class="info">
+          <h2>Kaninens Farvehave</h2>
+          <p>Hjælp Pjuske med at finde farverne, og pynt hendes have.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="farvehave-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
       <a class="game" data-for="riyana" href="spil/prinsesse-tal.html?leg=learn">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <defs>
@@ -838,7 +865,7 @@
       <button class="menu-item" id="sound-toggle" type="button">🔊 Lyd: til</button>
       <button class="menu-item danger" id="reset" type="button">🗑️ Nulstil stjerner</button>
       <p class="offline-status" id="offline-status" aria-live="polite"></p>
-      <p class="version" id="version">Version 1.19.2</p>
+      <p class="version" id="version">Version 1.20.0</p>
     </div>
   </div>
 
@@ -906,9 +933,9 @@
           await navigator.serviceWorker.ready;
           const keys = (await caches.keys()).sort();
           const cached = keys.length ? (await (await caches.open(keys[keys.length - 1])).keys()).length : 0;
-          statusEl.textContent = cached >= 14
+          statusEl.textContent = cached >= 15
             ? "✅ Klar til at spille uden net."
-            : `⚠️ Kun ${cached} af 14 filer er gemt. Tjek, at alle filer er uploadet, og genindlæs siden.`;
+            : `⚠️ Kun ${cached} af 15 filer er gemt. Tjek, at alle filer er uploadet, og genindlæs siden.`;
         } catch {
           statusEl.textContent = "⚠️ Kunne ikke gøre klar til offline.";
         }
@@ -985,7 +1012,7 @@
     }
 
     // Nulstil stjerner og fremskridt. Nye spil skal bruge et præfiks herfra til deres nøgler i localStorage.
-    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-", "dino-"];
+    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-", "dino-", "farvehave-"];
     const resetDialog = document.getElementById("reset-dialog");
     document.getElementById("reset").addEventListener("click", () => resetDialog.showModal());
     document.getElementById("reset-cancel").addEventListener("click", () => resetDialog.close());

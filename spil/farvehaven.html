@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#dff5ff">
+  <meta name="apple-mobile-web-app-title" content="Kaninens Farvehave">
+  <title>Kaninens Farvehave</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: #35523b;
+      font-synthesis: none;
+      --ink: #35523b;
+      --green: #378753;
+      --sun: #ffe27a;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    html { height: 100%; overflow: hidden; overscroll-behavior: none; }
+    body {
+      height: 100vh;
+      height: 100dvh;
+      min-width: 320px;
+      margin: 0;
+      overflow-y: auto;
+      overscroll-behavior: none;
+      background: #e6f8ff;
+    }
+    button, select { font: inherit; }
+    button { color: inherit; }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      height: 100%;
+      padding: calc(var(--tb-h, 54px) + 7px) 10px 10px;
+      overflow: hidden;
+    }
+    .hud {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: none;
+      min-height: 36px;
+      padding: 0 4px;
+      color: #356548;
+      font-size: clamp(.95rem, 3.4vw, 1.15rem);
+      font-weight: 900;
+    }
+    .progress { display: flex; align-items: center; gap: 5px; }
+    .step {
+      display: grid;
+      place-items: center;
+      width: clamp(24px, 7vw, 32px);
+      aspect-ratio: 1;
+      border: 2px solid #a9cbb1;
+      border-radius: 50%;
+      background: #ffffffa8;
+      color: #a9cbb1;
+      font-size: clamp(.8rem, 3vw, 1rem);
+      transition: transform .25s, background .25s, color .25s;
+    }
+    .step.done { transform: scale(1.12); border-color: #efb82e; background: #fff2aa; color: #bd7800; }
+
+    .field {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+      border: 4px solid #fff;
+      border-radius: 30px;
+      background: linear-gradient(180deg, #a9e3ff 0%, #dcf4ff 52%, #d4efbc 52%, #8bd078 100%);
+      box-shadow: 0 10px 24px #527b6b26, inset 0 0 0 1px #79bd8b;
+      isolation: isolate;
+    }
+    .sun {
+      position: absolute;
+      top: 7%;
+      right: 7%;
+      width: clamp(40px, 10vmin, 76px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff8c4, #ffca52);
+      box-shadow: 0 0 0 10px #fff3a640, 0 0 38px #fff3a680;
+      animation: sunGlow 3s ease-in-out infinite alternate;
+    }
+    .cloud {
+      position: absolute;
+      top: 13%;
+      left: -20%;
+      width: clamp(80px, 22vw, 150px);
+      height: 30px;
+      border-radius: 99px;
+      background: #ffffffd9;
+      animation: cloudDrift 34s linear infinite;
+    }
+    .cloud::before, .cloud::after { content: ""; position: absolute; bottom: 5px; border-radius: 50%; background: inherit; }
+    .cloud::before { left: 20%; width: 38%; aspect-ratio: 1; }
+    .cloud::after { left: 48%; width: 48%; aspect-ratio: 1; }
+    .cloud.two { top: 30%; left: 66%; transform: scale(.65); animation: cloudDriftBack 42s linear infinite; }
+    .hill {
+      position: absolute;
+      z-index: -1;
+      right: -15%;
+      bottom: 19%;
+      left: -15%;
+      height: 26%;
+      border-radius: 50% 50% 0 0 / 30% 30% 0 0;
+      background: linear-gradient(180deg, #a6df83, #78c66d);
+    }
+    .hill.back {
+      right: 38%;
+      bottom: 25%;
+      left: -25%;
+      height: 19%;
+      background: linear-gradient(180deg, #c0e99a, #98d67d);
+    }
+    .decor {
+      position: absolute;
+      z-index: 1;
+      right: 5%;
+      bottom: 20%;
+      left: 5%;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      height: 16%;
+      pointer-events: none;
+    }
+    .decor span {
+      display: inline-block;
+      font-size: clamp(1.3rem, 5vmin, 2.7rem);
+      filter: drop-shadow(0 3px 2px #315d3840);
+      animation: decorSway 2.5s ease-in-out infinite alternate;
+      animation-delay: calc(var(--i) * -180ms);
+    }
+
+    .speech {
+      position: absolute;
+      z-index: 6;
+      top: 6%;
+      left: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: min(88%, 580px);
+      min-height: 64px;
+      padding: 9px 12px 9px 18px;
+      border: 3px solid #fff;
+      border-radius: 24px;
+      background: #fffffff2;
+      box-shadow: 0 6px 16px #416e5a25;
+      text-align: center;
+      transform: translateX(-50%);
+    }
+    .speech::after {
+      content: "";
+      position: absolute;
+      bottom: -11px;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border-right: 3px solid #fff;
+      border-bottom: 3px solid #fff;
+      background: #fffffff2;
+      transform: translateX(-50%) rotate(45deg);
+    }
+    .message {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: clamp(1.05rem, 4vw, 1.55rem);
+      font-weight: 900;
+      line-height: 1.15;
+    }
+    .repeat {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      flex: none;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 2px solid #cfe8d2;
+      border-radius: 15px;
+      background: #f3fff2;
+      font-size: 1.35rem;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .repeat:active { transform: scale(.92); }
+    .repeat:focus-visible, .choice:focus-visible, .big-btn:focus-visible { outline: 4px solid #367be8; outline-offset: 3px; }
+
+    .bunny {
+      position: absolute;
+      z-index: 4;
+      bottom: 31%;
+      left: 50%;
+      width: clamp(100px, 23vmin, 174px);
+      height: auto;
+      aspect-ratio: 180 / 190;
+      margin-left: calc(clamp(100px, 23vmin, 174px) / -2);
+      transform-origin: 50% 100%;
+      filter: drop-shadow(0 8px 7px #315d3840);
+      animation: bunnyBob 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .bunny .ear { transform-box: fill-box; transform-origin: 50% 100%; animation: earWiggle 2.5s ease-in-out infinite alternate; }
+    .bunny .ear.right { animation-delay: -.6s; }
+    .bunny .blink { transform-box: fill-box; transform-origin: center; animation: blink 4s infinite; }
+    .bunny.dance { animation: bunnyDance .7s ease-in-out 2; }
+
+    .choices {
+      position: absolute;
+      z-index: 5;
+      right: 3%;
+      bottom: 3%;
+      left: 3%;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: end;
+      gap: clamp(6px, 2vw, 14px);
+    }
+    .choice {
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 2px;
+      min-width: 0;
+      min-height: clamp(100px, 19vh, 144px);
+      padding: 6px 3px 8px;
+      border: 4px solid #fff;
+      border-radius: 24px;
+      background: #ffffffed;
+      box-shadow: 0 7px 0 #518e5c, 0 12px 16px #315d3833;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform .15s, box-shadow .15s, border-color .15s, background .15s;
+    }
+    .choice:active { transform: translateY(4px) scale(.97); box-shadow: 0 3px 0 #518e5c, 0 7px 12px #315d3833; }
+    .choice:disabled { cursor: default; }
+    .choice .flower { width: clamp(48px, 13vmin, 82px); height: auto; overflow: visible; filter: drop-shadow(0 4px 2px #35523b22); }
+    .choice .petal { transform-box: fill-box; transform-origin: center; transition: transform .25s; }
+    .choice:hover .petal { transform: scale(1.07); }
+    .choice-name { max-width: 100%; overflow: hidden; color: #385840; font-size: clamp(.86rem, 3.4vw, 1.2rem); font-weight: 900; text-overflow: ellipsis; text-transform: capitalize; }
+    .choice.correct { border-color: #ffe17c; background: #fff9d8; animation: choiceWin .55s ease; }
+    .choice.wrong { border-color: #ffb6a8; background: #fff0ec; animation: choiceOops .42s ease; }
+
+    .storage-note {
+      position: absolute;
+      z-index: 8;
+      right: 10px;
+      bottom: 2px;
+      left: 10px;
+      color: #7a3d32;
+      font-size: .82rem;
+      font-weight: 800;
+      text-align: center;
+      text-shadow: 0 1px #fff;
+    }
+    .voice-note {
+      position: absolute;
+      z-index: 7;
+      top: 17%;
+      left: 50%;
+      width: max-content;
+      max-width: 90%;
+      margin: 0;
+      padding: 6px 12px;
+      border: 2px solid #fff;
+      border-radius: 14px;
+      background: #fff9e8;
+      color: #765c28;
+      font-size: clamp(.78rem, 2.8vw, .95rem);
+      font-weight: 800;
+      text-align: center;
+      transform: translateX(-50%);
+    }
+    .garden-note {
+      position: absolute;
+      z-index: 3;
+      right: 8%;
+      bottom: 20%;
+      left: 8%;
+      color: #356548;
+      font-size: clamp(.78rem, 2.8vw, 1rem);
+      font-weight: 900;
+      text-align: center;
+      text-shadow: 0 1px 2px #fff;
+      pointer-events: none;
+    }
+    .reward {
+      position: fixed;
+      z-index: 75;
+      top: 50%;
+      left: 50%;
+      display: grid;
+      justify-items: center;
+      gap: 3px;
+      min-width: min(76vw, 330px);
+      padding: 14px 20px;
+      border: 4px solid #fff;
+      border-radius: 26px;
+      background: linear-gradient(145deg, #fffbe1, #fff);
+      box-shadow: 0 14px 40px #365b3d55;
+      color: #4b653c;
+      font-size: 1.1rem;
+      font-weight: 900;
+      text-align: center;
+      transform: translate(-50%, -50%);
+      animation: rewardIn .4s cubic-bezier(.2, 1.5, .4, 1);
+    }
+    .reward span { font-size: 3.5rem; line-height: 1; animation: rewardFloat 1s ease-in-out infinite alternate; }
+
+    .start-screen, .finish-screen {
+      position: fixed;
+      z-index: 80;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: calc(var(--tb-h, 54px) + 12px) 18px 18px;
+      background: #eaf9e8c9;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+    .welcome, .finish-card {
+      display: grid;
+      justify-items: center;
+      gap: clamp(8px, 2vh, 16px);
+      width: min(100%, 520px);
+      padding: clamp(20px, 5vw, 36px);
+      border: 5px solid #fff;
+      border-radius: 34px;
+      background: linear-gradient(160deg, #fff, #f1ffe9);
+      box-shadow: 0 18px 48px #42765738;
+      text-align: center;
+      animation: cardIn .5s cubic-bezier(.2, 1.4, .4, 1);
+    }
+    .welcome-bunny { font-size: clamp(4.5rem, 22vmin, 8rem); line-height: 1; filter: drop-shadow(0 8px 5px #527b6b35); animation: bunnyBob 1.8s ease-in-out infinite; }
+    .welcome h1, .finish-card h2 { margin: 0; color: #367449; font-size: clamp(1.8rem, 7vw, 3rem); line-height: 1.05; }
+    .welcome p, .finish-card p { margin: 0; color: #55725c; font-size: clamp(1rem, 4vw, 1.25rem); font-weight: 800; line-height: 1.35; }
+    .big-btn {
+      min-width: min(100%, 260px);
+      min-height: 62px;
+      padding: 12px 24px;
+      border: 3px solid #fff;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #72d375, #3da659);
+      box-shadow: 0 7px 0 #277a42, 0 12px 20px #36744938;
+      color: #fff;
+      font-size: clamp(1.15rem, 4.8vw, 1.5rem);
+      font-weight: 900;
+      text-shadow: 0 2px 2px #286e3c66;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .big-btn:active { transform: translateY(4px); box-shadow: 0 3px 0 #277a42, 0 7px 14px #36744938; }
+    .finish-screen { background: #d7f0d7c9; }
+    .finish-card .finish-emoji { font-size: clamp(4.3rem, 18vmin, 7rem); line-height: 1; animation: bunnyDance .8s ease-in-out infinite alternate; }
+    .finish-stars { color: #e6a600; font-size: clamp(1.7rem, 7vw, 2.4rem); letter-spacing: .12em; }
+    .settings-control { display: grid; gap: 6px; padding: 4px 0 10px; color: #35523b; font-weight: 800; }
+    .settings-control select { min-height: 46px; padding: 8px 12px; border: 2px solid #cfe8d2; border-radius: 12px; background: #f6fff4; color: #35523b; font: inherit; font-weight: 800; }
+
+    @keyframes cloudDrift { to { transform: translateX(calc(120vw + 30px)); } }
+    @keyframes cloudDriftBack { to { transform: translateX(-130vw) scale(.65); } }
+    @keyframes sunGlow { to { box-shadow: 0 0 0 15px #fff3a640, 0 0 52px #fff3a6a0; transform: scale(1.04); } }
+    @keyframes decorSway { from { transform: rotate(-5deg) translateY(0); } to { transform: rotate(5deg) translateY(-4px); } }
+    @keyframes bunnyBob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(1deg); } }
+    @keyframes bunnyDance { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-14px) rotate(6deg); } }
+    @keyframes earWiggle { to { transform: rotate(7deg); } }
+    @keyframes blink { 0%, 46%, 50%, 100% { transform: scaleY(1); } 48% { transform: scaleY(.1); } }
+    @keyframes choiceWin { 40% { transform: translateY(-9px) scale(1.06); } 100% { transform: translateY(0) scale(1); } }
+    @keyframes choiceOops { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+    @keyframes rewardIn { from { opacity: 0; transform: translate(-50%, -45%) scale(.6) rotate(-6deg); } to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); } }
+    @keyframes rewardFloat { to { transform: translateY(-7px) rotate(5deg); } }
+    @keyframes cardIn { from { opacity: 0; transform: scale(.82) translateY(18px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+    @media (max-height: 560px) {
+      .app { gap: 4px; padding-bottom: 5px; }
+      .hud { min-height: 29px; }
+      .step { width: 23px; }
+      .speech { top: 4%; min-height: 52px; padding: 5px 8px 5px 12px; }
+      .repeat { width: 38px; height: 38px; }
+      .bunny { bottom: 31%; width: clamp(82px, 19vmin, 120px); margin-left: calc(clamp(82px, 19vmin, 120px) / -2); }
+      .choice { min-height: clamp(82px, 18vh, 106px); border-width: 3px; border-radius: 18px; }
+      .choice .flower { width: clamp(42px, 11vmin, 60px); }
+      .decor { bottom: 18%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hud">
+      <span id="roundLabel">Runde 1 af 5</span>
+      <div class="progress" id="progress" aria-label="Fremskridt"></div>
+    </header>
+
+    <section class="field" id="field" aria-label="Pjuskes farvehave">
+      <div class="sun" aria-hidden="true"></div>
+      <div class="cloud" aria-hidden="true"></div>
+      <div class="cloud two" aria-hidden="true"></div>
+      <div class="hill back" aria-hidden="true"></div>
+      <div class="hill" aria-hidden="true"></div>
+      <div class="decor" id="decor" aria-hidden="true"></div>
+      <p class="garden-note" id="gardenNote">Hjælp Pjuske med at finde farverne!</p>
+
+      <div class="speech">
+        <div class="message" id="message" aria-live="polite">Tryk start, så finder vi farver!</div>
+        <button class="repeat" id="repeat" type="button" aria-label="Hør spørgsmålet igen" title="Hør igen">🔊</button>
+      </div>
+
+      <svg class="bunny" id="bunny" viewBox="0 0 180 190" aria-hidden="true">
+        <g class="ear">
+          <path d="M56 77C35 52 28 8 44 5c20-4 30 43 29 69z" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
+          <path d="M52 56C42 37 40 17 46 14c7 0 15 24 17 39z" fill="#f3a5b4"/>
+        </g>
+        <g class="ear right">
+          <path d="M112 75c-8-33 0-73 16-70 20 4 14 49 1 74z" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
+          <path d="M119 55c-2-22 4-40 10-40 7 3 2 28-4 44z" fill="#f3a5b4"/>
+        </g>
+        <ellipse cx="88" cy="135" rx="49" ry="43" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
+        <ellipse cx="88" cy="83" rx="48" ry="42" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
+        <ellipse cx="70" cy="87" rx="5" ry="7" fill="#513b3d" class="blink"/>
+        <ellipse cx="108" cy="87" rx="5" ry="7" fill="#513b3d" class="blink"/>
+        <ellipse cx="89" cy="101" rx="7" ry="5" fill="#e98c9d"/>
+        <path d="M89 106q-4 8-11 5m11-5q4 8 11 5" fill="none" stroke="#735153" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cx="58" cy="101" rx="10" ry="6" fill="#f7c4c6" opacity=".8"/>
+        <ellipse cx="120" cy="101" rx="10" ry="6" fill="#f7c4c6" opacity=".8"/>
+        <path d="M56 124q-22 12-10 34 9 10 24-1m40-33q22 12 10 34-9 10-24-1" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
+        <ellipse cx="66" cy="167" rx="20" ry="11" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
+        <ellipse cx="111" cy="167" rx="20" ry="11" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
+        <circle cx="133" cy="137" r="13" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
+        <path d="M119 54q10-12 21 0-11 12-21 0zm21 0q11-12 21 0-10 12-21 0z" fill="#f26f8b"/>
+        <circle cx="140" cy="54" r="4" fill="#ffcf51"/>
+      </svg>
+
+      <div class="choices" id="choices" role="group" aria-label="Vælg en blomst"></div>
+      <p class="voice-note" id="voiceNote" aria-live="polite" hidden>Oplæsningen virker ikke lige nu. Tryk på 🔊 for at prøve igen.</p>
+      <p class="storage-note" id="storageNote" hidden></p>
+    </section>
+  </main>
+
+  <div class="start-screen" id="startScreen">
+    <div class="welcome">
+      <span class="welcome-bunny" aria-hidden="true">🐰</span>
+      <h1>Kaninens Farvehave</h1>
+      <p>Pjuske vil plante blomster. Kan du finde farverne, hun spørger efter?</p>
+      <button class="big-btn" id="startBtn" type="button">▶ Start legen</button>
+    </div>
+  </div>
+
+  <div class="finish-screen" id="finishScreen" role="dialog" aria-modal="true" aria-labelledby="finishTitle" hidden>
+    <div class="finish-card">
+      <span class="finish-emoji" aria-hidden="true">🐰🌷</span>
+      <h2 id="finishTitle">Hvor er du dygtig!</h2>
+      <p id="finishText">Pjuske har fået nye blomster i haven.</p>
+      <div class="finish-stars" id="finishStars" aria-label="Fem stjerner"></div>
+      <button class="big-btn" id="againBtn" type="button">🌼 Leg igen</button>
+    </div>
+  </div>
+
+  <div class="reward" id="reward" role="status" hidden><span id="rewardIcon">🦋</span><strong id="rewardText">En ny ven til haven!</strong></div>
+  <div class="settings-control" id="settings" hidden>
+    <label for="colorCount">Farver at øve</label>
+    <select id="colorCount">
+      <option value="4">4 farver</option>
+      <option value="6">6 farver</option>
+      <option value="8">8 farver</option>
+    </select>
+  </div>
+
+  <script src="../topbar.js"></script>
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = (id) => document.getElementById(id);
+      const COLORS = [
+        { id: "red", name: "rød", flower: "røde", hex: "#ef5350" },
+        { id: "yellow", name: "gul", flower: "gule", hex: "#ffca28" },
+        { id: "blue", name: "blå", flower: "blå", hex: "#42a5f5" },
+        { id: "green", name: "grøn", flower: "grønne", hex: "#66bb6a" },
+        { id: "orange", name: "orange", flower: "orange", hex: "#fb8c32" },
+        { id: "purple", name: "lilla", flower: "lilla", hex: "#ab75d1" },
+        { id: "brown", name: "brun", flower: "brune", hex: "#a66b42" },
+        { id: "pink", name: "lyserød", flower: "lyserøde", hex: "#f17aa7" }
+      ];
+      const DECORATIONS = [
+        { id: "butterfly", icon: "🦋", name: "en sommerfugl" },
+        { id: "sunflower", icon: "🌻", name: "en solsikke" },
+        { id: "mushroom", icon: "🍄", name: "en lille svamp" },
+        { id: "rainbow", icon: "🌈", name: "en regnbue" },
+        { id: "ladybug", icon: "🐞", name: "en mariehøne" },
+        { id: "tulip", icon: "🌷", name: "en tulipan" },
+        { id: "bee", icon: "🐝", name: "en lille bi" },
+        { id: "flower", icon: "💐", name: "en blomsterbuket" }
+      ];
+      const ROUNDS = 5;
+      const STAR_KEY = "farvehave-stars";
+      const DECOR_KEY = "farvehave-decor";
+      const COLORS_KEY = "farvehave-colors";
+      const steps = [];
+      let totalStars = 0;
+      let sessionStars = 0;
+      let round = 0;
+      let target = null;
+      let lastTarget = "";
+      let busy = false;
+      let muted = !Topbar.soundOn();
+      let voice = null;
+      let voiceToken = 0;
+      let activeAudio = null;
+      let unlocked = [];
+      let storageFailed = false;
+      let rewardTimer = 0;
+
+      const progress = $("progress");
+      const message = $("message");
+      const choices = $("choices");
+      const bunny = $("bunny");
+      const colorCount = $("colorCount");
+      const reward = $("reward");
+      const storageNote = $("storageNote");
+      const voiceNote = $("voiceNote");
+
+      function storageError(error) {
+        storageFailed = true;
+        console.error("Farvehavens fremskridt kunne ikke gemmes.", error);
+        storageNote.textContent = "Fremskridtet kunne ikke gemmes på denne enhed.";
+        storageNote.hidden = false;
+      }
+
+      function readNumber(key, fallback) {
+        try {
+          const value = Number(localStorage.getItem(key));
+          return Number.isInteger(value) && value >= 0 ? value : fallback;
+        } catch (error) {
+          storageError(error);
+          return fallback;
+        }
+      }
+
+      function saveValue(key, value) {
+        try {
+          localStorage.setItem(key, value);
+        } catch (error) {
+          storageError(error);
+        }
+      }
+
+      function loadDecor() {
+        try {
+          const saved = localStorage.getItem(DECOR_KEY);
+          if (!saved) return [];
+          const values = JSON.parse(saved);
+          if (!Array.isArray(values)) throw new TypeError("Farvehavens samling har et ugyldigt format.");
+          return [...new Set(values.filter((id) => DECORATIONS.some((item) => item.id === id)))];
+        } catch (error) {
+          storageError(error);
+          return [];
+        }
+      }
+
+      function shuffle(items) {
+        const result = items.slice();
+        for (let i = result.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [result[i], result[j]] = [result[j], result[i]];
+        }
+        return result;
+      }
+
+      function paintProgress() {
+        $("roundLabel").textContent = `Runde ${Math.min(round + 1, ROUNDS)} af ${ROUNDS}`;
+        steps.forEach((step, index) => step.classList.toggle("done", index < round));
+      }
+
+      function paintDecor() {
+        const garden = $("decor");
+        garden.replaceChildren();
+        unlocked.forEach((id, index) => {
+          const item = DECORATIONS.find((decoration) => decoration.id === id);
+          if (!item) return;
+          const el = document.createElement("span");
+          el.textContent = item.icon;
+          el.style.setProperty("--i", index);
+          el.setAttribute("aria-label", item.name);
+          garden.append(el);
+        });
+        $("gardenNote").textContent = unlocked.length
+          ? `Pjuskes have har fået ${unlocked.length} ${unlocked.length === 1 ? "pynteting" : "pynteting"}!`
+          : "Hjælp Pjuske med at finde farverne!";
+      }
+
+      function flowerSvg(color) {
+        return `<svg class="flower" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <g class="petal" fill="${color.hex}" stroke="#ffffff" stroke-width="3">
+            <circle cx="50" cy="23" r="18"/><circle cx="75" cy="42" r="18"/>
+            <circle cx="65" cy="70" r="18"/><circle cx="35" cy="70" r="18"/>
+            <circle cx="25" cy="42" r="18"/>
+          </g>
+          <circle cx="50" cy="49" r="15" fill="#ffe17c" stroke="#fff" stroke-width="3"/>
+          <circle cx="45" cy="46" r="1.8" fill="#8a6930"/><circle cx="55" cy="46" r="1.8" fill="#8a6930"/>
+          <path d="M46 53q4 4 8 0" fill="none" stroke="#8a6930" stroke-width="2" stroke-linecap="round"/>
+        </svg>`;
+      }
+
+      function renderChoices() {
+        const numberOfChoices = totalStars < 5 ? 2 : 3;
+        const options = shuffle([target, ...shuffle(activeColors.filter((color) => color.id !== target.id)).slice(0, numberOfChoices - 1)]);
+        choices.replaceChildren();
+        for (const color of options) {
+          const button = document.createElement("button");
+          button.className = "choice";
+          button.type = "button";
+          button.setAttribute("aria-label", color.name);
+          button.innerHTML = `${flowerSvg(color)}<span class="choice-name">${color.name}</span>`;
+          button.addEventListener("click", () => chooseColor(color, button));
+          choices.append(button);
+        }
+      }
+
+      let activeColors = COLORS.slice(0, 4);
+      function chooseTarget() {
+        const available = activeColors.filter((color) => color.id !== lastTarget);
+        target = available[Math.floor(Math.random() * available.length)] || activeColors[0];
+        lastTarget = target.id;
+      }
+
+      function askQuestion() {
+        if (round >= ROUNDS) {
+          finishSession();
+          return;
+        }
+        resetBunny();
+        busy = false;
+        paintProgress();
+        chooseTarget();
+        renderChoices();
+        message.textContent = `Find den ${target.flower} blomst!`;
+        readOut(`Find den ${target.flower} blomst.`);
+      }
+
+      function beginSession() {
+        round = 0;
+        sessionStars = 0;
+        lastTarget = "";
+        bunny.classList.remove("dance");
+        resetBunny();
+        activeColors = COLORS.slice(0, Number(colorCount.value) || 4);
+        $("finishScreen").hidden = true;
+        $("startScreen").hidden = true;
+        $("choices").hidden = false;
+        paintProgress();
+        askQuestion();
+      }
+
+      function hopTo(button) {
+        resetBunny();
+        const fieldRect = $("field").getBoundingClientRect();
+        const bunnyRect = bunny.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
+        const dx = buttonRect.left + buttonRect.width / 2 - (bunnyRect.left + bunnyRect.width / 2);
+        const dy = buttonRect.top + buttonRect.height * .16 - (bunnyRect.top + bunnyRect.height / 2);
+        const rise = Math.min(80, fieldRect.height * .18);
+        bunny.style.animation = "none";
+        const animation = bunny.animate([
+          { transform: "translate(0, 0) scale(1)" },
+          { transform: `translate(${dx * .5}px, ${dy * .5 - rise}px) scale(1.14)`, offset: .48 },
+          { transform: `translate(${dx}px, ${dy}px) scale(.96)` }
+        ], { duration: 620, easing: "cubic-bezier(.2, 1.4, .4, 1)", fill: "forwards" });
+        animation.onfinish = () => {
+          bunny.style.animation = "";
+        };
+      }
+
+      function resetBunny() {
+        bunny.getAnimations().forEach((animation) => animation.cancel());
+        bunny.style.animation = "";
+      }
+
+      function awardStar() {
+        totalStars += 1;
+        sessionStars += 1;
+        saveValue(STAR_KEY, String(totalStars));
+        Topbar.refreshStars(true);
+        return totalStars % 3 === 0 ? unlockDecoration() : null;
+      }
+
+      function unlockDecoration() {
+        const next = DECORATIONS.find((item) => !unlocked.includes(item.id));
+        if (!next) return null;
+        unlocked.push(next.id);
+        saveValue(DECOR_KEY, JSON.stringify(unlocked));
+        paintDecor();
+        return next;
+      }
+
+      function showReward(item) {
+        if (!item) return;
+        $("rewardIcon").textContent = item.icon;
+        $("rewardText").textContent = `En ny ven: ${item.name}!`;
+        reward.hidden = false;
+        clearTimeout(rewardTimer);
+        rewardTimer = window.setTimeout(() => { reward.hidden = true; }, 1350);
+      }
+
+      function chooseColor(color, button) {
+        if (busy) return;
+        busy = true;
+        choices.querySelectorAll("button").forEach((choice) => { choice.disabled = true; });
+        if (color.id !== target.id) {
+          button.classList.add("wrong");
+          hopTo(button);
+          message.textContent = `Du valgte ${color.name}. Find den ${target.flower} blomst!`;
+          readOut(`Du valgte ${color.name}. Find den ${target.flower} blomst.`);
+          window.setTimeout(() => {
+            button.classList.remove("wrong");
+            choices.querySelectorAll("button").forEach((choice) => { choice.disabled = false; });
+            busy = false;
+          }, 850);
+          return;
+        }
+
+        button.classList.add("correct");
+        hopTo(button);
+        const decoration = awardStar();
+        round += 1;
+        paintProgress();
+        message.textContent = `Ja, den ${target.flower} blomst! Flot fundet!`;
+        readOut(`Ja, den ${target.flower} blomst! Hvor er du dygtig!`);
+        showReward(decoration);
+        window.setTimeout(askQuestion, decoration ? 1550 : 1050);
+      }
+
+      function finishSession() {
+        busy = true;
+        resetBunny();
+        $("choices").hidden = true;
+        $("roundLabel").textContent = "Haven er fuld af farver!";
+        message.textContent = "Pjuske siger tusind tak!";
+        bunny.classList.add("dance");
+        $("finishStars").textContent = "⭐".repeat(sessionStars);
+        $("finishText").textContent = `Du hjalp Pjuske med ${sessionStars} farver. Kom og leg igen!`;
+        $("finishScreen").hidden = false;
+        readOut("Hvor er du dygtig! Tak for hjælpen, siger Pjuske.");
+      }
+
+      function findDanishVoice() {
+        if (!("speechSynthesis" in window)) return;
+        voice = speechSynthesis.getVoices().find((item) => item.lang && item.lang.toLowerCase().startsWith("da")) || null;
+      }
+
+      function stopVoice() {
+        voiceToken += 1;
+        if ("speechSynthesis" in window) speechSynthesis.cancel();
+        if (activeAudio) {
+          activeAudio.pause();
+          activeAudio = null;
+        }
+      }
+
+      function voiceUnavailable(token) {
+        if (token !== voiceToken || muted) return;
+        console.warn("Dansk oplæsning kunne ikke afspilles.");
+        voiceNote.hidden = false;
+        $("repeat").title = "Oplæsning virker ikke lige nu – prøv igen";
+      }
+
+      function playOnline(text, token) {
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=da&q=${encodeURIComponent(text)}`;
+        let audio;
+        try {
+          audio = new Audio(url);
+        } catch (error) {
+          console.error("Kunne ikke starte dansk oplæsning.", error);
+          voiceUnavailable(token);
+          return;
+        }
+        let failed = false;
+        const fail = () => {
+          if (failed) return;
+          failed = true;
+          if (activeAudio === audio) activeAudio = null;
+          voiceUnavailable(token);
+        };
+        activeAudio = audio;
+        audio.onended = () => { if (activeAudio === audio) activeAudio = null; };
+        audio.onerror = fail;
+        try {
+          const playPromise = audio.play();
+          if (playPromise && typeof playPromise.catch === "function") playPromise.catch(fail);
+        } catch (error) {
+          console.error("Kunne ikke afspille dansk oplæsning.", error);
+          fail();
+        }
+      }
+
+      function readOut(text) {
+        stopVoice();
+        if (muted) return;
+        voiceNote.hidden = true;
+        const token = voiceToken;
+        if ("speechSynthesis" in window && voice) {
+          try {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "da-DK";
+            utterance.voice = voice;
+            utterance.rate = .88;
+            utterance.onerror = () => {
+              if (token === voiceToken && !muted) playOnline(text, token);
+            };
+            speechSynthesis.speak(utterance);
+          } catch (error) {
+            console.warn("Dansk tale på enheden kunne ikke startes.", error);
+            playOnline(text, token);
+          }
+          return;
+        }
+        playOnline(text, token);
+      }
+
+      for (let i = 0; i < ROUNDS; i++) {
+        const step = document.createElement("span");
+        step.className = "step";
+        step.textContent = "★";
+        step.setAttribute("aria-hidden", "true");
+        progress.append(step);
+        steps.push(step);
+      }
+
+      totalStars = readNumber(STAR_KEY, 0);
+      unlocked = loadDecor();
+      const savedColors = readNumber(COLORS_KEY, 4);
+      colorCount.value = [4, 6, 8].includes(savedColors) ? String(savedColors) : "4";
+      colorCount.addEventListener("change", () => saveValue(COLORS_KEY, colorCount.value));
+      colorCount.addEventListener("change", () => {
+        $("gardenNote").textContent = `Næste leg øver ${colorCount.value} farver.`;
+      });
+
+      $("startBtn").addEventListener("click", beginSession);
+      $("againBtn").addEventListener("click", beginSession);
+      $("repeat").addEventListener("click", () => {
+        if (target) readOut(`Find den ${target.name} blomst.`);
+      });
+      paintProgress();
+      paintDecor();
+      Topbar.init({ kid: "riyana", controls: [$("settings")] });
+      findDanishVoice();
+      if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", findDanishVoice);
+      window.addEventListener("topbar:sound", (event) => {
+        muted = !event.detail.on;
+        if (muted) stopVoice();
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -8,7 +8,7 @@
   // Nye spil skal tilføje deres stjernenøgle her (bruges også af forsiden)
   const STAR_KEYS = {
     ari: ["talbasket-stars", "tabbi-stars", "leo-stars", "maal-stars", "dino-stars"],
-    riyana: ["prinsesse-stars", "prinsesse-make-stars", "prinsesse-find-stars", "prinsesse-count-stars"]
+    riyana: ["prinsesse-stars", "prinsesse-make-stars", "prinsesse-find-stars", "prinsesse-count-stars", "farvehave-stars"]
   };
 
   const read = (key) => { try { return localStorage.getItem(key); } catch { return null; } };

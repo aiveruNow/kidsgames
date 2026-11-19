@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v1.19.2";
+const CACHE = "regnespil-v1.20.0";
 const FILES = [
   "./",
   "index.html",
@@ -13,7 +13,8 @@ const FILES = [
   "spil/loeven-leo.html",
   "spil/aris-maal.html",
   "spil/dino-broen.html",
-  "spil/prinsesse-tal.html"
+  "spil/prinsesse-tal.html",
+  "spil/farvehaven.html"
 ];
 
 // Hver fil caches for sig, så én manglende fil ikke vælter hele installationen
