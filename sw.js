@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v2";
+const CACHE = "regnespil-v1.1.0";
 const FILES = [
   "./",
   "index.html",
@@ -17,7 +17,7 @@ const FILES = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => Promise.allSettled(FILES.map((f) => cache.add(f))))
+      .then((cache) => Promise.allSettled(FILES.map((f) => cache.add(new Request(f, { cache: "reload" })))))
       .then(() => self.skipWaiting())
   );
 });
@@ -34,6 +34,8 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
+  // Fetch-handler: kald der eksplicit springer cache over (fx tjek af ny version) går direkte til nettet
+  if (req.cache === "no-store" || req.cache === "reload") return;
   event.respondWith(
     caches.match(req, { ignoreSearch: true }).then((hit) => hit || fetch(req)).catch(() =>
       req.mode === "navigate" ? caches.match("index.html") : Response.error()

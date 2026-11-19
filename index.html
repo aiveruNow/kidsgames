@@ -172,7 +172,10 @@
       font-size: .85rem;
     }
 
-    .download-wrap { margin: 18px 0 0; text-align: center; }
+    .download-wrap { margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .download.secondary { background: #fff; color: #2f6fed; box-shadow: inset 0 0 0 2px #2f6fed; }
+    .download:disabled { opacity: .6; cursor: default; }
+    .version { margin: 6px 0 0; text-align: center; font-size: .8rem; color: #8a96a9; }
     .offline-status { margin: 10px 0 0; text-align: center; font-size: .9rem; font-weight: 700; color: #62718a; }
 
     .download {
@@ -457,8 +460,12 @@
       </a>
     </nav>
     <p class="footer-note">Vælg et spil og optjen stjerner.</p>
-    <p class="download-wrap"><button class="download" id="install" type="button">📲 Hent som app</button></p>
+    <p class="download-wrap">
+      <button class="download" id="install" type="button">📲 Hent som app</button>
+      <button class="download secondary" id="upgrade" type="button">🔄 Opgrader</button>
+    </p>
     <p class="offline-status" id="offline-status" aria-live="polite"></p>
+    <p class="version" id="version">Version 1.1.0</p>
   </main>
 
   <dialog id="help">
@@ -518,7 +525,54 @@
         }
       }
     }
-    showOfflineStatus();
+    showOfflineStatus().then(() => {
+      if (sessionStorage.getItem("upgraded")) {
+        sessionStorage.removeItem("upgraded");
+        statusEl.textContent = `🔄 Opdateret til ${document.getElementById("version").textContent}. ${statusEl.textContent}`;
+      }
+    });
+
+    const upgradeBtn = document.getElementById("upgrade");
+    upgradeBtn.addEventListener("click", async () => {
+      if (!location.protocol.startsWith("http") || !("serviceWorker" in navigator)) {
+        statusEl.textContent = "Opgradering virker kun, når spillene åbnes fra hjemmesiden.";
+        return;
+      }
+      if (!navigator.onLine) {
+        statusEl.textContent = "Du skal have net for at opgradere.";
+        return;
+      }
+      upgradeBtn.disabled = true;
+      statusEl.textContent = "Leder efter ny version…";
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        await reg.update();
+        // Den nye version læses direkte fra nettet (springer cachen over)
+        const html = await (await fetch("index.html", { cache: "no-store" })).text();
+        const live = (html.match(/id="version">Version ([^<]+)</) || [])[1];
+        const shown = document.getElementById("version").textContent.replace("Version ", "");
+        if (!live || live === shown) {
+          statusEl.textContent = "✅ Du har allerede den nyeste version.";
+        } else {
+          statusEl.textContent = `Henter version ${live}…`;
+          // Vent til den nye version er gemt til offline (cache hedder regnespil-v<version>)
+          let ready = false;
+          for (let i = 0; i < 40 && !ready; i++) {
+            const settled = !reg.installing && !reg.waiting;
+            ready = settled && await caches.has(`regnespil-v${live}`);
+            if (!ready) await new Promise((r) => setTimeout(r, 500));
+          }
+          if (!ready) throw new Error("timeout");
+          await new Promise((r) => setTimeout(r, 500));
+          sessionStorage.setItem("upgraded", "1");
+          location.reload();
+        }
+      } catch {
+        statusEl.textContent = "⚠️ Kunne ikke opgradere. Tjek nettet og prøv igen.";
+      } finally {
+        upgradeBtn.disabled = false;
+      }
+    });
 
     document.getElementById("help-close").addEventListener("click", () => help.close());
   </script>
