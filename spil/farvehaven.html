@@ -216,6 +216,10 @@
     .bunny .ear.right { animation-delay: -.6s; }
     .bunny .blink { transform-box: fill-box; transform-origin: center; animation: blink 4s infinite; }
     .bunny.dance { animation: bunnyDance .7s ease-in-out 2; }
+    .bunny.catching .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyCatch .45s ease-out; }
+    .bunny.nope .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyNope .6s ease-in-out; }
+    .fly-flower { position: fixed; z-index: 8; pointer-events: none; filter: drop-shadow(0 6px 4px #315d3840); }
+    .fly-flower .flower { display: block; width: 100%; height: auto; overflow: visible; }
     .bunny .trowel, .bunny .watering-can, .bunny .water-drops { opacity: 0; }
     .bunny.digging .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyDig .42s ease-in-out 2; }
     .bunny.digging .trowel { opacity: 1; transform-box: fill-box; transform-origin: 20% 20%; animation: trowelDig .28s ease-in-out 3 alternate; }
@@ -417,6 +421,8 @@
     @keyframes bunnyBob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(1deg); } }
     @keyframes bunnyDance { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-14px) rotate(6deg); } }
     @keyframes bunnyDig { 0%, 100% { transform: translateY(0) rotate(0); } 45% { transform: translateY(7px) rotate(-7deg); } }
+    @keyframes bunnyCatch { 0% { transform: scale(1); } 30% { transform: scale(1.1, .88); } 65% { transform: translateY(-10px) scale(.96, 1.07); } 100% { transform: scale(1); } }
+    @keyframes bunnyNope { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-8deg); } 45% { transform: rotate(8deg); } 70% { transform: rotate(-5deg); } }
     @keyframes bunnyWater { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(7deg) translateY(-2px); } }
     @keyframes trowelDig { to { transform: rotate(-28deg) translateY(3px); } }
     @keyframes canTip { 50% { transform: rotate(-24deg) translateY(-3px); } }
@@ -591,6 +597,8 @@
       let unlocked = [];
       let storageFailed = false;
       let rewardTimer = 0;
+      let bunnySpot = 0;
+      let bunnyMotion = null;
 
       const progress = $("progress");
       const message = $("message");
@@ -760,6 +768,8 @@
         bunny.classList.remove("dance");
         resetBunny();
         resetFlowerBed();
+        bunnySpot = 0;
+        placeBunny(0);
         activeColors = COLORS.slice(0, Number(colorCount.value) || 4);
         $("finishScreen").hidden = true;
         $("startScreen").hidden = true;
@@ -768,78 +778,111 @@
         askQuestion();
       }
 
-      function hopTo(button) {
-        resetBunny();
-        const fieldRect = $("field").getBoundingClientRect();
-        const bunnyRect = bunny.getBoundingClientRect();
-        const buttonRect = button.getBoundingClientRect();
-        const dx = buttonRect.left + buttonRect.width / 2 - (bunnyRect.left + bunnyRect.width / 2);
-        const dy = buttonRect.top + buttonRect.height * .16 - (bunnyRect.top + bunnyRect.height / 2);
-        const rise = Math.min(80, fieldRect.height * .18);
+      // Pjuske står bag blomsterbedet over det plot, hun skal plante i, og flytter sig kun ét plot ad gangen.
+      function placeBunny(index) {
+        const plot = flowerBed.children[index];
+        if (!plot) return;
+        const field = $("field");
+        const fieldRect = field.getBoundingClientRect();
+        const border = field.clientLeft;
+        const plotRect = plot.getBoundingClientRect();
+        const style = getComputedStyle(bunny);
+        const width = parseFloat(style.width) || bunny.getBoundingClientRect().width;
+        const height = parseFloat(style.height) || bunny.getBoundingClientRect().height;
+        const centre = plotRect.left + plotRect.width / 2 - fieldRect.left - border;
+        const x = Math.min(Math.max(centre, width / 2 + 6), field.clientWidth - width / 2 - 6);
+        bunny.style.left = `${x}px`;
+        bunny.style.bottom = `${fieldRect.bottom - border - plotRect.top - height * .22}px`;
+      }
+
+      function hopToSpot(index) {
+        const before = bunny.getBoundingClientRect();
+        placeBunny(index);
+        bunnySpot = index;
+        const after = bunny.getBoundingClientRect();
+        const dx = before.left - after.left;
+        const dy = before.top - after.top;
+        if (reduceMotion || (!dx && !dy)) return;
+        const hop = Math.min(38, Math.max(24, Math.abs(dx) * .18));
         bunny.style.animation = "none";
-        const animation = bunny.animate([
-          { transform: "translate(0, 0) scale(1)" },
-          { transform: `translate(${dx * .5}px, ${dy * .5 - rise}px) scale(1.14)`, offset: .48 },
-          { transform: `translate(${dx}px, ${dy}px) scale(.96)` }
-        ], { duration: reduceMotion ? 1 : 620, easing: "cubic-bezier(.2, 1.4, .4, 1)", fill: "forwards" });
-        animation.onfinish = () => {
-          bunny.style.animation = "";
-        };
+        bunnyMotion = bunny.animate([
+          { transform: `translate(${dx}px, ${dy}px) scale(1, 1)`, offset: 0 },
+          { transform: `translate(${dx * .75}px, ${dy * .75 - hop}px) scale(.96, 1.06)`, offset: .2 },
+          { transform: `translate(${dx * .5}px, ${dy * .5}px) scale(1.06, .92)`, offset: .45 },
+          { transform: `translate(${dx * .25}px, ${dy * .25 - hop}px) scale(.96, 1.06)`, offset: .7 },
+          { transform: "translate(0, 0) scale(1.06, .92)", offset: .92 },
+          { transform: "translate(0, 0) scale(1, 1)", offset: 1 }
+        ], { duration: 700, easing: "ease-in-out" });
+        const done = () => { if (bunny.style.animation === "none") bunny.style.animation = ""; };
+        bunnyMotion.onfinish = done;
+        bunnyMotion.oncancel = done;
       }
 
       function resetBunny() {
-        bunny.getAnimations().forEach((animation) => animation.cancel());
+        if (bunnyMotion) bunnyMotion.cancel();
+        bunnyMotion = null;
         bunny.style.animation = "";
-        bunny.classList.remove("digging", "watering");
+        bunny.classList.remove("digging", "watering", "catching", "nope");
       }
 
-      function animatePlanting(choice, plot) {
-        resetBunny();
-        const fieldRect = $("field").getBoundingClientRect();
+      function shakeNo() {
+        bunny.classList.remove("nope");
+        void bunny.getBoundingClientRect();
+        bunny.classList.add("nope");
+        window.setTimeout(() => bunny.classList.remove("nope"), 650);
+      }
+
+      function flySeed(choice, color) {
+        if (reduceMotion) return;
+        const source = (choice.querySelector(".flower") || choice).getBoundingClientRect();
         const bunnyRect = bunny.getBoundingClientRect();
-        const choiceRect = choice.getBoundingClientRect();
-        const plotRect = plot.getBoundingClientRect();
-        const startX = bunnyRect.left + bunnyRect.width / 2;
-        const startY = bunnyRect.top + bunnyRect.height / 2;
-        const choiceX = choiceRect.left + choiceRect.width / 2;
-        const choiceY = choiceRect.top + choiceRect.height * .18;
-        const plotX = plotRect.left + plotRect.width / 2;
-        const plotY = plotRect.top - bunnyRect.height * .28;
-        const choiceDx = choiceX - startX;
-        const choiceDy = choiceY - startY;
-        const plotDx = plotX - startX;
-        const plotDy = plotY - startY;
-        const rise = Math.min(64, fieldRect.height * .14);
-        const animation = bunny.animate([
-          { transform: "translate(0, 0) scale(1)", offset: 0 },
-          { transform: `translate(${choiceDx * .45}px, ${choiceDy * .45 - rise}px) scale(1.12)`, offset: .19 },
-          { transform: `translate(${choiceDx}px, ${choiceDy}px) scale(.96)`, offset: .38 },
-          { transform: `translate(${choiceDx + (plotDx - choiceDx) * .45}px, ${choiceDy + (plotDy - choiceDy) * .45 - rise * .55}px) scale(1.12)`, offset: .59 },
-          { transform: `translate(${plotDx}px, ${plotDy}px) scale(.96)`, offset: .82 },
-          { transform: `translate(${plotDx}px, ${plotDy}px) scale(.96)`, offset: 1 }
-        ], { duration: reduceMotion ? 1 : 1300, easing: "cubic-bezier(.2, 1.4, .4, 1)", fill: "forwards" });
-        animation.onfinish = () => { bunny.style.animation = ""; };
+        const size = Math.min(source.width, 64);
+        const fromX = source.left + source.width / 2;
+        const fromY = source.top + source.height / 2;
+        const dx = bunnyRect.left + bunnyRect.width * .64 - fromX;
+        const dy = bunnyRect.top + bunnyRect.height * .66 - fromY;
+        const fly = document.createElement("div");
+        fly.className = "fly-flower";
+        fly.setAttribute("aria-hidden", "true");
+        fly.style.width = `${size}px`;
+        fly.style.left = `${fromX - size / 2}px`;
+        fly.style.top = `${fromY - size / 2}px`;
+        fly.innerHTML = flowerSvg(color);
+        document.body.append(fly);
+        const arc = Math.max(46, Math.abs(dy) * .3);
+        const motion = fly.animate([
+          { transform: "translate(0, 0) scale(1) rotate(0)", opacity: 1, offset: 0 },
+          { transform: `translate(${dx * .5}px, ${dy * .5 - arc}px) scale(1.15) rotate(150deg)`, opacity: 1, offset: .5 },
+          { transform: `translate(${dx}px, ${dy}px) scale(.3) rotate(320deg)`, opacity: .9, offset: 1 }
+        ], { duration: 600, easing: "ease-in-out", fill: "forwards" });
+        motion.onfinish = () => fly.remove();
+        motion.oncancel = () => fly.remove();
       }
 
       function beginPlanting(color, index, choice, decoration) {
         const plot = flowerBed.children[index];
         if (!plot) return;
-        animatePlanting(choice, plot);
-        window.setTimeout(() => {
+        const later = (action, delay) => window.setTimeout(action, reduceMotion ? 0 : delay);
+        resetBunny();
+        flySeed(choice, color);
+        later(() => bunny.classList.add("catching"), 520);
+        later(() => {
+          bunny.classList.remove("catching");
           bunny.classList.add("digging");
           message.textContent = `Pjuske graver et lille hul til den ${color.flower} blomst.`;
-        }, reduceMotion ? 0 : 850);
-        window.setTimeout(() => {
+        }, 700);
+        later(() => {
           bunny.classList.remove("digging");
           bunny.classList.add("watering");
-          message.textContent = `Nu vander Pjuske sin blomst!`;
-        }, reduceMotion ? 0 : 1400);
-        window.setTimeout(() => {
+          message.textContent = "Nu vander Pjuske sin blomst!";
+        }, 1580);
+        later(() => {
           bunny.classList.remove("watering");
           plantFlower(color, index);
           message.textContent = `Se! Den ${color.flower} blomst vokser!`;
-        }, reduceMotion ? 0 : 1950);
-        if (decoration) window.setTimeout(() => showReward(decoration), reduceMotion ? 0 : 3050);
+        }, 2600);
+        if (index + 1 < ROUNDS) later(() => hopToSpot(index + 1), 3350);
+        if (decoration) later(() => showReward(decoration), 3800);
       }
 
       function awardStar() {
@@ -874,7 +917,7 @@
         choices.querySelectorAll("button").forEach((choice) => { choice.disabled = true; });
         if (color.id !== target.id) {
           button.classList.add("wrong");
-          hopTo(button);
+          shakeNo();
           message.textContent = `Du valgte ${color.name}. Find den ${target.flower} blomst!`;
           readOut(`Du valgte ${color.name}. Find den ${target.flower} blomst.`);
           window.setTimeout(() => {
@@ -893,7 +936,7 @@
         message.textContent = `Ja! Pjuske planter en ${color.name} blomst!`;
         readOut(`Ja! Nu planter Pjuske en ${color.name} blomst!`);
         beginPlanting(color, flowerIndex, button, decoration);
-        window.setTimeout(askQuestion, reduceMotion ? 1100 : decoration ? 4400 : 3250);
+        window.setTimeout(askQuestion, reduceMotion ? 1100 : decoration ? 5150 : 4050);
       }
 
       function finishSession() {
@@ -1006,6 +1049,10 @@
       });
       paintProgress();
       paintDecor();
+      placeBunny(bunnySpot);
+      if ("ResizeObserver" in window) new ResizeObserver(() => placeBunny(bunnySpot)).observe($("field"));
+      window.addEventListener("resize", () => placeBunny(bunnySpot));
+      window.addEventListener("load", () => placeBunny(bunnySpot));
       Topbar.init({ kid: "riyana", controls: [$("settings")] });
       findDanishVoice();
       if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", findDanishVoice);
