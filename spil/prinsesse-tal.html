@@ -19,11 +19,14 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     [hidden] { display: none !important; }
 
+    html { height: 100%; overflow: hidden; overscroll-behavior: none; }
+
     body {
       min-width: 320px;
-      min-height: 100vh;
+      height: 100vh;
+      height: 100dvh;
       margin: 0;
-      padding: 10px 12px 24px;
+      padding: 10px 12px 14px;
       background:
         radial-gradient(circle at 15% 0%, #fff 0, transparent 40%),
         linear-gradient(160deg, #ffd6ec 0%, #e9d5ff 55%, #cfe8ff 100%) fixed;
@@ -31,6 +34,8 @@
       -webkit-user-select: none;
       touch-action: manipulation;
       overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: none;
     }
 
     button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }

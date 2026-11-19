@@ -20,11 +20,17 @@
 
     * { box-sizing: border-box; }
 
+    html { height: 100%; overflow: hidden; overscroll-behavior: none; }
+
     body {
       min-width: 320px;
-      min-height: 100vh;
+      height: 100vh;
+      height: 100dvh;
       margin: 0;
       padding: 28px 18px 42px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: none;
       background:
         radial-gradient(ellipse at 10% 0%, #fff 0, transparent 38%),
         #f4f8ff;
@@ -813,7 +819,7 @@
 
     .fullscreen-button[hidden] { display: none; }
 
-    @media (max-width: 700px), (max-height: 520px) {
+    @media (max-width: 700px), (max-height: 1100px), (orientation: portrait) and (max-width: 1100px) {
       html, body {
         height: 100%;
         overflow: hidden;
@@ -836,7 +842,9 @@
       .app {
         display: flex;
         width: 100%;
+        max-width: 900px;
         height: 100%;
+        margin: 0 auto;
         flex-direction: column;
       }
 
