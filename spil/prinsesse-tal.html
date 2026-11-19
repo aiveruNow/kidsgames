@@ -110,6 +110,7 @@
 
     /* ---------- Ting, der tælles ---------- */
     .items { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * 1); max-width: calc(var(--it) * 5.6); }
+    .items.many { --it: clamp(1.7rem, calc(var(--u) * 6.5), 4.2rem); max-width: calc(var(--it) * 10.8); }
     .it {
       position: relative; display: grid; place-items: center; width: var(--it); height: var(--it); font-size: calc(var(--it) * .8); line-height: 1;
       transition: transform .2s; filter: drop-shadow(0 .3rem .3rem #8a2f7d33);
@@ -127,9 +128,9 @@
     .tappable .it { cursor: pointer; }
 
     /* ---------- Lær tallene ---------- */
-    .strip { display: grid; grid-template-columns: repeat(var(--cols, 5), 1fr); gap: calc(var(--u) * 1.4); width: min(100%, 640px); }
+    .strip { display: grid; grid-template-columns: repeat(var(--cols, 5), 1fr); gap: calc(var(--u) * 1.2); width: min(100%, 640px); }
     .nb {
-      position: relative; aspect-ratio: 1.1; max-height: calc(var(--u) * 19); border-radius: 26px; color: #fff; font-weight: 900; font-size: clamp(2.4rem, calc(var(--u) * 9), 5.5rem);
+      position: relative; aspect-ratio: 1.1; max-height: var(--nh, calc(var(--u) * 19)); border-radius: 20px; color: #fff; font-weight: 900; font-size: var(--nf, clamp(2.4rem, calc(var(--u) * 9), 5.5rem));
       text-shadow: 0 3px 0 #0003; background: linear-gradient(160deg, var(--a), var(--b));
       box-shadow: 0 7px 0 color-mix(in srgb, var(--b) 70%, #000), 0 12px 20px #8a2f7d22; transition: transform .12s;
     }
@@ -137,13 +138,17 @@
     .nb.on { outline: 5px solid #fff; transform: scale(1.07); }
     .nb.hint { animation: glow .8s ease-in-out infinite alternate; }
     .nb.hint::after { content: "👆"; position: absolute; left: 50%; bottom: -34%; font-size: .55em; animation: tapHint .8s ease-in-out infinite alternate; }
-    .show { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * 1.2); width: 100%; min-height: 0; }
+    /* Visningen af det valgte tal: størrelsen følger antallet, så alt passer på skærmen */
+    .show { --it: clamp(2.6rem, calc(var(--u) * 13), 8rem); --bn: calc(var(--u) * 16); display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * 1.4); width: 100%; min-height: 0; }
+    .show.six { --it: clamp(2.2rem, calc(var(--u) * 8.5), 5.5rem); --bn: calc(var(--u) * 12); }
+    .show.many { --it: clamp(1.5rem, calc(var(--u) * 6.5), 4.2rem); --bn: calc(var(--u) * 10); }
+    .showtop { display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 2.4); }
     .bignum {
-      display: grid; place-items: center; width: calc(var(--it) * 1.5); height: calc(var(--it) * 1.5); border-radius: 50%; color: #fff; font-weight: 900;
-      font-size: calc(var(--it) * 1.05); line-height: 1; text-shadow: 0 4px 0 #0003; animation: pop .55s;
+      display: grid; place-items: center; flex: none; width: var(--bn); height: var(--bn); min-width: 3.4rem; min-height: 3.4rem; border-radius: 50%; color: #fff; font-weight: 900;
+      font-size: calc(var(--bn) * .68); line-height: 1; text-shadow: 0 4px 0 #0003; animation: pop .55s;
       background: radial-gradient(circle at 35% 30%, var(--a), var(--b)); box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000), 0 0 0 6px #fff, 0 14px 26px #8a2f7d33;
     }
-    .word { font-size: clamp(1.5rem, calc(var(--u) * 5), 3.4rem); font-weight: 900; color: var(--b); text-transform: capitalize; }
+    .word { font-size: clamp(1.6rem, calc(var(--bn) * .42), 4.4rem); font-weight: 900; color: var(--b); text-transform: capitalize; text-shadow: 0 3px 0 #fff; }
     .hand { font-size: clamp(3rem, calc(var(--u) * 10), 6rem); animation: float 1.2s ease-in-out infinite alternate; }
 
     /* ---------- Smykkeskrinet ---------- */
@@ -272,6 +277,8 @@
       :root { --u: min(1vw, 1.02vh); }
       .collect { font-size: 1.05rem; }
       .ask { gap: 8px; }
+      .show.six { --it: 2rem; --bn: calc(var(--u) * 9); }
+      .show.many { --it: 1.4rem; --bn: calc(var(--u) * 8); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -306,7 +313,7 @@
 
   <script src="../topbar.js"></script>
   <script>
-    const W = ["nul", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni", "ti"];
+    const W = ["nul", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni", "ti", "elleve", "tolv", "tretten", "fjorten", "femten", "seksten", "sytten", "atten", "nitten", "tyve"];
     const THINGS = [
       { e: "💎", sg: "diamant", pl: "diamanter", art: "en", where: "i smykkeskrinet" },
       { e: "🎀", sg: "sløjfe", pl: "sløjfer", art: "en", where: "i smykkeskrinet" },
@@ -346,9 +353,11 @@
     $("#startIco").textContent = MODES[MODE].ico;
     $("#startTitle").textContent = MODES[MODE].title;
 
+    const MAX_NUM = 20;   // højeste tal, man kan vælge i ⚙️
     const S = {
       stars: Number(store.get(STAR_KEY, 0)) || 0,
-      max: Math.min(10, Math.max(2, Number(store.get("prinsesse-max", 3)) || 3)),
+      max: Math.min(MAX_NUM, Math.max(2, Number(store.get("prinsesse-max", 3)) || 3)),
+      learnMax: Math.min(MAX_NUM, Math.max(3, Number(store.get("prinsesse-learn-max", 10)) || 10)),
       muted: !Topbar.soundOn(),
       streak: 0,
       last: -1
@@ -563,7 +572,9 @@
 
     /* ---------- Hjælpere ---------- */
     const phrase = (n, t) => n === 1 ? `${t.art} ${t.sg}` : `${W[n]} ${t.pl}`;
-    const chip = n => `<span class="chip c${n}">${n}</span>`;
+    // Talfarverne gentager sig efter ti
+    const cc = n => ((n - 1) % 10) + 1;
+    const chip = n => `<span class="chip c${cc(n)}">${n}</span>`;
 
     function pick() {
       const p = [];
@@ -583,7 +594,7 @@
 
     function items(n, t, { hide = false, tappable = false } = {}) {
       const row = document.createElement("div");
-      row.className = "items" + (tappable ? " tappable" : "");
+      row.className = "items" + (tappable ? " tappable" : "") + (n > 10 ? " many" : "");
       for (let i = 0; i < n; i++) {
         const s = document.createElement("button");
         s.type = "button";
@@ -640,12 +651,17 @@
       ({ learn: learnView, make: makeRound, find: findRound, count: countRound })[name]();
     }
 
-    // Talområdet vælges i ⚙️-menuen (undtagen "Lær tallene", som viser alle tal op til niveauet)
-    const paintMax = () => { $("#maxN").textContent = S.max; };
+    // Talområdet vælges i ⚙️-menuen. "Lær tallene" har sit eget (standard 1–10), de andre lege har deres (stiger af sig selv op til 10).
+    const paintMax = () => { $("#maxN").textContent = MODE === "learn" ? S.learnMax : S.max; };
     const stepMax = d => {
-      S.max = Math.min(10, Math.max(2, S.max + d));
-      S.streak = 0;
-      store.set("prinsesse-max", S.max);
+      if (MODE === "learn") {
+        S.learnMax = Math.min(MAX_NUM, Math.max(3, S.learnMax + d));
+        store.set("prinsesse-learn-max", S.learnMax);
+      } else {
+        S.max = Math.min(MAX_NUM, Math.max(2, S.max + d));
+        S.streak = 0;
+        store.set("prinsesse-max", S.max);
+      }
       paintMax();
       go(MODE);
     };
@@ -684,11 +700,13 @@
     /* ---------- Lær tallene ---------- */
     function learnView() {
       const stage = scaffold();
-      // Tallene vokser med niveauet, men starter småt: 1 til 5
-      const N = Math.min(10, Math.max(5, S.max));
+      // Tallene går fra 1 og op til det valgte (standard 10, op til 20 i ⚙️)
+      const N = S.learnMax;
+      const cols = N <= 5 ? N : N <= 10 ? 5 : N <= 16 ? 8 : 10;
+      const fs = cols <= 5 ? 9 : cols <= 8 ? 6.6 : 5.4;
       ask("Tryk på et tal 👆", "Tryk på et tal");
       stage.innerHTML = `
-        <div class="strip" style="--cols:${Math.min(N, 5)}">${Array.from({ length: N }, (_, i) => `<button class="nb c${i + 1}${i === 0 ? " hint" : ""}" data-n="${i + 1}" type="button">${i + 1}</button>`).join("")}</div>
+        <div class="strip" style="--cols:${cols};--nf:clamp(1.3rem, calc(var(--u) * ${fs}), 5.5rem);--nh:calc(var(--u) * ${N > 5 ? 9.5 : 19})">${Array.from({ length: N }, (_, i) => `<button class="nb c${cc(i + 1)}${i === 0 ? " hint" : ""}" data-n="${i + 1}" type="button">${i + 1}</button>`).join("")}</div>
         <div class="show" id="show"></div>`;
       let current = 0;
       stage.querySelector(".strip").addEventListener("click", e => {
@@ -705,8 +723,10 @@
         stage.querySelectorAll(".nb").forEach(b => { b.classList.remove("hint"); b.classList.toggle("on", Number(b.dataset.n) === n); });
         const t = rnd(THINGS);
         const show = $("#show");
+        show.classList.toggle("six", n > 5 && n <= 10);
+        show.classList.toggle("many", n > 10);
         const row = items(n, t, { hide: true, tappable: true });
-        show.innerHTML = `<div class="bignum c${n}">${n}</div><div class="word c${n}">${W[n]}</div>`;
+        show.innerHTML = `<div class="showtop"><div class="bignum c${cc(n)}">${n}</div><div class="word c${cc(n)}">${W[n]}</div></div>`;
         show.append(row);
         sfx.note(n);
         if (!(await countAloud(v, row))) return;
@@ -724,13 +744,13 @@
       const v = ver, n = pick(), t = rnd(THINGS);
       const stage = scaffold();
       ask(`Læg ${chip(n)} ${t.e}`, `Læg ${phrase(n, t)} ${t.where}`);
-      const trayCount = Math.min(10, n + 2);
+      const trayCount = Math.min(22, n + 2);
       stage.innerHTML = `
-        <div class="chest" id="chest" style="--slot:calc(var(--u) * ${n > 5 ? 8.5 : 12})">
+        <div class="chest" id="chest" style="--slot:calc(var(--u) * ${n > 10 ? 5.2 : n > 5 ? 7.5 : 12})">
           <div class="lid"></div>
-          <div class="box"><div class="slots" style="--cols:${Math.min(n, 5)}">${'<div class="slot"></div>'.repeat(n)}</div></div>
+          <div class="box"><div class="slots" style="--cols:${n <= 5 ? n : n <= 10 ? 5 : 10}">${'<div class="slot"></div>'.repeat(n)}</div></div>
         </div>
-        <div class="tray" id="tray" style="--it:clamp(2.6rem, calc(var(--u) * ${n > 5 ? 9 : 11}), 7rem)">${Array.from({ length: trayCount }, () => `<button class="gem" type="button" aria-label="${t.sg}">${t.e}</button>`).join("")}</div>`;
+        <div class="tray" id="tray" style="--it:clamp(2.2rem, calc(var(--u) * ${n > 10 ? 5.5 : n > 5 ? 7.2 : 11}), 7rem)">${Array.from({ length: trayCount }, () => `<button class="gem" type="button" aria-label="${t.sg}">${t.e}</button>`).join("")}</div>`;
       mk = { v, n, t, k: 0, busy: false, slots: [...stage.querySelectorAll(".slot")], chest: $("#chest"), tray: $("#tray") };
       mk.slots[0].classList.add("next");
 
@@ -838,7 +858,7 @@
       const stage = scaffold();
       ask(`Find ${chip(n)}`, `Find tallet ${W[n]}`);
       stage.innerHTML = `
-        <div class="sky" id="sky">${opts.map((o, i) => `<button class="balloon c${o}" data-n="${o}" style="--i:${i}" type="button" aria-label="${o}">${o}</button>`).join("")}</div>
+        <div class="sky" id="sky">${opts.map((o, i) => `<button class="balloon c${cc(o)}" data-n="${o}" style="--i:${i}" type="button" aria-label="${o}">${o}</button>`).join("")}</div>
         <div class="reveal" id="reveal"></div>`;
       let wrong = 0, locked = false;
       $("#sky").addEventListener("click", async e => {
@@ -878,7 +898,7 @@
       ask(`Hvor mange ${t.e}?`, `Hvor mange ${t.pl} er der? Tæl med!`);
       const row = items(n, t, { tappable: true });
       stage.innerHTML = `<div class="field" id="field"></div>
-        <div class="answers" id="answers">${opts.map(o => `<button class="ans c${o}" data-n="${o}" type="button" aria-label="${o}">${o}</button>`).join("")}</div>`;
+        <div class="answers" id="answers">${opts.map(o => `<button class="ans c${cc(o)}" data-n="${o}" type="button" aria-label="${o}">${o}</button>`).join("")}</div>`;
       $("#field").append(row);
       let counted = 0, wrong = 0, busy = false, idle = 0;
 
@@ -961,7 +981,7 @@
     }
 
     /* ---------- Start ---------- */
-    Topbar.init({ kid: "riyana", controls: MODE !== "learn" ? [$("#settings")] : [] });
+    Topbar.init({ kid: "riyana", controls: [$("#settings")] });
 
     function begin() {
       started = true;
