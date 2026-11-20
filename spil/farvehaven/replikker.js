@@ -1,4 +1,4 @@
-// Alle Pjuskes replikker i Farvehaven. Spillet, service workeren og lydgeneratoren
+// Alle Budhas replikker i Farvehaven. Spillet, service workeren og lydgeneratoren
 // (lydvaerktoej\lav-lyd.mjs) bruger denne ene fil, så tekst og lydklip altid passer sammen.
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
@@ -36,9 +36,9 @@
       (c) => `Find den ${c.flower} blomst.`,
       (c) => `Kan du finde den ${c.flower} blomst?`,
       (c) => `Hvor er den ${c.flower} blomst?`,
-      (c) => `Pjuske vil gerne have en ${c.name} blomst. Kan du hjælpe?`,
+      (c) => `Budha vil gerne have en ${c.name} blomst. Kan du hjælpe?`,
       (c) => `Tryk på den ${c.flower} blomst.`,
-      (c) => `Åh, nu mangler Pjuske en ${c.name} blomst!`,
+      (c) => `Åh, nu mangler Budha en ${c.name} blomst!`,
       (c) => `Hvilken blomst er ${c.name}?`
     ],
     // Siges, når barnet vælger en forkert farve (c = den farve, der blev valgt). Bagefter spørges der igen.
@@ -63,10 +63,10 @@
       "Rigtig godt klaret!"
     ],
     plant: [
-      (c) => `Nu planter Pjuske en ${c.name} blomst!`,
-      (c) => `Pjuske graver et hul til den ${c.flower} blomst.`,
+      (c) => `Nu planter Budha en ${c.name} blomst!`,
+      (c) => `Budha graver et hul til den ${c.flower} blomst.`,
       (c) => `Se, hvor smuk en ${c.name} blomst!`,
-      (c) => `Pjuske vander den ${c.flower} blomst, så den kan vokse.`
+      (c) => `Budha vander den ${c.flower} blomst, så den kan vokse.`
     ],
     reward: [
       (d) => `Ej, hvor er du god! Nu har du fået ${d}!`,
@@ -74,10 +74,10 @@
       (d) => `Wow, se! Du har fået ${d} til haven!`
     ],
     finish: [
-      "Hvor er du dygtig! Tak for hjælpen, siger Pjuske.",
+      "Hvor er du dygtig! Tak for hjælpen, siger Budha.",
       "Hurra! Haven er fuld af blomster. Tusind tak!",
       "Sikke en flot have! Du er så dygtig!",
-      "Pjuske er så glad! Tak, fordi du hjalp!",
+      "Budha er så glad! Tak, fordi du hjalp!",
       "Wow! Se alle de flotte farver. Godt klaret!"
     ]
   };

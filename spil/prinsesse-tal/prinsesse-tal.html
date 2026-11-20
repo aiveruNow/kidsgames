@@ -343,24 +343,15 @@
   <div id="fx" aria-hidden="true"></div>
 
   <script src="../../topbar.js"></script>
+  <script src="replikker.js"></script>
   <script>
-    const W = ["nul", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni", "ti", "elleve", "tolv", "tretten", "fjorten", "femten", "seksten", "sytten", "atten", "nitten", "tyve"];
-    const THINGS = [
-      { e: "💎", sg: "diamant", pl: "diamanter", art: "en", where: "i smykkeskrinet" },
-      { e: "🎀", sg: "sløjfe", pl: "sløjfer", art: "en", where: "i smykkeskrinet" },
-      { e: "💍", sg: "ring", pl: "ringe", art: "en", where: "i smykkeskrinet" },
-      { e: "👑", sg: "krone", pl: "kroner", art: "en", where: "i smykkeskrinet" },
-      { e: "🌸", sg: "blomst", pl: "blomster", art: "en", where: "i smykkeskrinet" },
-      { e: "🦋", sg: "sommerfugl", pl: "sommerfugle", art: "en", where: "i smykkeskrinet" },
-      { e: "💖", sg: "hjerte", pl: "hjerter", art: "et", where: "i smykkeskrinet" },
-      { e: "⭐", sg: "stjerne", pl: "stjerner", art: "en", where: "i smykkeskrinet" }
-    ];
-    // Hver tredje stjerne giver et nyt prinsessting til samlingen
-    const ACC = [
-      { e: "🎀", name: "sløjfe" }, { e: "💍", name: "ring" }, { e: "💄", name: "læbestift" }, { e: "💎", name: "diamant" },
-      { e: "🦄", name: "enhjørning" }, { e: "🌸", name: "blomst" }, { e: "🦋", name: "sommerfugl" }, { e: "👑", name: "krone" }
-    ];
-    const PRAISE = ["Flot!", "Dygtig!", "Super!", "Hurra!", "Sådan!", "Fantastisk!"];
+    // Alle ord og sætninger står i replikker.js (samme kilde til spillet, sw.js og lydgeneratoren)
+    const R = PrinsesseReplikker;
+    const L = R.lines;
+    const W = R.numbers;
+    const THINGS = R.things;
+    const ACC = R.accessories;
+    const PRAISE = R.praise;
 
     const $ = (s, r = document) => r.querySelector(s);
     const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -481,7 +472,7 @@
       whoosh() { noise(.3, .08, 0, "bandpass", 400, 2400); }
     };
 
-    /* ---------- Tale ---------- */
+    /* ---------- Tale: indtalte lydklip (som i Farvehaven), enhedens stemme som reserve ---------- */
     let daVoice = null;
     function findVoice() {
       if (!("speechSynthesis" in window)) return;
@@ -490,39 +481,56 @@
     findVoice();
     if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", findVoice);
 
-    // Uden dansk stemme på enheden hentes oplæsningen online (kun selve teksten sendes).
-    const clips = new Map();
-    let curClip = null;
+    const clipAudio = new Audio();
+    clipAudio.preload = "auto";
+    let voiceToken = 0;
+    let endCurrent = null;   // afslutter den igangværende sætning, hvis den afbrydes
+
     function stopSpeech() {
+      voiceToken++;
       try { speechSynthesis.cancel(); } catch { /* ingen tale */ }
-      if (curClip) { curClip.pause(); curClip = null; }
+      clipAudio.onended = null;
+      clipAudio.onerror = null;
+      clipAudio.pause();
+      const end = endCurrent;
+      endCurrent = null;
+      if (end) end();
     }
 
+    // Siger en sætning eller flere efter hinanden. Svaret er klar, når alt er sagt (eller kunne ikke sagt).
     function speak(text) {
+      const parts = Array.isArray(text) ? text : [text];
       return new Promise(res => {
         if (S.muted) { setTimeout(res, 450); return; }
-        let done = false;
-        const fin = () => { if (!done) { done = true; res(); } };
-        setTimeout(fin, 1500 + text.length * 110);
         stopSpeech();
-        if (daVoice) {
-          const u = new SpeechSynthesisUtterance(text);
-          u.voice = daVoice; u.lang = daVoice.lang; u.rate = .85; u.pitch = 1.2;
-          u.onend = fin; u.onerror = fin;
-          speechSynthesis.speak(u);
-          return;
-        }
-        const key = text.toLowerCase();
-        if (!clips.has(key)) {
-          const a = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=da&q=${encodeURIComponent(key)}`);
-          a.preload = "auto";
-          clips.set(key, a);
-        }
-        const a = clips.get(key);
-        curClip = a;
-        a.onended = fin; a.onerror = fin;
-        a.currentTime = 0;
-        a.play().catch(fin);
+        const token = voiceToken;
+        let done = false;
+        const fin = () => { if (!done) { done = true; if (endCurrent === fin) endCurrent = null; res(); } };
+        endCurrent = fin;
+        setTimeout(fin, 2500 + parts.join(" ").length * 140);
+
+        const deviceVoice = rest => {
+          if (token !== voiceToken || !daVoice) { fin(); return; }
+          try {
+            const u = new SpeechSynthesisUtterance(rest.join(" "));
+            u.voice = daVoice; u.lang = daVoice.lang; u.rate = .88;
+            u.onend = fin; u.onerror = fin;
+            speechSynthesis.speak(u);
+          } catch { fin(); }
+        };
+
+        const next = i => {
+          if (token !== voiceToken) { fin(); return; }
+          if (i >= parts.length) { fin(); return; }
+          let handled = false;
+          const fail = () => { if (!handled) { handled = true; deviceVoice(parts.slice(i)); } };
+          clipAudio.onended = () => { if (!handled) { handled = true; next(i + 1); } };
+          clipAudio.onerror = fail;
+          clipAudio.src = `lyd/${R.clipFile(parts[i])}`;
+          const p = clipAudio.play();
+          if (p && typeof p.catch === "function") p.catch(fail);
+        };
+        next(0);
       });
     }
 
@@ -602,7 +610,7 @@
     }
 
     /* ---------- Hjælpere ---------- */
-    const phrase = (n, t) => n === 1 ? `${t.art} ${t.sg}` : `${W[n]} ${t.pl}`;
+    const phrase = L.amount;
     // Talfarverne gentager sig efter ti
     const cc = n => ((n - 1) % 10) + 1;
     const chip = n => `<span class="chip c${cc(n)}">${n}</span>`;
@@ -651,8 +659,8 @@
       Topbar.refreshStars(true);
       await speak(line);
       if (v !== ver) return false;
-      if (unlock) { await showPop(unlock.e, `Du fik en ${unlock.name}!`); if (v !== ver) return false; }
-      if (levelUp) { await showPop(S.max, "Nu kan vi øve flere tal!"); if (v !== ver) return false; }
+      if (unlock) { await showPop(unlock.e, L.unlock(unlock)); if (v !== ver) return false; }
+      if (levelUp) { await showPop(S.max, L.moreNumbers); if (v !== ver) return false; }
       return true;
     }
 
@@ -855,7 +863,7 @@
       const N = S.learnMax;
       const cols = N <= 5 ? N : N <= 10 ? 5 : N <= 16 ? 8 : 10;
       const fs = cols <= 5 ? 9 : cols <= 8 ? 6.6 : 5.4;
-      ask("Tryk på et tal 👆", "Tryk på et tal");
+      ask("Tryk på et tal 👆", L.tapNumber);
       stage.innerHTML = `
         <div class="strip" style="--cols:${cols};--nf:clamp(1.3rem, calc(var(--u) * ${fs}), 5.5rem);--nh:calc(var(--u) * ${N > 5 ? 9.5 : 19})">${Array.from({ length: N }, (_, i) => `<button class="nb c${cc(i + 1)}${i === 0 ? " hint" : ""}" data-n="${i + 1}" type="button">${i + 1}</button>`).join("")}</div>
         <div class="show" id="show"></div>`;
@@ -895,7 +903,7 @@
       const forced = Number(new URLSearchParams(location.search).get("n")) || 0;   // ?n=7 til test
       const v = ver, n = forced || pick(), t = rnd(THINGS);
       const stage = scaffold();
-      ask(`Læg ${chip(n)} ${t.e}`, `Læg ${phrase(n, t)} ${t.where}`, false);
+      ask(`Læg ${chip(n)} ${t.e}`, L.put(n, t), false);
       // Tryk på boblen viser tallet igen
       const again = $("#again"), fresh = again.cloneNode(true);
       again.replaceWith(fresh);
@@ -1007,7 +1015,7 @@
         sfx.chest();
         burstEl(round.chest, ["✨", "💎", "💖", "⭐"], 14, 150);
         await sleep(700);
-        if (await reward(v, true, `${phrase(round.n, round.t)}. ${rnd(PRAISE)}`)) makeRound();
+        if (await reward(v, true, [phrase(round.n, round.t), rnd(PRAISE)])) makeRound();
       }
     }
 
@@ -1015,7 +1023,7 @@
     function findRound() {
       const v = ver, n = pick(), t = rnd(THINGS), opts = choices(n);
       const stage = scaffold();
-      ask(`Find ${chip(n)}`, `Find tallet ${W[n]}`);
+      ask(`Find ${chip(n)}`, L.findAsk(n));
       stage.innerHTML = `
         <div class="sky" id="sky">${opts.map((o, i) => `<button class="balloon c${cc(o)}" data-n="${o}" style="--i:${i}" type="button" aria-label="${o}">${o}</button>`).join("")}</div>
         <div class="reveal" id="reveal"></div>`;
@@ -1031,7 +1039,7 @@
           b.classList.remove("wobble");
           void b.offsetWidth;
           b.classList.add("wobble");
-          speak(`Det er ${W[m]}. Find ${W[n]}`);
+          speak([L.isNumber(m), L.findAgain(n)]);
           if (wrong >= 2) $(`.balloon[data-n="${n}"]`).classList.add("hint");
           return;
         }
@@ -1046,7 +1054,7 @@
         $("#reveal").append(row);
         if (!(await countAloud(v, row))) return;
         dance(row);
-        if (await reward(v, wrong === 0, `${phrase(n, t)}. ${rnd(PRAISE)}`)) findRound();
+        if (await reward(v, wrong === 0, [phrase(n, t), rnd(PRAISE)])) findRound();
       });
     }
 
@@ -1054,7 +1062,7 @@
     function countRound() {
       const v = ver, n = pick(), t = rnd(THINGS), opts = choices(n);
       const stage = scaffold();
-      ask(`Hvor mange ${t.e}?`, `Hvor mange ${t.pl} er der? Tæl med!`);
+      ask(`Hvor mange ${t.e}?`, L.countAsk(t));
       const row = items(n, t, { tappable: true });
       stage.innerHTML = `<div class="field" id="field"></div>
         <div class="answers" id="answers">${opts.map(o => `<button class="ans c${cc(o)}" data-n="${o}" type="button" aria-label="${o}">${o}</button>`).join("")}</div>`;
@@ -1120,11 +1128,11 @@
           b.classList.add("shake");
           if (wrong === 1) {
             busy = true;
-            await speak(`Det er ikke ${W[m]}. Lad os tælle sammen!`);
+            await speak([L.notNumber(m), L.letsCount]);
             if (v !== ver || !(await autoCount())) return;
             busy = false;
           } else {
-            speak(`Det er ikke ${W[m]}. Prøv igen`);
+            speak([L.notNumber(m), L.tryAgain]);
             $(`.ans[data-n="${n}"]`).classList.add("hint");
           }
           return;
@@ -1135,7 +1143,7 @@
         burstEl(b, ["💖", "✨", "⭐"], 12, 120);
         if (counted < n && !(await autoCount())) return;
         dance(row);
-        if (await reward(v, wrong === 0, `${phrase(n, t)}. ${rnd(PRAISE)}`)) countRound();
+        if (await reward(v, wrong === 0, [phrase(n, t), rnd(PRAISE)])) countRound();
       });
     }
 

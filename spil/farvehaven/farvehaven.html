@@ -639,7 +639,7 @@
       <div class="progress" id="progress" aria-label="Fremskridt"></div>
     </header>
 
-    <section class="field" id="field" aria-label="Pjuskes farvehave">
+    <section class="field" id="field" aria-label="Budhas farvehave">
       <div class="scene" id="scene" aria-hidden="true">
         <svg class="rainbow" id="rainbow" data-toy="rainbow" viewBox="0 0 300 150" focusable="false" hidden>
           <path pathLength="1" style="--i: 0" stroke="#ff6b6b" d="M10 150A140 140 0 0 1 290 150"/>
@@ -852,7 +852,7 @@
         </g>
       </svg>
 
-      <div class="flower-bed" id="flowerBed" role="img" aria-label="Pjuskes blomsterbed: 0 af 5 blomster plantet"></div>
+      <div class="flower-bed" id="flowerBed" role="img" aria-label="Budhas blomsterbed: 0 af 5 blomster plantet"></div>
       <div class="fliers" id="fliers"></div>
       <div class="choices" id="choices" role="group" aria-label="Vælg en blomst"></div>
       <div class="fx" id="fx" aria-hidden="true"></div>
@@ -865,7 +865,7 @@
     <div class="welcome">
       <span class="welcome-bunny" aria-hidden="true">🐰</span>
       <h1>Kaninens Farvehave</h1>
-      <p>Pjuske vil plante blomster. Kan du finde farverne, hun spørger efter?</p>
+      <p>Budha vil plante blomster. Kan du finde farverne, hun spørger efter?</p>
       <button class="big-btn" id="startBtn" type="button">▶ Start legen</button>
     </div>
   </div>
@@ -874,7 +874,7 @@
     <div class="finish-card">
       <span class="finish-emoji" aria-hidden="true">🐰🌷</span>
       <h2 id="finishTitle">Hvor er du dygtig!</h2>
-      <p id="finishText">Pjuske har fået nye blomster i haven.</p>
+      <p id="finishText">Budha har fået nye blomster i haven.</p>
       <div class="finish-stars" id="finishStars" aria-label="Fem stjerner"></div>
       <button class="big-btn" id="againBtn" type="button">🌼 Leg igen</button>
     </div>
@@ -1003,7 +1003,7 @@
 
       function paintProgress() {
         $("roundLabel").textContent = `Blomster ${round} af ${ROUNDS}`;
-        flowerBed.setAttribute("aria-label", `Pjuskes blomsterbed: ${round} af ${ROUNDS} blomster plantet`);
+        flowerBed.setAttribute("aria-label", `Budhas blomsterbed: ${round} af ${ROUNDS} blomster plantet`);
         steps.forEach((step, index) => step.classList.toggle("done", index < round));
       }
 
@@ -1505,7 +1505,7 @@
           plot.innerHTML = '<span class="seed"></span>';
           flowerBed.append(plot);
         }
-        flowerBed.setAttribute("aria-label", `Pjuskes blomsterbed: ${round} af ${ROUNDS} blomster plantet`);
+        flowerBed.setAttribute("aria-label", `Budhas blomsterbed: ${round} af ${ROUNDS} blomster plantet`);
       }
 
       function plantFlower(color, index) {
@@ -1527,7 +1527,7 @@
             <path d="M28 29q2 2 4 0" fill="none" stroke="#8a6930" stroke-width="1" stroke-linecap="round"/>
           </g>
         </svg><span class="sparkle" aria-hidden="true">✨</span>`;
-        flowerBed.setAttribute("aria-label", `Pjuskes blomsterbed: ${index + 1} af ${ROUNDS} blomster plantet`);
+        flowerBed.setAttribute("aria-label", `Budhas blomsterbed: ${index + 1} af ${ROUNDS} blomster plantet`);
       }
 
       function flowerSvg(color) {
@@ -1612,7 +1612,7 @@
         askQuestion();
       }
 
-      // Pjuske står bag blomsterbedet med fødderne ved jordhøjen i det plot, hun skal plante i, og flytter sig kun ét plot ad gangen.
+      // Budha står bag blomsterbedet med fødderne ved jordhøjen i det plot, hun skal plante i, og flytter sig kun ét plot ad gangen.
       function placeBunny(index) {
         const plot = flowerBed.children[index];
         if (!plot) return;
@@ -1702,7 +1702,7 @@
         bunny.classList.remove("digging", "watering", "catching", "nope", "happy");
       }
 
-      // Pjuske følger fingeren eller musen med øjne og hoved.
+      // Budha følger fingeren eller musen med øjne og hoved.
       function lookAt(x, y) {
         const rect = bunny.getBoundingClientRect();
         const reach = Math.max(rect.width * 2.4, 180);
@@ -1833,7 +1833,7 @@
         const spoken = readOut(lines);
         beginPlanting(color, flowerIndex, button, decoration);
         const animationTime = reduceMotion ? 1100 : decoration ? 4850 : 4300;
-        // Næste spørgsmål kommer først, når Pjuske er færdig med at tale
+        // Næste spørgsmål kommer først, når Budha er færdig med at tale
         Promise.all([spoken, new Promise((resolve) => window.setTimeout(resolve, animationTime))])
           .then(() => window.setTimeout(askQuestion, 400));
       }
@@ -1845,7 +1845,7 @@
         $("roundLabel").textContent = "Haven er fuld af farver!";
         bunny.classList.add("dance", "happy");
         $("finishStars").textContent = "⭐".repeat(sessionStars);
-        $("finishText").textContent = `Du hjalp Pjuske med at plante ${sessionStars} blomster. Kom og leg igen!`;
+        $("finishText").textContent = `Du hjalp Budha med at plante ${sessionStars} blomster. Kom og leg igen!`;
         $("finishScreen").hidden = false;
         readOut(pickLine("finish", R.lines.finish));
       }

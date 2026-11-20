@@ -1,4 +1,13 @@
-const CACHE = "regnespil-v1.23.0";
+const CACHE = "regnespil-v1.24.1";
+
+// Prinsesse Riyanas lydklip hentes fra samme replikliste som spillet bruger
+let prinsesseClips = [];
+try {
+  importScripts("spil/prinsesse-tal/replikker.js");
+  prinsesseClips = PrinsesseReplikker.allClips().map((text) => `spil/prinsesse-tal/lyd/${PrinsesseReplikker.clipFile(text)}`);
+} catch (error) {
+  console.warn("Kunne ikke læse replikkerne til Prinsesse Riyana.", error);
+}
 
 // Farvehavens lydklip hentes fra samme replikliste som spillet bruger
 let clipFiles = [];
@@ -7,6 +16,15 @@ try {
   clipFiles = FarvehavenReplikker.allClips().map((text) => `spil/farvehaven/lyd/${FarvehavenReplikker.clipFile(text)}`);
 } catch (error) {
   console.warn("Kunne ikke læse replikkerne til Farvehaven.", error);
+}
+
+// Urundais tamilske lydklip hentes fra samme ordliste som spillet bruger
+let urundaiClips = [];
+try {
+  importScripts("spil/urundai/ord.js");
+  urundaiClips = UrundaiOrd.allClips().map((c) => `spil/urundai/lyd/${UrundaiOrd.clipFile(c.id)}`);
+} catch (error) {
+  console.warn("Kunne ikke læse ordene til Urundai.", error);
 }
 
 const FILES = [
@@ -24,9 +42,16 @@ const FILES = [
   "spil/aris-maal/aris-maal.html",
   "spil/dino-broen/dino-broen.html",
   "spil/prinsesse-tal/prinsesse-tal.html",
+  "spil/prinsesse-tal/replikker.js",
   "spil/farvehaven/farvehaven.html",
   "spil/farvehaven/replikker.js",
-  ...clipFiles
+  "spil/urundai/urundai.html",
+  "spil/urundai/ord.js",
+  "spil/urundai/billeder.js",
+  "spil/urundai/laengder.js",
+  ...clipFiles,
+  ...prinsesseClips,
+  ...urundaiClips
 ];
 
 // Forsiden spørger, hvor mange filer der skal gemmes, så den kan vise offline-status
