@@ -271,7 +271,12 @@
     thoppi: () => svg(`<path d="M14 66Q14 22 52 22Q86 22 86 66Z" fill="#2563eb" stroke="#1e3a8a" stroke-width="3" stroke-linejoin="round"/><path d="M70 60Q98 58 96 74Q80 72 62 70Z" fill="#1e40af" stroke="#1e3a8a" stroke-width="3" stroke-linejoin="round"/><circle cx="52" cy="22" r="5" fill="#fde047"/><path d="M14 66H70" stroke="#fde047" stroke-width="4"/><path d="M30 34Q38 28 48 28" stroke="#93c5fd" stroke-width="4" fill="none" stroke-linecap="round"/>`),
     kadikaaram: () => svg(`<circle cx="26" cy="20" r="11" fill="#f59e0b" stroke="#b45309" stroke-width="3"/><circle cx="74" cy="20" r="11" fill="#f59e0b" stroke="#b45309" stroke-width="3"/><circle cx="50" cy="54" r="38" fill="#fff" stroke="#ef4444" stroke-width="7"/>` + Array.from({ length: 12 }, (_, i) => { const a = (i * Math.PI) / 6; return `<line x1="${(50 + Math.cos(a) * 29).toFixed(1)}" y1="${(54 + Math.sin(a) * 29).toFixed(1)}" x2="${(50 + Math.cos(a) * 33).toFixed(1)}" y2="${(54 + Math.sin(a) * 33).toFixed(1)}" stroke="#374151" stroke-width="3" stroke-linecap="round"/>`; }).join("") + `<path d="M50 54V32M50 54L64 62" stroke="#1f2937" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="54" r="4" fill="#ef4444"/>`)
   };
-  for (let n = 11; n <= 20; n++) MORE[`n${n}`] = () => numeral(n);
+  for (let n = 1; n <= 20; n++) MORE[`n${n}`] = () => numeral(n);
+  // Farveprøve (bruges til farverne i stedet for en blomst): blank, rund dråbe med kant og glans
+  const swatch = (color) => {
+    const edge = color.toLowerCase() === "#ffffff" ? "#b6bcc8" : dark(color, .35);
+    return svg(`<ellipse cx="50" cy="91" rx="30" ry="5" fill="#000" opacity=".14"/><circle cx="50" cy="50" r="40" fill="${color}" stroke="${edge}" stroke-width="5"/><circle cx="50" cy="50" r="40" fill="url(#sw)" opacity=".0"/><ellipse cx="36" cy="33" rx="13" ry="8" fill="#fff" opacity="${color.toLowerCase() === "#ffffff" ? ".0" : ".45"}" transform="rotate(-35 36 33)"/><path d="M22 62A30 30 0 0 0 76 70" fill="none" stroke="#000" stroke-width="5" opacity=".1" stroke-linecap="round"/>`);
+  };
   Object.assign(ANIMALS, MORE);
 
   // ---------- Bladene i junglen (baggrund) ----------
@@ -335,6 +340,7 @@
   // Nøgler: "lotus:#hex", "ghost:#hex", "fruit:<navn>", "diya", "gopuram" eller et ord-id (dyr og personer)
   function get(key) {
     if (key.startsWith("lotus:")) return lotus(key.slice(6));
+    if (key.startsWith("swatch:")) return swatch(key.slice(7));
     if (key.startsWith("ghost:")) return ghost(key.slice(6));
     if (key.startsWith("fruit:")) return fruit(key.slice(6));
     if (key === "diya") return diya();
@@ -345,5 +351,5 @@
 
   const dataUri = (markup) => `data:image/svg+xml;utf8,${encodeURIComponent(markup)}`;
 
-  return { get, lotus, diya, gopuram, ghost, scene, dataUri, mix, dark, light };
+  return { get, lotus, swatch, diya, gopuram, ghost, scene, dataUri, mix, dark, light };
 });
