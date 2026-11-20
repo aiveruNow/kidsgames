@@ -627,37 +627,9 @@
   </div>
 
   <script src="../../topbar.js"></script>
+  <script src="./ord.js"></script>
   <script>
-    const WORD_SETS = {
-      3: [
-        // Begynderord: ét bogstav pr. lyd, uden stumme bogstaver eller konsonantgrupper.
-        ["SOL", "☀️"], ["KAT", "🐱"], ["HUS", "🏠"], ["MUS", "🐭"], ["BUS", "🚌"],
-        ["BIL", "🚗"], ["RIS", "🍚"], ["LAM", "🐑"], ["KAM", "🪮"], ["HAT", "🎩"],
-        ["LIM", "🧴"], ["TAL", "🔢"], ["PIL", "➡️"]
-      ],
-      4: [
-        ["HUND", "🐶"], ["KAGE", "🍰"], ["BOLD", "⚽"], ["MÅNE", "🌙"], ["FISK", "🐟"],
-        ["HEST", "🐴"], ["HØNE", "🐔"], ["ÆBLE", "🍎"], ["LØVE", "🦁"], ["UGLE", "🦉"],
-        ["GRIS", "🐷"], ["HÅND", "✋"], ["NÆSE", "👃"], ["MUND", "👄"], ["SAKS", "✂️"],
-        ["BABY", "👶"], ["BRØD", "🍞"], ["PIGE", "👧"], ["RING", "💍"], ["MÆLK", "🥛"],
-        ["VAND", "💧"], ["TAND", "🦷"], ["ROSE", "🌹"],
-        ["KIWI", "🥝"], ["PÆRE", "🍐"], ["SLOT", "🏰"], ["REGN", "🌧️"], ["SKIB", "🚢"],
-        ["FUGL", "🐦"], ["TELT", "⛺"], ["DANS", "💃"], ["MAJS", "🌽"],
-        ["SLIK", "🍬"], ["JORD", "🌍"], ["LAMA", "🦙"], ["HANE", "🐓"], ["VIND", "💨"], ["BLAD", "🍃"],
-        ["SPIL", "🎮"], ["SÆBE", "🧼"], ["SOFA", "🛋️"], ["SENG", "🛏️"], ["BREV", "✉️"], ["GAVE", "🎁"],
-        ["FEST", "🎉"], ["KOLD", "🥶"], ["HVAL", "🐳"], ["OKSE", "🐂"]
-      ],
-      5: [
-        ["BAMSE", "🧸"], ["DRENG", "👦"], ["BJØRN", "🐻"], ["TIGER", "🐯"], ["ZEBRA", "🦓"], ["KAMEL", "🐫"],
-        ["GIRAF", "🦒"], ["KRONE", "👑"], ["TOMAT", "🍅"], ["BANAN", "🍌"], ["DRAGE", "🐉"], ["ROBOT", "🤖"],
-        ["CYKEL", "🚲"], ["FROSK", "🐸"], ["SNEGL", "🐌"], ["PIZZA", "🍕"], ["KANIN", "🐰"], ["SVANE", "🦢"],
-        ["MANGO", "🥭"], ["PANDA", "🐼"], ["KLOVN", "🤡"], ["SKOLE", "🏫"], ["KIRKE", "⛪"],
-        ["KJOLE", "👗"], ["MELON", "🍈"], ["HJORT", "🦌"], ["TASKE", "👜"], ["BJERG", "⛰️"], ["KOKOS", "🥥"],
-        ["SALAT", "🥗"], ["KAFFE", "☕"], ["SUSHI", "🍣"], ["PASTA", "🍝"], ["JUICE", "🧃"], ["RAKET", "🚀"],
-        ["KOMET", "☄️"], ["EGERN", "🐿️"], ["PENGE", "💰"], ["NØGLE", "🔑"], ["MUSIK", "🎵"], ["PIANO", "🎹"],
-        ["DRUER", "🍇"], ["AGURK", "🥒"], ["PØLSE", "🌭"], ["CHILI", "🌶️"]
-      ]
-    };
+    const WORD_SETS = LoevenOrd.sets;
 
     const FRIENDS = [
       { id: "elefant", name: "ELEFANT", e: "🐘", c: "#9fb3c8" },
@@ -802,21 +774,51 @@
     findVoice();
     if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", findVoice);
 
-    // Uden dansk stemme på enheden hentes oplæsningen online (kun selve ordet sendes).
+    // Ordklip afspilles lokalt; øvrige replikker bruger enhedens stemme eller netoplæsning.
+    const clipWords = new Set(LoevenOrd.allClips());
     const clips = new Map();
     function clip(text) {
-      const key = text.toLowerCase();
+      const key = text.toUpperCase();
       if (!clips.has(key)) {
-        const el = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=da&q=${encodeURIComponent(key)}`);
+        const el = new Audio(`lyd/${LoevenOrd.clipFile(key)}`);
         el.preload = "auto";
         clips.set(key, el);
       }
       return clips.get(key);
     }
 
+    function playClip(text) {
+      const key = text.toUpperCase();
+      if (!clipWords.has(key)) return Promise.resolve(false);
+      return new Promise(resolve => {
+        const el = clip(key);
+        let settled = false;
+        const finish = played => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          el.onended = null;
+          el.onerror = null;
+          resolve(played);
+        };
+        const timer = setTimeout(() => finish(false), 4000);
+        el.onended = () => finish(true);
+        el.onerror = () => finish(false);
+        el.currentTime = 0;
+        el.play().catch(() => finish(false));
+      });
+    }
+
+    const onlineClips = new Map();
     function sayOnline(text) {
       return new Promise(resolve => {
-        const el = clip(text);
+        const key = text.toLowerCase();
+        if (!onlineClips.has(key)) {
+          const el = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=da&q=${encodeURIComponent(key)}`);
+          el.preload = "auto";
+          onlineClips.set(key, el);
+        }
+        const el = onlineClips.get(key);
         el.onended = resolve;
         el.onerror = resolve;
         el.currentTime = 0;
@@ -825,9 +827,9 @@
       });
     }
 
-    function say(text, rate = .8) {
+    function sayWithDeviceVoice(text, rate) {
       return new Promise(resolve => {
-        if (muted) return resolve();
+        if (!daVoice) findVoice();
         if (!daVoice) return sayOnline(text).then(resolve);
         const u = new SpeechSynthesisUtterance(text.toLowerCase());
         u.voice = daVoice;
@@ -840,6 +842,11 @@
         speechSynthesis.speak(u);
         setTimeout(resolve, 3500);
       });
+    }
+
+    function say(text, rate = .8) {
+      if (muted) return Promise.resolve();
+      return playClip(text).then(played => played ? undefined : sayWithDeviceVoice(text, rate));
     }
 
     // ---------- Scene ----------
@@ -1096,7 +1103,7 @@
         return btn;
       }));
 
-      if (!daVoice && !muted) clip(target[0]);
+      if (!muted) clip(target[0]);
       bubble(gold ? "Et guldord! Dobbelt stjerne!" : pick(["Hvad står der?", "Find det rigtige billede!", "Hvilket billede passer?"]));
       setIdleNudge();
       showGhost();

@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v1.25.0";
+const CACHE = "regnespil-v1.26.0";
 
 // Prinsesse Riyanas lydklip hentes fra samme replikliste som spillet bruger
 let prinsesseClips = [];
@@ -27,6 +27,15 @@ try {
   console.warn("Kunne ikke læse ordene til Urundai.", error);
 }
 
+// Løven Aris ordklip hentes fra samme ordliste som spillet bruger
+let leoClips = [];
+try {
+  importScripts("spil/loeven-leo/ord.js");
+  leoClips = LoevenOrd.allClips().map((word) => `spil/loeven-leo/lyd/${LoevenOrd.clipFile(word)}`);
+} catch (error) {
+  console.warn("Kunne ikke læse ordene til Løven Ari.", error);
+}
+
 const FILES = [
   "./",
   "index.html",
@@ -39,6 +48,7 @@ const FILES = [
   "spil/positionsvaerdi/positionsvaerdi.html",
   "spil/tabeller/tabeller.html",
   "spil/loeven-leo/loeven-leo.html",
+  "spil/loeven-leo/ord.js",
   "spil/aris-maal/aris-maal.html",
   "spil/dino-broen/dino-broen.html",
   "spil/prinsesse-tal/prinsesse-tal.html",
@@ -51,7 +61,8 @@ const FILES = [
   "spil/urundai/laengder.js",
   ...clipFiles,
   ...prinsesseClips,
-  ...urundaiClips
+  ...urundaiClips,
+  ...leoClips
 ];
 
 // Forsiden spørger, hvor mange filer der skal gemmes, så den kan vise offline-status
