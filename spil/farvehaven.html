@@ -931,7 +931,6 @@
       let muted = !Topbar.soundOn();
       let voice = null;
       let voiceToken = 0;
-      let activeAudio = null;
       let unlocked = [];
       let storageFailed = false;
       let rewardTimer = 0;
@@ -1847,16 +1846,14 @@
 
       function findDanishVoice() {
         if (!("speechSynthesis" in window)) return;
-        voice = speechSynthesis.getVoices().find((item) => item.lang && item.lang.toLowerCase().startsWith("da")) || null;
+        const danish = speechSynthesis.getVoices().filter((item) => item.lang && item.lang.toLowerCase().replace("_", "-").startsWith("da"));
+        // Foretræk stemmer, der ligger på enheden, frem for netværksstemmer
+        voice = danish.find((item) => item.localService) || danish[0] || null;
       }
 
       function stopVoice() {
         voiceToken += 1;
         if ("speechSynthesis" in window) speechSynthesis.cancel();
-        if (activeAudio) {
-          activeAudio.pause();
-          activeAudio = null;
-        }
       }
 
       function voiceUnavailable(token) {
@@ -1866,57 +1863,31 @@
         $("repeat").title = "Oplæsning virker ikke lige nu – prøv igen";
       }
 
-      function playOnline(text, token) {
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=da&q=${encodeURIComponent(text)}`;
-        let audio;
-        try {
-          audio = new Audio(url);
-        } catch (error) {
-          console.error("Kunne ikke starte dansk oplæsning.", error);
-          voiceUnavailable(token);
-          return;
-        }
-        let failed = false;
-        const fail = () => {
-          if (failed) return;
-          failed = true;
-          if (activeAudio === audio) activeAudio = null;
-          voiceUnavailable(token);
-        };
-        activeAudio = audio;
-        audio.onended = () => { if (activeAudio === audio) activeAudio = null; };
-        audio.onerror = fail;
-        try {
-          const playPromise = audio.play();
-          if (playPromise && typeof playPromise.catch === "function") playPromise.catch(fail);
-        } catch (error) {
-          console.error("Kunne ikke afspille dansk oplæsning.", error);
-          fail();
-        }
-      }
-
       function readOut(text) {
         stopVoice();
         if (muted) return;
         voiceNote.hidden = true;
         const token = voiceToken;
-        if ("speechSynthesis" in window && voice) {
-          try {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = "da-DK";
-            utterance.voice = voice;
-            utterance.rate = .88;
-            utterance.onerror = () => {
-              if (token === voiceToken && !muted) playOnline(text, token);
-            };
-            speechSynthesis.speak(utterance);
-          } catch (error) {
-            console.warn("Dansk tale på enheden kunne ikke startes.", error);
-            playOnline(text, token);
-          }
+        if (!("speechSynthesis" in window)) {
+          voiceUnavailable(token);
           return;
         }
-        playOnline(text, token);
+        // Stemmerne indlæses ofte sent på mobil, så find dem igen her
+        if (!voice) findDanishVoice();
+        try {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = "da-DK";
+          if (voice) utterance.voice = voice;
+          utterance.rate = .88;
+          utterance.onerror = (event) => {
+            if (event.error === "canceled" || event.error === "interrupted") return;
+            voiceUnavailable(token);
+          };
+          speechSynthesis.speak(utterance);
+        } catch (error) {
+          console.warn("Dansk tale på enheden kunne ikke startes.", error);
+          voiceUnavailable(token);
+        }
       }
 
       for (let i = 0; i < ROUNDS; i++) {
