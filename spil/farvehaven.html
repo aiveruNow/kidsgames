@@ -208,24 +208,74 @@
       aspect-ratio: 180 / 190;
       margin-left: calc(clamp(100px, 23vmin, 174px) / -2);
       transform-origin: 50% 100%;
-      filter: drop-shadow(0 8px 7px #315d3840);
-      animation: bunnyBob 2s ease-in-out infinite;
+      overflow: visible;
       pointer-events: none;
     }
-    .bunny .ear { transform-box: fill-box; transform-origin: 50% 100%; animation: earWiggle 2.5s ease-in-out infinite alternate; }
-    .bunny .ear.right { animation-delay: -.6s; }
-    .bunny .blink { transform-box: fill-box; transform-origin: center; animation: blink 4s infinite; }
-    .bunny.dance { animation: bunnyDance .7s ease-in-out 2; }
-    .bunny.catching .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyCatch .45s ease-out; }
-    .bunny.nope .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyNope .6s ease-in-out; }
+    .bunny-shadow {
+      position: absolute;
+      z-index: 3;
+      bottom: 40%;
+      left: 50%;
+      width: 80px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, #2d5a3a73 0%, #2d5a3a38 55%, #2d5a3a00 74%);
+      pointer-events: none;
+    }
+    .bunny .part { transform-box: view-box; }
+    .bunny .torso { transform-origin: 88px 178px; animation: breathe 3.4s ease-in-out infinite; }
+    .bunny .head-look { transform-origin: 88px 120px; transform: translate(calc(var(--lx, 0) * 2px), calc(var(--ly, 0) * 1.5px)) rotate(calc(var(--lx, 0) * 4deg)); transition: transform .35s ease-out; }
+    .bunny .head { transform-origin: 88px 120px; animation: headIdle 7s ease-in-out infinite; }
+    .bunny .ear.left { transform-origin: 64px 76px; animation: earFlickL 7s ease-in-out infinite; }
+    .bunny .ear.right { transform-origin: 120px 77px; animation: earFlickR 9s -4s ease-in-out infinite; }
+    .bunny .eyes { transform: translate(calc(var(--ex, 0) * 1px), calc(var(--ey, 0) * 1px)); transition: transform .25s ease-out; }
+    .bunny .blink { animation: blink 4.6s infinite; }
+    .bunny .blink.l { transform-origin: 70px 87px; }
+    .bunny .blink.r { transform-origin: 108px 87px; }
+    .bunny .nose { transform-origin: 89px 102px; animation: noseTwitch 3.6s infinite; }
+    .bunny .whiskers.l { --w: 1; transform-origin: 66px 106px; animation: whiskerTwitch 3.6s infinite; }
+    .bunny .whiskers.r { --w: -1; transform-origin: 112px 106px; animation: whiskerTwitch 3.6s infinite; }
+    .bunny .tail { transform-origin: 139px 150px; animation: tailWag 6s ease-in-out infinite; }
+    .bunny .arm { transition: transform .3s ease-out; }
+    .bunny .arm.left { transform-origin: 58px 124px; }
+    .bunny .arm.right { transform-origin: 118px 124px; }
+    .bunny .mouth-open { opacity: 0; }
+    .bunny.happy .mouth-open { opacity: 1; }
+    .bunny.happy .mouth-smile { opacity: 0; }
+    .bunny .can, .bunny .dirt, .bunny .drops { opacity: 0; transition: opacity .2s; }
+    .bunny .can { transform-origin: 120px 140px; }
+
+    .bunny.catching .arm.left { transform: rotate(48deg); }
+    .bunny.catching .arm.right { transform: rotate(-48deg); }
+    .bunny.catching .torso { animation: catchTorso .45s ease-out; }
+    .bunny.catching .head-look { transform: translateY(-3px); }
+
+    .bunny.digging .torso { animation: digTorso .3s ease-in-out infinite alternate; }
+    .bunny.digging .head-look { transform: translateY(6px); }
+    .bunny.digging .eyes { transform: translateY(3px); }
+    .bunny.digging .arm.left { animation: pawScratch .3s ease-in-out infinite alternate; }
+    .bunny.digging .arm.right { animation: pawScratch .3s -.15s ease-in-out infinite alternate; }
+    .bunny.digging .dirt { opacity: 1; }
+    .bunny .dirt circle { animation: dirtFly .6s ease-out infinite; animation-delay: calc(var(--i) * -.12s); }
+
+    .bunny.watering .arm.left { transform: rotate(-16deg); }
+    .bunny.watering .arm.right { transform: rotate(16deg); }
+    .bunny.watering .head-look { transform: translate(2px, 3px) rotate(3deg); }
+    .bunny.watering .eyes { transform: translate(-1px, 3px); }
+    .bunny.watering .can { opacity: 1; animation: canTip 1s ease-in-out both; }
+    .bunny.watering .drops { opacity: 1; }
+    .bunny .drops circle { animation: dropFall .45s ease-in infinite; animation-delay: calc(var(--i) * -.15s); }
+
+    .bunny.nope .head-look { animation: headNope .6s ease-in-out; }
+
+    .bunny.dance { animation: bunnyDance 1.2s ease-in-out infinite; }
+    .bunny.dance .arm.left { animation: armCheerL .3s ease-in-out infinite alternate; }
+    .bunny.dance .arm.right { animation: armCheerR .3s -.15s ease-in-out infinite alternate; }
+
+    .plot.wet::before { background: linear-gradient(#7c5636, #59391f); }
+    .plot.wet::after { content: ""; position: absolute; bottom: 3px; width: clamp(24px, 6vmin, 40px); height: 11px; border: 2px solid #a8dcf0; border-radius: 50%; animation: ripple .55s ease-out 2; pointer-events: none; }
     .fly-flower { position: fixed; z-index: 8; pointer-events: none; filter: drop-shadow(0 6px 4px #315d3840); }
     .fly-flower .flower { display: block; width: 100%; height: auto; overflow: visible; }
-    .bunny .trowel, .bunny .watering-can, .bunny .water-drops { opacity: 0; }
-    .bunny.digging .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyDig .42s ease-in-out 2; }
-    .bunny.digging .trowel { opacity: 1; transform-box: fill-box; transform-origin: 20% 20%; animation: trowelDig .28s ease-in-out 3 alternate; }
-    .bunny.watering .bunny-body { transform-box: fill-box; transform-origin: 50% 100%; animation: bunnyWater .5s ease-in-out 2; }
-    .bunny.watering .watering-can { opacity: 1; transform-box: fill-box; transform-origin: 10% 70%; animation: canTip .55s ease-in-out 2; }
-    .bunny.watering .water-drops { opacity: 1; animation: waterSpark .65s ease-out 2; }
 
     .choices {
       position: absolute;
@@ -418,22 +468,40 @@
     @keyframes cloudDriftBack { to { transform: translateX(-130vw) scale(.65); } }
     @keyframes sunGlow { to { box-shadow: 0 0 0 15px #fff3a640, 0 0 52px #fff3a6a0; transform: scale(1.04); } }
     @keyframes decorSway { from { transform: rotate(-5deg) translateY(0); } to { transform: rotate(5deg) translateY(-4px); } }
-    @keyframes bunnyBob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(1deg); } }
-    @keyframes bunnyDance { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-14px) rotate(6deg); } }
-    @keyframes bunnyDig { 0%, 100% { transform: translateY(0) rotate(0); } 45% { transform: translateY(7px) rotate(-7deg); } }
-    @keyframes bunnyCatch { 0% { transform: scale(1); } 30% { transform: scale(1.1, .88); } 65% { transform: translateY(-10px) scale(.96, 1.07); } 100% { transform: scale(1); } }
-    @keyframes bunnyNope { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-8deg); } 45% { transform: rotate(8deg); } 70% { transform: rotate(-5deg); } }
-    @keyframes bunnyWater { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(7deg) translateY(-2px); } }
-    @keyframes trowelDig { to { transform: rotate(-28deg) translateY(3px); } }
-    @keyframes canTip { 50% { transform: rotate(-24deg) translateY(-3px); } }
-    @keyframes waterSpark { 0% { opacity: 0; transform: translateY(-4px) scale(.5); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateY(16px) scale(1.1); } }
+    @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.03); } }
+    @keyframes headIdle { 0%, 100% { transform: translateY(0) rotate(0); } 18% { transform: translateY(-1.2px) rotate(-1.5deg); } 36% { transform: translateY(0) rotate(0); } 54% { transform: translateY(-1.2px) rotate(2deg); } 72% { transform: translateY(0) rotate(0); } 86% { transform: translateY(1px) rotate(-3deg); } }
+    @keyframes bunnyDance {
+      0%, 100% { transform: translateY(0) scale(1.06, .92) rotate(-4deg); }
+      25% { transform: translateY(-18px) scale(.96, 1.07) rotate(0); }
+      50% { transform: translateY(0) scale(1.06, .92) rotate(4deg); }
+      75% { transform: translateY(-18px) scale(.96, 1.07) rotate(0); }
+    }
+    @keyframes armCheerL { from { transform: rotate(8deg); } to { transform: rotate(62deg); } }
+    @keyframes armCheerR { from { transform: rotate(-8deg); } to { transform: rotate(-62deg); } }
+    @keyframes catchTorso { 0% { transform: scale(1); } 35% { transform: scale(1.08, .9); } 70% { transform: scale(.97, 1.05); } 100% { transform: scale(1); } }
+    @keyframes digTorso { from { transform: scale(1.01, .95); } to { transform: scale(1, .93); } }
+    @keyframes pawScratch { from { transform: translateY(-3px) rotate(0); } to { transform: translateY(12px) rotate(-8deg); } }
+    @keyframes dirtFly {
+      0% { opacity: 0; transform: translate(0, 0) scale(.5); }
+      15% { opacity: 1; }
+      50% { opacity: 1; transform: translate(calc(var(--dx) * .6), -22px) scale(1); }
+      100% { opacity: 0; transform: translate(var(--dx), 4px) scale(.8); }
+    }
+    @keyframes canTip { 0% { transform: rotate(0); } 22%, 85% { transform: rotate(-16deg); } 100% { transform: rotate(0); } }
+    @keyframes dropFall { 0% { opacity: 0; transform: translateY(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(14px); } }
+    @keyframes ripple { 0% { opacity: .9; transform: scale(.3); } 100% { opacity: 0; transform: scale(1.4); } }
+    @keyframes headNope { 0%, 100% { transform: rotate(0); } 18% { transform: translateX(-2px) rotate(-10deg); } 40% { transform: translateX(2px) rotate(9deg); } 62% { transform: translateX(-1px) rotate(-6deg); } 82% { transform: rotate(3deg); } }
     @keyframes stemGrow { to { stroke-dashoffset: 0; } }
     @keyframes leafGrow { from { opacity: 0; transform: scale(.1) rotate(-20deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
     @keyframes bloomPop { 0% { opacity: 0; transform: scale(.1) rotate(-35deg); } 75% { opacity: 1; transform: scale(1.18) rotate(8deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
     @keyframes sparkleBurst { 0% { opacity: 0; transform: translate(-50%, 8px) scale(.3); } 35% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -22px) scale(1.2) rotate(30deg); } }
     @keyframes choiceFlower { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-5px) rotate(3deg); } }
-    @keyframes earWiggle { to { transform: rotate(7deg); } }
-    @keyframes blink { 0%, 46%, 50%, 100% { transform: scaleY(1); } 48% { transform: scaleY(.1); } }
+    @keyframes earFlickL { 0%, 80%, 100% { transform: rotate(0); } 40% { transform: rotate(2.5deg); } 86% { transform: rotate(-11deg); } 90% { transform: rotate(4deg); } 94% { transform: rotate(-3deg); } }
+    @keyframes earFlickR { 0%, 80%, 100% { transform: rotate(0); } 45% { transform: rotate(-2.5deg); } 86% { transform: rotate(11deg); } 90% { transform: rotate(-4deg); } 94% { transform: rotate(3deg); } }
+    @keyframes blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.08); } }
+    @keyframes noseTwitch { 0%, 22%, 100% { transform: scale(1); } 4% { transform: scale(1.14, 1.1) translateY(-.6px); } 8% { transform: scale(.95); } 12% { transform: scale(1.12, 1.08); } 16% { transform: scale(1); } }
+    @keyframes whiskerTwitch { 0%, 22%, 100% { transform: rotate(0); } 4% { transform: rotate(calc(var(--w) * -3deg)); } 8% { transform: rotate(calc(var(--w) * 2deg)); } 12% { transform: rotate(calc(var(--w) * -2deg)); } 16% { transform: rotate(0); } }
+    @keyframes tailWag { 0%, 78%, 100% { transform: rotate(0) scale(1); } 82% { transform: rotate(10deg) scale(1.1); } 86% { transform: rotate(-8deg); } 90% { transform: rotate(7deg) scale(1.06); } 94% { transform: rotate(-3deg); } }
     @keyframes choiceWin { 40% { transform: translateY(-9px) scale(1.06); } 100% { transform: translateY(0) scale(1); } }
     @keyframes choiceOops { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
     @keyframes rewardIn { from { opacity: 0; transform: translate(-50%, -45%) scale(.6) rotate(-6deg); } to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); } }
@@ -477,42 +545,94 @@
         <button class="repeat" id="repeat" type="button" aria-label="Hør spørgsmålet igen" title="Hør igen">🔊</button>
       </div>
 
-      <svg class="bunny" id="bunny" viewBox="0 0 180 190" aria-hidden="true">
-        <g class="bunny-body">
-        <g class="ear">
-          <path d="M56 77C35 52 28 8 44 5c20-4 30 43 29 69z" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
-          <path d="M52 56C42 37 40 17 46 14c7 0 15 24 17 39z" fill="#f3a5b4"/>
+      <div class="bunny-shadow" id="bunnyShadow" aria-hidden="true"></div>
+      <svg class="bunny" id="bunny" viewBox="0 0 180 190" aria-hidden="true" focusable="false">
+        <defs>
+          <radialGradient id="bunnyFur" cx=".38" cy=".3" r=".85">
+            <stop offset="0" stop-color="#fff"/>
+            <stop offset=".7" stop-color="#fcfaf6"/>
+            <stop offset="1" stop-color="#eee7dc"/>
+          </radialGradient>
+        </defs>
+        <g class="tail part">
+          <circle cx="139" cy="148" r="14" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+          <circle cx="135" cy="144" r="5" fill="#fff" opacity=".85"/>
         </g>
-        <g class="ear right">
-          <path d="M112 75c-8-33 0-73 16-70 20 4 14 49 1 74z" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
-          <path d="M119 55c-2-22 4-40 10-40 7 3 2 28-4 44z" fill="#f3a5b4"/>
+        <g class="torso part">
+          <ellipse cx="88" cy="135" rx="49" ry="43" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+          <ellipse cx="88" cy="146" rx="26" ry="24" fill="#fff7ee" opacity=".9"/>
         </g>
-        <ellipse cx="88" cy="135" rx="49" ry="43" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
-        <ellipse cx="88" cy="83" rx="48" ry="42" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
-        <ellipse cx="70" cy="87" rx="5" ry="7" fill="#513b3d" class="blink"/>
-        <ellipse cx="108" cy="87" rx="5" ry="7" fill="#513b3d" class="blink"/>
-        <ellipse cx="89" cy="101" rx="7" ry="5" fill="#e98c9d"/>
-        <path d="M89 106q-4 8-11 5m11-5q4 8 11 5" fill="none" stroke="#735153" stroke-width="2.5" stroke-linecap="round"/>
-        <ellipse cx="58" cy="101" rx="10" ry="6" fill="#f7c4c6" opacity=".8"/>
-        <ellipse cx="120" cy="101" rx="10" ry="6" fill="#f7c4c6" opacity=".8"/>
-        <path d="M56 124q-22 12-10 34 9 10 24-1m40-33q22 12 10 34-9 10-24-1" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
-        <ellipse cx="66" cy="167" rx="20" ry="11" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
-        <ellipse cx="111" cy="167" rx="20" ry="11" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
-        <circle cx="133" cy="137" r="13" fill="#fff" stroke="#d7d2c8" stroke-width="3"/>
-        <path d="M119 54q10-12 21 0-11 12-21 0zm21 0q11-12 21 0-10 12-21 0z" fill="#f26f8b"/>
-        <circle cx="140" cy="54" r="4" fill="#ffcf51"/>
-        <g class="trowel">
-          <path d="M126 119l14 20" fill="none" stroke="#8a603e" stroke-width="5" stroke-linecap="round"/>
-          <path d="M136 136q11 1 11 11-10 5-16-3z" fill="#b9dbe5" stroke="#7898a3" stroke-width="2"/>
+        <g class="arm left part">
+          <path d="M56 124q-22 12-10 34 9 10 24-1z" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M52 154q4 3 8 0" fill="none" stroke="#e0d8cc" stroke-width="1.6" stroke-linecap="round"/>
         </g>
-        <g class="watering-can">
-          <rect x="125" y="121" width="21" height="18" rx="4" fill="#61b8c5" stroke="#fff" stroke-width="2"/>
-          <path d="M125 125q-10-5-10 4v5m31-7h10l-7 5" fill="none" stroke="#4b9eaa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M130 120q5-9 12 0" fill="none" stroke="#4b9eaa" stroke-width="3" stroke-linecap="round"/>
+        <g class="arm right part">
+          <path d="M120 124q22 12 10 34-9 10-24-1z" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M116 154q4 3 8 0" fill="none" stroke="#e0d8cc" stroke-width="1.6" stroke-linecap="round"/>
         </g>
-        <g class="water-drops" fill="#68c7f0">
-          <circle cx="158" cy="139" r="2.5"/><circle cx="166" cy="145" r="2"/><circle cx="155" cy="150" r="1.8"/>
+        <ellipse cx="66" cy="167" rx="20" ry="11" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+        <ellipse cx="111" cy="167" rx="20" ry="11" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+        <g class="head-look part">
+          <g class="head part">
+            <g class="ear left part">
+              <path d="M56 77C35 52 28 8 44 5c20-4 30 43 29 69z" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+              <path d="M52 56C42 37 40 17 46 14c7 0 15 24 17 39z" fill="#f3a5b4"/>
+            </g>
+            <g class="ear right part">
+              <path d="M112 75c-8-33 0-73 16-70 20 4 14 49 1 74z" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+              <path d="M119 55c-2-22 4-40 10-40 7 3 2 28-4 44z" fill="#f3a5b4"/>
+              <path d="M119 54q10-12 21 0-11 12-21 0zm21 0q11-12 21 0-10 12-21 0z" fill="#f26f8b"/>
+              <circle cx="140" cy="54" r="4" fill="#ffcf51"/>
+            </g>
+            <ellipse cx="88" cy="83" rx="48" ry="42" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+            <ellipse cx="58" cy="101" rx="10" ry="6" fill="#f7c4c6" opacity=".8"/>
+            <ellipse cx="120" cy="101" rx="10" ry="6" fill="#f7c4c6" opacity=".8"/>
+            <g class="eyes part">
+              <g class="blink l part">
+                <ellipse cx="70" cy="87" rx="5" ry="7" fill="#513b3d"/>
+                <circle cx="68.4" cy="84.6" r="1.9" fill="#fff"/>
+              </g>
+              <g class="blink r part">
+                <ellipse cx="108" cy="87" rx="5" ry="7" fill="#513b3d"/>
+                <circle cx="106.4" cy="84.6" r="1.9" fill="#fff"/>
+              </g>
+            </g>
+            <g class="whiskers l part" fill="none" stroke="#cbbfb2" stroke-width="1.6" stroke-linecap="round">
+              <path d="M64 103L34 96M64 107L32 108M66 111L38 120"/>
+            </g>
+            <g class="whiskers r part" fill="none" stroke="#cbbfb2" stroke-width="1.6" stroke-linecap="round">
+              <path d="M114 103l30-7M114 107l32 1M112 111l28 9"/>
+            </g>
+            <path class="mouth-smile" d="M89 106q-4 8-11 5m11-5q4 8 11 5" fill="none" stroke="#735153" stroke-width="2.5" stroke-linecap="round"/>
+            <g class="mouth-open">
+              <path d="M77 107q12 18 24 0q-12-4-24 0z" fill="#b8475f" stroke="#735153" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M83 114q6 5 12 0q-6-3-12 0z" fill="#f28ba0"/>
+            </g>
+            <g class="nose part">
+              <ellipse cx="89" cy="101" rx="7" ry="5" fill="#e98c9d"/>
+              <ellipse cx="87" cy="99.6" rx="2.2" ry="1.2" fill="#fff" opacity=".55"/>
+            </g>
+          </g>
         </g>
+        <g class="can part">
+          <path d="M96 118q10-12 22 0" fill="none" stroke="#4b9eaa" stroke-width="3" stroke-linecap="round"/>
+          <path d="M120 128q13 0 11 12-1 6-11 6" fill="none" stroke="#4b9eaa" stroke-width="3" stroke-linecap="round"/>
+          <path d="M94 130l-20 12" fill="none" stroke="#4b9eaa" stroke-width="4.5" stroke-linecap="round"/>
+          <ellipse cx="72" cy="143" rx="3.2" ry="5.2" transform="rotate(35 72 143)" fill="#7fd0da" stroke="#4b9eaa" stroke-width="1.5"/>
+          <rect x="92" y="120" width="28" height="26" rx="6" fill="#61b8c5" stroke="#fff" stroke-width="2"/>
+          <path d="M97 128h18" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+        </g>
+        <g class="drops" fill="#68c7f0">
+          <circle cx="70" cy="153" r="2.4" style="--i: 0"/>
+          <circle cx="66" cy="153" r="2" style="--i: 1"/>
+          <circle cx="73" cy="153" r="1.8" style="--i: 2"/>
+        </g>
+        <g class="dirt" fill="#8d6039">
+          <circle cx="62" cy="176" r="4" style="--i: 0; --dx: -34px"/>
+          <circle cx="76" cy="178" r="3.2" style="--i: 1; --dx: -16px"/>
+          <circle cx="100" cy="178" r="3.4" style="--i: 2; --dx: 16px"/>
+          <circle cx="114" cy="176" r="4" style="--i: 3; --dx: 34px"/>
+          <circle cx="88" cy="180" r="3" style="--i: 4; --dx: 6px"/>
         </g>
       </svg>
 
@@ -598,12 +718,13 @@
       let storageFailed = false;
       let rewardTimer = 0;
       let bunnySpot = 0;
-      let bunnyMotion = null;
+      let bunnyMotions = [];
 
       const progress = $("progress");
       const message = $("message");
       const choices = $("choices");
       const bunny = $("bunny");
+      const shadow = $("bunnyShadow");
       const flowerBed = $("flowerBed");
       const colorCount = $("colorCount");
       const reward = $("reward");
@@ -778,7 +899,7 @@
         askQuestion();
       }
 
-      // Pjuske står bag blomsterbedet over det plot, hun skal plante i, og flytter sig kun ét plot ad gangen.
+      // Pjuske står bag blomsterbedet med fødderne ved jordhøjen i det plot, hun skal plante i, og flytter sig kun ét plot ad gangen.
       function placeBunny(index) {
         const plot = flowerBed.children[index];
         if (!plot) return;
@@ -791,10 +912,19 @@
         const height = parseFloat(style.height) || bunny.getBoundingClientRect().height;
         const centre = plotRect.left + plotRect.width / 2 - fieldRect.left - border;
         const x = Math.min(Math.max(centre, width / 2 + 6), field.clientWidth - width / 2 - 6);
+        const bottom = fieldRect.bottom - border - plotRect.bottom + 2;
+        const shadowWidth = width * .62;
+        const shadowHeight = shadowWidth * .17;
         bunny.style.left = `${x}px`;
-        bunny.style.bottom = `${fieldRect.bottom - border - plotRect.top - height * .22}px`;
+        bunny.style.bottom = `${bottom}px`;
+        shadow.style.left = `${x}px`;
+        shadow.style.bottom = `${bottom + height * .063 - shadowHeight / 2}px`;
+        shadow.style.width = `${shadowWidth}px`;
+        shadow.style.height = `${shadowHeight}px`;
+        shadow.style.marginLeft = `${-shadowWidth / 2}px`;
       }
 
+      // To hop med forberedelse, udstrækning i luften og blød landing. Ørerne hænger bagefter og skyggen følger jorden.
       function hopToSpot(index) {
         const before = bunny.getBoundingClientRect();
         placeBunny(index);
@@ -803,26 +933,71 @@
         const dx = before.left - after.left;
         const dy = before.top - after.top;
         if (reduceMotion || (!dx && !dy)) return;
-        const hop = Math.min(38, Math.max(24, Math.abs(dx) * .18));
+        const hop = Math.min(44, Math.max(26, Math.abs(dx) * .2));
+        const at = (progress, lift, scale) => `translate(${dx * (1 - progress)}px, ${dy * (1 - progress) - lift}px) scale(${scale})`;
+        const duration = 950;
         bunny.style.animation = "none";
-        bunnyMotion = bunny.animate([
-          { transform: `translate(${dx}px, ${dy}px) scale(1, 1)`, offset: 0 },
-          { transform: `translate(${dx * .75}px, ${dy * .75 - hop}px) scale(.96, 1.06)`, offset: .2 },
-          { transform: `translate(${dx * .5}px, ${dy * .5}px) scale(1.06, .92)`, offset: .45 },
-          { transform: `translate(${dx * .25}px, ${dy * .25 - hop}px) scale(.96, 1.06)`, offset: .7 },
-          { transform: "translate(0, 0) scale(1.06, .92)", offset: .92 },
-          { transform: "translate(0, 0) scale(1, 1)", offset: 1 }
-        ], { duration: 700, easing: "ease-in-out" });
+        bunnyMotions = [
+          bunny.animate([
+            { transform: at(0, 0, "1, 1"), offset: 0, easing: "ease-out" },
+            { transform: at(0, 0, "1.08, .86"), offset: .1, easing: "cubic-bezier(.2, .7, .4, 1)" },
+            { transform: at(.25, hop, ".94, 1.12"), offset: .24, easing: "cubic-bezier(.6, 0, .8, .4)" },
+            { transform: at(.5, 0, "1.09, .88"), offset: .4, easing: "ease-out" },
+            { transform: at(.5, 0, "1, 1"), offset: .46, easing: "ease-out" },
+            { transform: at(.5, 0, "1.07, .89"), offset: .54, easing: "cubic-bezier(.2, .7, .4, 1)" },
+            { transform: at(.75, hop * .9, ".95, 1.1"), offset: .67, easing: "cubic-bezier(.6, 0, .8, .4)" },
+            { transform: at(1, 0, "1.1, .87"), offset: .82, easing: "ease-out" },
+            { transform: at(1, 0, ".98, 1.03"), offset: .92, easing: "ease-in-out" },
+            { transform: at(1, 0, "1, 1"), offset: 1 }
+          ], { duration })
+        ];
+        bunnyMotions.push(shadow.animate([
+          { transform: `translateX(${dx}px) scale(1)`, opacity: 1, offset: 0 },
+          { transform: `translateX(${dx * .75}px) scale(.72)`, opacity: .55, offset: .24 },
+          { transform: `translateX(${dx * .5}px) scale(1.1)`, opacity: 1, offset: .4 },
+          { transform: `translateX(${dx * .5}px) scale(1)`, opacity: 1, offset: .5 },
+          { transform: `translateX(${dx * .25}px) scale(.74)`, opacity: .55, offset: .67 },
+          { transform: "translateX(0) scale(1.1)", opacity: 1, offset: .82 },
+          { transform: "translateX(0) scale(1)", opacity: 1, offset: 1 }
+        ], { duration }));
+        bunny.querySelectorAll(".ear").forEach((ear) => {
+          const side = ear.classList.contains("left") ? -1 : 1;
+          bunnyMotions.push(ear.animate([
+            { transform: "rotate(0deg)", offset: 0 },
+            { transform: `rotate(${side * 4}deg)`, offset: .1 },
+            { transform: `rotate(${side * 13}deg)`, offset: .22 },
+            { transform: `rotate(${side * -6}deg)`, offset: .34 },
+            { transform: `rotate(${side * 11}deg)`, offset: .42 },
+            { transform: "rotate(0deg)", offset: .52 },
+            { transform: `rotate(${side * 13}deg)`, offset: .66 },
+            { transform: `rotate(${side * -6}deg)`, offset: .78 },
+            { transform: `rotate(${side * 9}deg)`, offset: .86 },
+            { transform: `rotate(${side * -2}deg)`, offset: .94 },
+            { transform: "rotate(0deg)", offset: 1 }
+          ], { duration, easing: "ease-in-out" }));
+        });
         const done = () => { if (bunny.style.animation === "none") bunny.style.animation = ""; };
-        bunnyMotion.onfinish = done;
-        bunnyMotion.oncancel = done;
+        bunnyMotions[0].onfinish = done;
+        bunnyMotions[0].oncancel = done;
       }
 
       function resetBunny() {
-        if (bunnyMotion) bunnyMotion.cancel();
-        bunnyMotion = null;
+        bunnyMotions.forEach((motion) => motion.cancel());
+        bunnyMotions = [];
         bunny.style.animation = "";
-        bunny.classList.remove("digging", "watering", "catching", "nope");
+        bunny.classList.remove("digging", "watering", "catching", "nope", "happy");
+      }
+
+      // Pjuske følger fingeren eller musen med øjne og hoved.
+      function lookAt(x, y) {
+        const rect = bunny.getBoundingClientRect();
+        const reach = Math.max(rect.width * 2.4, 180);
+        const nx = Math.max(-1, Math.min(1, (x - (rect.left + rect.width / 2)) / reach));
+        const ny = Math.max(-1, Math.min(1, (y - (rect.top + rect.height * .42)) / reach));
+        bunny.style.setProperty("--lx", nx.toFixed(2));
+        bunny.style.setProperty("--ly", ny.toFixed(2));
+        bunny.style.setProperty("--ex", (nx * 3.2).toFixed(2));
+        bunny.style.setProperty("--ey", (ny * 2.4).toFixed(2));
       }
 
       function shakeNo() {
@@ -865,7 +1040,7 @@
         const later = (action, delay) => window.setTimeout(action, reduceMotion ? 0 : delay);
         resetBunny();
         flySeed(choice, color);
-        later(() => bunny.classList.add("catching"), 520);
+        later(() => bunny.classList.add("catching", "happy"), 520);
         later(() => {
           bunny.classList.remove("catching");
           bunny.classList.add("digging");
@@ -874,6 +1049,7 @@
         later(() => {
           bunny.classList.remove("digging");
           bunny.classList.add("watering");
+          plot.classList.add("wet");
           message.textContent = "Nu vander Pjuske sin blomst!";
         }, 1580);
         later(() => {
@@ -881,8 +1057,14 @@
           plantFlower(color, index);
           message.textContent = `Se! Den ${color.flower} blomst vokser!`;
         }, 2600);
-        if (index + 1 < ROUNDS) later(() => hopToSpot(index + 1), 3350);
-        if (decoration) later(() => showReward(decoration), 3800);
+        if (index + 1 < ROUNDS) {
+          later(() => hopToSpot(index + 1), 2680);
+          later(() => {
+            const grown = plot.getBoundingClientRect();
+            lookAt(grown.left + grown.width / 2, grown.top);
+          }, 3500);
+        }
+        if (decoration) later(() => showReward(decoration), 3400);
       }
 
       function awardStar() {
@@ -936,7 +1118,7 @@
         message.textContent = `Ja! Pjuske planter en ${color.name} blomst!`;
         readOut(`Ja! Nu planter Pjuske en ${color.name} blomst!`);
         beginPlanting(color, flowerIndex, button, decoration);
-        window.setTimeout(askQuestion, reduceMotion ? 1100 : decoration ? 5150 : 4050);
+        window.setTimeout(askQuestion, reduceMotion ? 1100 : decoration ? 4850 : 4300);
       }
 
       function finishSession() {
@@ -945,7 +1127,7 @@
         $("choices").hidden = true;
         $("roundLabel").textContent = "Haven er fuld af farver!";
         message.textContent = "Pjuske siger tusind tak!";
-        bunny.classList.add("dance");
+        bunny.classList.add("dance", "happy");
         $("finishStars").textContent = "⭐".repeat(sessionStars);
         $("finishText").textContent = `Du hjalp Pjuske med at plante ${sessionStars} blomster. Kom og leg igen!`;
         $("finishScreen").hidden = false;
@@ -1053,6 +1235,17 @@
       if ("ResizeObserver" in window) new ResizeObserver(() => placeBunny(bunnySpot)).observe($("field"));
       window.addEventListener("resize", () => placeBunny(bunnySpot));
       window.addEventListener("load", () => placeBunny(bunnySpot));
+      let lookFrame = 0;
+      const followPointer = (event) => {
+        const { clientX, clientY } = event;
+        if (lookFrame) cancelAnimationFrame(lookFrame);
+        lookFrame = requestAnimationFrame(() => {
+          lookFrame = 0;
+          lookAt(clientX, clientY);
+        });
+      };
+      window.addEventListener("pointermove", followPointer, { passive: true });
+      window.addEventListener("pointerdown", followPointer, { passive: true });
       Topbar.init({ kid: "riyana", controls: [$("settings")] });
       findDanishVoice();
       if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", findDanishVoice);
