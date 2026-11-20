@@ -890,7 +890,7 @@
     </select>
   </div>
 
-  <script src="../topbar.js"></script>
+  <script src="../../topbar.js"></script>
   <script>
     (() => {
       "use strict";
@@ -931,6 +931,8 @@
       let muted = !Topbar.soundOn();
       let voice = null;
       let voiceToken = 0;
+      const clipAudio = new Audio();
+      clipAudio.preload = "auto";
       let unlocked = [];
       let storageFailed = false;
       let rewardTimer = 0;
@@ -1810,7 +1812,7 @@
           button.classList.add("wrong");
           shakeNo();
           message.textContent = `Du valgte ${color.name}. Find den ${target.flower} blomst!`;
-          readOut(`Du valgte ${color.name}. Find den ${target.flower} blomst.`);
+          readOut([`Du valgte ${color.name}.`, `Find den ${target.flower} blomst.`]);
           window.setTimeout(() => {
             button.classList.remove("wrong");
             choices.querySelectorAll("button").forEach((choice) => { choice.disabled = false; });
@@ -1854,6 +1856,9 @@
       function stopVoice() {
         voiceToken += 1;
         if ("speechSynthesis" in window) speechSynthesis.cancel();
+        clipAudio.onended = null;
+        clipAudio.onerror = null;
+        clipAudio.pause();
       }
 
       function voiceUnavailable(token) {
@@ -1863,11 +1868,7 @@
         $("repeat").title = "Oplæsning virker ikke lige nu – prøv igen";
       }
 
-      function readOut(text) {
-        stopVoice();
-        if (muted) return;
-        voiceNote.hidden = true;
-        const token = voiceToken;
+      function speakWithDeviceVoice(text, token) {
         if (!("speechSynthesis" in window)) {
           voiceUnavailable(token);
           return;
@@ -1890,6 +1891,39 @@
         }
       }
 
+      function clipUrl(text) {
+        const name = text.toLowerCase().replace(/æ/g, "ae").replace(/ø/g, "oe").replace(/å/g, "aa")
+          .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        return `lyd/${name}.mp3`;
+      }
+
+      // Afspiller de indtalte lydklip efter hinanden; mangler et klip, læser enhedens stemme resten op
+      function playClips(parts, token) {
+        if (token !== voiceToken || muted || !parts.length) return;
+        let handled = false;
+        const fallback = () => {
+          if (handled) return;
+          handled = true;
+          if (token === voiceToken && !muted) speakWithDeviceVoice(parts.join(" "), token);
+        };
+        clipAudio.onended = () => {
+          if (handled) return;
+          handled = true;
+          playClips(parts.slice(1), token);
+        };
+        clipAudio.onerror = fallback;
+        clipAudio.src = clipUrl(parts[0]);
+        const playing = clipAudio.play();
+        if (playing && typeof playing.catch === "function") playing.catch(fallback);
+      }
+
+      function readOut(text) {
+        stopVoice();
+        if (muted) return;
+        voiceNote.hidden = true;
+        playClips(Array.isArray(text) ? text : [text], voiceToken);
+      }
+
       for (let i = 0; i < ROUNDS; i++) {
         const step = document.createElement("span");
         step.className = "step";
@@ -1909,7 +1943,7 @@
       $("startBtn").addEventListener("click", beginSession);
       $("againBtn").addEventListener("click", beginSession);
       $("repeat").addEventListener("click", () => {
-        if (target) readOut(`Find den ${target.name} blomst.`);
+        if (target) readOut(`Find den ${target.flower} blomst.`);
       });
       paintProgress();
       buildScenery();

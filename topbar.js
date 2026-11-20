@@ -40,7 +40,7 @@
     const inGame = /\/spil\//.test(location.pathname);
     const childPage = /menu\.html$/.test(location.pathname) && location.search;
     if (inGame || childPage) {
-      const front = inGame ? "../menu.html" : "menu.html";
+      const front = inGame ? "../../menu.html" : "menu.html";
       location.replace(new URL(front, location.href).href);
     }
   }
@@ -251,7 +251,7 @@
       <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
         <linearGradient id="tb-gold" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe66d"/><stop offset="1" stop-color="#ffb300"/></linearGradient>
       </defs></svg>
-      <a class="tb-btn tb-home" href="${opts && opts.home ? opts.home : "../menu.html"}?barn=${kid}" aria-label="Alle spil" title="Alle spil">🏠</a>
+      <a class="tb-btn tb-home" href="${opts && opts.home ? opts.home : "../../menu.html"}?barn=${kid}" aria-label="Alle spil" title="Alle spil">🏠</a>
       <div class="tb-stars" role="img" aria-label="Stjerner i alt">${Array.from({ length: 10 }, starSvg).join("")}</div>
       <button class="tb-btn tb-gear" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Indstillinger" title="Indstillinger">⚙️</button>
       <div class="tb-panel" role="dialog" aria-label="Indstillinger" hidden>
