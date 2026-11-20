@@ -1,4 +1,14 @@
-const CACHE = "regnespil-v1.22.0";
+const CACHE = "regnespil-v1.23.0";
+
+// Farvehavens lydklip hentes fra samme replikliste som spillet bruger
+let clipFiles = [];
+try {
+  importScripts("spil/farvehaven/replikker.js");
+  clipFiles = FarvehavenReplikker.allClips().map((text) => `spil/farvehaven/lyd/${FarvehavenReplikker.clipFile(text)}`);
+} catch (error) {
+  console.warn("Kunne ikke læse replikkerne til Farvehaven.", error);
+}
+
 const FILES = [
   "./",
   "index.html",
@@ -15,18 +25,14 @@ const FILES = [
   "spil/dino-broen/dino-broen.html",
   "spil/prinsesse-tal/prinsesse-tal.html",
   "spil/farvehaven/farvehaven.html",
-  ...[
-    "du-valgte-blaa", "du-valgte-brun", "du-valgte-groen", "du-valgte-gul",
-    "du-valgte-lilla", "du-valgte-lyseroed", "du-valgte-orange", "du-valgte-roed",
-    "find-den-blaa-blomst", "find-den-brune-blomst", "find-den-groenne-blomst", "find-den-gule-blomst",
-    "find-den-lilla-blomst", "find-den-lyseroede-blomst", "find-den-orange-blomst", "find-den-roede-blomst",
-    "hvor-er-du-dygtig-tak-for-hjaelpen-siger-pjuske",
-    "ja-nu-planter-pjuske-en-blaa-blomst", "ja-nu-planter-pjuske-en-brun-blomst",
-    "ja-nu-planter-pjuske-en-groen-blomst", "ja-nu-planter-pjuske-en-gul-blomst",
-    "ja-nu-planter-pjuske-en-lilla-blomst", "ja-nu-planter-pjuske-en-lyseroed-blomst",
-    "ja-nu-planter-pjuske-en-orange-blomst", "ja-nu-planter-pjuske-en-roed-blomst"
-  ].map((name) => `spil/farvehaven/lyd/${name}.mp3`)
+  "spil/farvehaven/replikker.js",
+  ...clipFiles
 ];
+
+// Forsiden spørger, hvor mange filer der skal gemmes, så den kan vise offline-status
+self.addEventListener("message", (event) => {
+  if (event.data === "antal" && event.ports[0]) event.ports[0].postMessage(FILES.length);
+});
 
 // Hver fil caches for sig, så én manglende fil ikke vælter hele installationen
 self.addEventListener("install", (event) => {

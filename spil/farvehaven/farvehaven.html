@@ -891,31 +891,33 @@
   </div>
 
   <script src="../../topbar.js"></script>
+  <script src="replikker.js"></script>
   <script>
     (() => {
       "use strict";
 
       const $ = (id) => document.getElementById(id);
+      const R = FarvehavenReplikker;
       const COLORS = [
-        { id: "red", name: "rød", flower: "røde", hex: "#ef5350" },
-        { id: "yellow", name: "gul", flower: "gule", hex: "#ffca28" },
-        { id: "blue", name: "blå", flower: "blå", hex: "#42a5f5" },
-        { id: "green", name: "grøn", flower: "grønne", hex: "#66bb6a" },
-        { id: "orange", name: "orange", flower: "orange", hex: "#fb8c32" },
-        { id: "purple", name: "lilla", flower: "lilla", hex: "#ab75d1" },
-        { id: "brown", name: "brun", flower: "brune", hex: "#a66b42" },
-        { id: "pink", name: "lyserød", flower: "lyserøde", hex: "#f17aa7" }
-      ];
+        { id: "red", hex: "#ef5350" },
+        { id: "yellow", hex: "#ffca28" },
+        { id: "blue", hex: "#42a5f5" },
+        { id: "green", hex: "#66bb6a" },
+        { id: "orange", hex: "#fb8c32" },
+        { id: "purple", hex: "#ab75d1" },
+        { id: "brown", hex: "#a66b42" },
+        { id: "pink", hex: "#f17aa7" }
+      ].map((color) => ({ ...color, ...R.colors[color.id] }));
       const DECORATIONS = [
-        { id: "butterfly", icon: "🦋", name: "en sommerfugl" },
-        { id: "sunflower", icon: "🌻", name: "en solsikke" },
-        { id: "mushroom", icon: "🍄", name: "en lille svamp" },
-        { id: "rainbow", icon: "🌈", name: "en regnbue" },
-        { id: "ladybug", icon: "🐞", name: "en mariehøne" },
-        { id: "tulip", icon: "🌷", name: "en tulipan" },
-        { id: "bee", icon: "🐝", name: "en lille bi" },
-        { id: "flower", icon: "💐", name: "en blomsterbuket" }
-      ];
+        { id: "butterfly", icon: "🦋" },
+        { id: "sunflower", icon: "🌻" },
+        { id: "mushroom", icon: "🍄" },
+        { id: "rainbow", icon: "🌈" },
+        { id: "ladybug", icon: "🐞" },
+        { id: "tulip", icon: "🌷" },
+        { id: "bee", icon: "🐝" },
+        { id: "flower", icon: "💐" }
+      ].map((item) => ({ ...item, name: R.decorations[item.id] }));
       const ROUNDS = 5;
       const STAR_KEY = "farvehave-stars";
       const DECOR_KEY = "farvehave-decor";
@@ -926,6 +928,8 @@
       let sessionStars = 0;
       let round = 0;
       let target = null;
+      let currentAsk = "";
+      const lastLine = {};
       let lastTarget = "";
       let busy = false;
       let muted = !Topbar.soundOn();
@@ -1587,8 +1591,8 @@
         paintProgress();
         chooseTarget();
         renderChoices();
-        message.textContent = `Find den ${target.flower} blomst!`;
-        readOut(`Find den ${target.flower} blomst.`);
+        currentAsk = pickLine("ask", R.lines.ask, target);
+        readOut(currentAsk);
       }
 
       function beginSession() {
@@ -1755,18 +1759,15 @@
         later(() => {
           bunny.classList.remove("catching");
           bunny.classList.add("digging");
-          message.textContent = `Pjuske graver et lille hul til den ${color.flower} blomst.`;
         }, 700);
         later(() => {
           bunny.classList.remove("digging");
           bunny.classList.add("watering");
           plot.classList.add("wet");
-          message.textContent = "Nu vander Pjuske sin blomst!";
         }, 1580);
         later(() => {
           bunny.classList.remove("watering");
           plantFlower(color, index);
-          message.textContent = `Se! Den ${color.flower} blomst vokser!`;
         }, 2600);
         if (index + 1 < ROUNDS) {
           later(() => hopToSpot(index + 1), 2680);
@@ -1811,8 +1812,8 @@
         if (color.id !== target.id) {
           button.classList.add("wrong");
           shakeNo();
-          message.textContent = `Du valgte ${color.name}. Find den ${target.flower} blomst!`;
-          readOut([`Du valgte ${color.name}.`, `Find den ${target.flower} blomst.`]);
+          currentAsk = pickLine("ask", R.lines.ask, target);
+          readOut([pickLine("wrong", R.lines.wrong, color), currentAsk]);
           window.setTimeout(() => {
             button.classList.remove("wrong");
             choices.querySelectorAll("button").forEach((choice) => { choice.disabled = false; });
@@ -1827,10 +1828,14 @@
         const decoration = awardStar();
         round += 1;
         paintProgress();
-        message.textContent = `Ja! Pjuske planter en ${color.name} blomst!`;
-        readOut(`Ja! Nu planter Pjuske en ${color.name} blomst!`);
+        const lines = [pickLine("praise", R.lines.praise), pickLine("plant", R.lines.plant, color)];
+        if (decoration) lines.push(pickLine("reward", R.lines.reward, decoration.name));
+        const spoken = readOut(lines);
         beginPlanting(color, flowerIndex, button, decoration);
-        window.setTimeout(askQuestion, reduceMotion ? 1100 : decoration ? 4850 : 4300);
+        const animationTime = reduceMotion ? 1100 : decoration ? 4850 : 4300;
+        // Næste spørgsmål kommer først, når Pjuske er færdig med at tale
+        Promise.all([spoken, new Promise((resolve) => window.setTimeout(resolve, animationTime))])
+          .then(() => window.setTimeout(askQuestion, 400));
       }
 
       function finishSession() {
@@ -1838,12 +1843,11 @@
         resetBunny();
         $("choices").hidden = true;
         $("roundLabel").textContent = "Haven er fuld af farver!";
-        message.textContent = "Pjuske siger tusind tak!";
         bunny.classList.add("dance", "happy");
         $("finishStars").textContent = "⭐".repeat(sessionStars);
         $("finishText").textContent = `Du hjalp Pjuske med at plante ${sessionStars} blomster. Kom og leg igen!`;
         $("finishScreen").hidden = false;
-        readOut("Hvor er du dygtig! Tak for hjælpen, siger Pjuske.");
+        readOut(pickLine("finish", R.lines.finish));
       }
 
       function findDanishVoice() {
@@ -1853,12 +1857,22 @@
         voice = danish.find((item) => item.localService) || danish[0] || null;
       }
 
+      let finishSpeech = null;
+
+      function endSpeech(completed) {
+        if (!finishSpeech) return;
+        const done = finishSpeech;
+        finishSpeech = null;
+        done(completed);
+      }
+
       function stopVoice() {
         voiceToken += 1;
         if ("speechSynthesis" in window) speechSynthesis.cancel();
         clipAudio.onended = null;
         clipAudio.onerror = null;
         clipAudio.pause();
+        endSpeech(false);
       }
 
       function voiceUnavailable(token) {
@@ -1866,6 +1880,7 @@
         console.warn("Dansk oplæsning kunne ikke afspilles.");
         voiceNote.hidden = false;
         $("repeat").title = "Oplæsning virker ikke lige nu – prøv igen";
+        endSpeech(false);
       }
 
       function speakWithDeviceVoice(text, token) {
@@ -1880,6 +1895,7 @@
           utterance.lang = "da-DK";
           if (voice) utterance.voice = voice;
           utterance.rate = .88;
+          utterance.onend = () => { if (token === voiceToken) endSpeech(true); };
           utterance.onerror = (event) => {
             if (event.error === "canceled" || event.error === "interrupted") return;
             voiceUnavailable(token);
@@ -1891,37 +1907,60 @@
         }
       }
 
-      function clipUrl(text) {
-        const name = text.toLowerCase().replace(/æ/g, "ae").replace(/ø/g, "oe").replace(/å/g, "aa")
-          .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-        return `lyd/${name}.mp3`;
+      // Tilfældig replik fra en gruppe i replikker.js, aldrig den samme to gange i træk
+      function pickLine(key, pool, arg) {
+        let index;
+        do {
+          index = Math.floor(Math.random() * pool.length);
+        } while (pool.length > 1 && index === lastLine[key]);
+        lastLine[key] = index;
+        const item = pool[index];
+        return typeof item === "function" ? item(arg) : item;
       }
 
-      // Afspiller de indtalte lydklip efter hinanden; mangler et klip, læser enhedens stemme resten op
-      function playClips(parts, token) {
-        if (token !== voiceToken || muted || !parts.length) return;
+      // Afspiller de indtalte lydklip efter hinanden og viser den sætning, der siges. Mangler et klip, læser enhedens stemme resten op.
+      function playClips(parts, index, token) {
+        if (token !== voiceToken) return;
+        if (index >= parts.length) {
+          endSpeech(true);
+          return;
+        }
+        message.textContent = parts[index];
         let handled = false;
         const fallback = () => {
           if (handled) return;
           handled = true;
-          if (token === voiceToken && !muted) speakWithDeviceVoice(parts.join(" "), token);
+          if (token !== voiceToken || muted) return;
+          const rest = parts.slice(index).join(" ");
+          message.textContent = rest;
+          speakWithDeviceVoice(rest, token);
         };
         clipAudio.onended = () => {
           if (handled) return;
           handled = true;
-          playClips(parts.slice(1), token);
+          playClips(parts, index + 1, token);
         };
         clipAudio.onerror = fallback;
-        clipAudio.src = clipUrl(parts[0]);
+        clipAudio.src = `lyd/${R.clipFile(parts[index])}`;
         const playing = clipAudio.play();
         if (playing && typeof playing.catch === "function") playing.catch(fallback);
       }
 
+      // Viser teksten og siger den højt. Svaret er true, når alt er sagt til ende.
       function readOut(text) {
         stopVoice();
-        if (muted) return;
+        const parts = Array.isArray(text) ? text : [text];
+        if (muted) {
+          message.textContent = parts.join(" ");
+          return Promise.resolve(false);
+        }
         voiceNote.hidden = true;
-        playClips(Array.isArray(text) ? text : [text], voiceToken);
+        const token = voiceToken;
+        return new Promise((resolve) => {
+          finishSpeech = resolve;
+          window.setTimeout(() => { if (token === voiceToken) endSpeech(false); }, 15000);
+          playClips(parts, 0, token);
+        });
       }
 
       for (let i = 0; i < ROUNDS; i++) {
@@ -1943,7 +1982,7 @@
       $("startBtn").addEventListener("click", beginSession);
       $("againBtn").addEventListener("click", beginSession);
       $("repeat").addEventListener("click", () => {
-        if (target) readOut(`Find den ${target.flower} blomst.`);
+        if (target && !busy) readOut(currentAsk);
       });
       paintProgress();
       buildScenery();
