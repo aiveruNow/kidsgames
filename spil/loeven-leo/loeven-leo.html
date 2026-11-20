@@ -157,27 +157,20 @@
     .scene-card.dragging .leo-ring { opacity: .95; }
     .scene-card.over .leo-ring { stroke: #ffd54f; stroke-width: 8; }
 
-    .egg-body {
+    .trail-friend {
+      opacity: .14;
       transform-box: fill-box;
       transform-origin: 50% 100%;
-      filter: drop-shadow(0 0 calc(var(--glow, 0) * 16px) #fff1a6);
+      transition: opacity .45s, transform .45s;
+      filter: grayscale(1) brightness(.35);
     }
 
-    .egg-body.wobble { animation: wobble 1.4s ease-in-out infinite; }
-    .egg-body.jiggle { animation: jiggle .6s ease-in-out; }
-    .egg-body.shake-hard { animation: shake-hard .8s ease-in-out; }
-    .egg-body.drop { animation: egg-drop .9s cubic-bezier(.3, 1.4, .5, 1); }
-    .crack { fill: none; stroke-linecap: butt; stroke-linejoin: round; stroke-dasharray: 100 100; stroke-dashoffset: 100; transition: stroke-dashoffset .7s ease-out; }
-    .branch { opacity: 0; transition: opacity .4s; }
-    .branch.on { opacity: 1; }
-    .chick { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
-    .burst { opacity: 0; transform-box: fill-box; transform-origin: 50% 50%; }
-    .hatched .shell-top { animation: shell-fly 1s ease-in forwards; }
-    .hatched .shell-bot { transform-box: fill-box; transform-origin: 50% 100%; animation: shell-tilt .6s .2s ease-out forwards; }
-    .hatched .crack, .hatched .branch { opacity: 0; }
-    .hatched .chick { animation: chick-pop 1.1s .25s cubic-bezier(.3, 1.6, .5, 1) forwards; }
-    .hatched .burst { animation: burst 1s ease-out forwards; }
-    .shell-top, .shell-bot { transform-box: fill-box; transform-origin: 50% 50%; }
+    .trail-friend.peek { opacity: .5; filter: none; transform: translateY(-5px); }
+    .trail-goal.found .trail-friend { opacity: 1; filter: none; transform: translateY(-18px) scale(1.18); }
+    .trail-leaves { transform-box: fill-box; transform-origin: 50% 100%; transition: transform .75s, opacity .75s; }
+    .trail-goal.found .trail-leaves { opacity: .35; transform: translateY(-26px) rotate(-12deg) scale(.8); }
+    .trail-glow { opacity: .12; transition: opacity .5s; }
+    .trail-goal.found .trail-glow { opacity: .9; }
 
     .path {
       display: flex;
@@ -192,17 +185,21 @@
     .dot {
       flex: 1;
       display: grid;
-      height: clamp(22px, 5.4vw, 30px);
+      min-width: 22px;
+      height: clamp(28px, 6vw, 38px);
       place-items: center;
       border-radius: 50%;
-      background: #dfe7dd;
-      font-size: clamp(.7rem, 2.6vw, .95rem);
-      filter: grayscale(1);
-      opacity: .6;
-      transition: background .3s, transform .3s;
+      background: #e8f0df;
+      font-size: clamp(.8rem, 3vw, 1.1rem);
+      opacity: .72;
+      transition: background .3s, transform .3s, box-shadow .3s, opacity .3s;
     }
 
-    .dot.done { background: #ffd54f; filter: none; opacity: 1; transform: scale(1.12); }
+    .dot.done { background: #ffd54f; opacity: 1; transform: scale(1.12); box-shadow: 0 0 0 3px #ffffffb8, 0 3px 9px #8a5a0044; }
+    .dot.current { animation: trail-pulse 1.15s ease-in-out infinite; opacity: 1; }
+    .scene-step { opacity: .14; transition: opacity .35s, fill .35s, transform .35s; }
+    .scene-step.done { opacity: .96; fill: #8a5a2a; }
+    .scene-step.current { animation: scene-step-pulse 1.15s ease-in-out infinite; fill: #f3b935; }
 
     /* ---------- Ord og valg ---------- */
     .wordcard {
@@ -441,14 +438,8 @@
     @keyframes dash { to { stroke-dashoffset: -20; } }
     @keyframes shake { 20%, 60% { transform: translateX(-9px); } 40%, 80% { transform: translateX(9px); } }
     @keyframes nudge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-    @keyframes wobble { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
-    @keyframes jiggle { 0%, 100% { transform: rotate(0) scale(1); } 15% { transform: rotate(-9deg) scale(1.05); } 35% { transform: rotate(8deg) scale(1.06); } 55% { transform: rotate(-5deg); } 75% { transform: rotate(3deg); } }
-    @keyframes shake-hard { 0%, 100% { transform: rotate(0) scale(1); } 10%, 50%, 90% { transform: rotate(-12deg) scale(1.08); } 30%, 70% { transform: rotate(12deg) scale(1.1); } }
-    @keyframes egg-drop { 0% { transform: translateY(-190px) scale(.8); opacity: 0; } 60% { transform: translateY(8px) scale(1.05, .92); opacity: 1; } 80% { transform: translateY(-6px) scale(.98, 1.03); } 100% { transform: translateY(0) scale(1); } }
-    @keyframes shell-fly { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 100% { transform: translate(-40px, -130px) rotate(-55deg); opacity: 0; } }
-    @keyframes shell-tilt { to { transform: rotate(7deg) scale(1.03); } }
-    @keyframes chick-pop { 0% { opacity: 0; transform: translateY(40px) scale(.1); } 50% { opacity: 1; transform: translateY(-48px) scale(1.4); } 100% { opacity: 1; transform: translateY(-24px) scale(1.15); } }
-    @keyframes burst { 0% { opacity: .95; transform: scale(.1); } 100% { opacity: 0; transform: scale(5); } }
+    @keyframes trail-pulse { 50% { transform: scale(1.2); box-shadow: 0 0 0 4px #ffffffb8, 0 0 16px #f4ba36; } }
+    @keyframes scene-step-pulse { 50% { opacity: .55; filter: drop-shadow(0 0 3px #f4ba36); } }
     @keyframes friend-in { 0% { transform: scale(0) rotate(-40deg); } 100% { transform: scale(1) rotate(0); } }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     @keyframes hop { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-14px) scale(1.2); } 60% { transform: translateY(0) scale(.95); } }
@@ -466,11 +457,11 @@
       </div>
     </div>
 
-    <div class="sizes" role="group" aria-label="Antal bogstaver">
-      <span>Bogstaver:</span>
-      <button class="size" type="button" data-size="3">3<small></small></button>
-      <button class="size" type="button" data-size="4">4<small></small></button>
-      <button class="size" type="button" data-size="5">5<small></small></button>
+    <div class="sizes" role="group" aria-label="Ordniveau">
+      <span>Ord:</span>
+      <button class="size" type="button" data-size="3">Let<small>lydrette ord</small></button>
+      <button class="size" type="button" data-size="4">Mellem<small>4 · blandede ord</small></button>
+      <button class="size" type="button" data-size="5">Svær<small>5 · blandede ord</small></button>
     </div>
 
     <div class="play">
@@ -487,22 +478,6 @@
             <stop offset="0" stop-color="#86d96f"/>
             <stop offset="1" stop-color="#4aa84f"/>
           </linearGradient>
-          <radialGradient id="eggGrad" cx=".35" cy=".3" r=".85">
-            <stop offset="0" style="stop-color: var(--egg-hi, #fff)"/>
-            <stop offset=".55" style="stop-color: var(--egg, #f2b84b)"/>
-            <stop offset="1" style="stop-color: var(--egg-lo, #b8761c)"/>
-          </radialGradient>
-          <clipPath id="eggClip"><path d="M0-62C34-62 52-18 52 14 52 48 30 64 0 64-30 64-52 48-52 14-52-18-34-62 0-62Z"/></clipPath>
-          <clipPath id="eggTop"><path d="M-80-80H80V4L56 4 40 14 24 0 8 16-8-2-24 14-40-4-56 8-80 8Z"/></clipPath>
-          <clipPath id="eggBot"><path d="M-80 6-56 6-40-6-24 12-8-4 8 14 24-2 40 12 56 2 80 2V100H-80Z"/></clipPath>
-          <g id="eggArt">
-            <path d="M0-62C34-62 52-18 52 14 52 48 30 64 0 64-30 64-52 48-52 14-52-18-34-62 0-62Z" fill="url(#eggGrad)" stroke="var(--egg-lo, #b8761c)" stroke-width="3"/>
-            <g style="fill: var(--egg-lo, #b8761c)" opacity=".38">
-              <circle cx="-22" cy="-24" r="8"/><circle cx="18" cy="-34" r="6"/><circle cx="30" cy="-4" r="9"/>
-              <circle cx="-30" cy="22" r="7"/><circle cx="6" cy="40" r="9"/><circle cx="-6" cy="-2" r="5"/>
-            </g>
-            <ellipse cx="-20" cy="-30" rx="9" ry="18" fill="#fff" opacity=".45" transform="rotate(18 -20 -30)"/>
-          </g>
           <g id="leaf">
             <path d="M0 0C28-34 84-46 128-18C98 10 40 22 0 0Z"/>
             <path d="M6 0C40-12 80-18 118-17" fill="none" stroke="#ffffff55" stroke-width="3" stroke-linecap="round"/>
@@ -540,30 +515,20 @@
 
         <g id="friends" font-size="40" text-anchor="middle"></g>
 
-        <ellipse cx="500" cy="276" rx="74" ry="17" fill="#7a4c1f"/>
-        <g transform="translate(500 214)">
-          <g class="egg" id="egg">
-            <g class="egg-body" id="eggBody">
-              <g class="shell-bot"><g clip-path="url(#eggBot)"><use href="#eggArt"/></g></g>
-              <text class="chick" id="chick" x="0" y="36" font-size="66" text-anchor="middle">🦒</text>
-              <g class="shell-top"><g clip-path="url(#eggTop)"><use href="#eggArt"/></g></g>
-              <g clip-path="url(#eggClip)">
-              <path class="crack" id="crackDark" pathLength="100" d="M-60 8-56 8-40-4-24 14-8-2 8 16 24 0 40 14 56 4 60 4" stroke="#4a2c14" stroke-width="4"/>
-              <path class="crack" id="crackLight" pathLength="100" d="M-60 8-56 8-40-4-24 14-8-2 8 16 24 0 40 14 56 4 60 4" stroke="#fff6bd" stroke-width="1.6"/>
-              <g stroke="#4a2c14" stroke-width="3" stroke-linecap="round" fill="none">
-                <path class="branch" id="br1" d="M-24 14-30 30-24 42"/>
-                <path class="branch" id="br2" d="M8-2 14-24 8-40"/>
-                <path class="branch" id="br3" d="M24 0 36-14 34-30M-40-4-44-20"/>
-              </g>
-              </g>
-            </g>
+        <g id="sceneTrail" aria-hidden="true"></g>
+        <g class="trail-goal" id="trailGoal" transform="translate(500 220)">
+          <ellipse cx="0" cy="55" rx="78" ry="16" fill="#426d35" opacity=".35"/>
+          <circle class="trail-glow" id="trailGlow" cx="0" cy="2" r="58" fill="#fff2a3" filter="blur(8px)"/>
+          <text class="trail-friend" id="trailFriend" x="0" y="30" font-size="70" text-anchor="middle">🐘</text>
+          <g class="trail-leaves">
+            <path d="M-68 38Q-92 4-64-20q28 4 30 35 13-54 44-50 24 32-8 67 45-42 68-15 0 36-49 49h-96Z" fill="#28794b" stroke="#1b6039" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M-38 49q-18-38 8-65 19 26 6 62M10 48q-7-48 21-69 15 34-7 69M-66 37q-8-37-41-42 1 36 41 52" fill="#51ae62" stroke="#28794b" stroke-width="3" stroke-linejoin="round"/>
+            <circle cx="-32" cy="8" r="5" fill="#9bde71"/><circle cx="42" cy="22" r="5" fill="#9bde71"/>
           </g>
-          <circle class="burst" cx="0" cy="0" r="46" fill="#fff7c4"/>
+          <text x="0" y="-62" font-size="28" text-anchor="middle" opacity=".8">✨</text>
         </g>
-        <path d="M426 270Q500 312 574 270Q500 292 426 270Z" fill="#a8703a"/>
-        <g stroke="#6e4116" stroke-width="3" stroke-linecap="round" fill="none"><path d="M436 274q26 12 52 14M470 282q30 6 66-4M520 288q30-2 50-14M444 270q40 18 100 14"/></g>
 
-        <g transform="translate(26 92) scale(.96)">
+        <g id="leoSpot" transform="translate(26 92) scale(.96)">
           <g class="leo" id="leo">
             <ellipse cx="100" cy="206" rx="64" ry="9" fill="#17233c" opacity=".16"/>
             <g class="tail"><path d="M150 180Q186 176 182 140" stroke="#d9a038" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="182" cy="136" r="11" fill="#b8651b"/></g>
@@ -616,7 +581,7 @@
           <circle class="firefly" cx="260" cy="60" r="2.5" style="--dx:26px;--dy:16px;animation-delay:-5s"/>
         </g>
       </svg>
-      <div class="bubble" id="bubble" aria-live="polite">Hjælp mig med at læse!</div>
+      <div class="bubble" id="bubble" aria-live="polite">Læs et ord, og følg sporene med Ari!</div>
     </section>
 
     <div class="path" id="path" aria-label="Fremskridt"></div>
@@ -633,22 +598,22 @@
       <section class="choices" id="choices" aria-label="Vælg det rigtige billede"></section>
       <div class="ghost" id="ghost" aria-hidden="true">👆</div>
     </div>
-    <p class="drag-note">Træk billedet hen til Ari 🦁</p>
+    <p class="drag-note">Læs ordet, og træk det rigtige billede hen til Ari!</p>
     </div>
     </div>
   </main>
 
-  <div class="overlay" id="hatch" hidden>
-    <div class="friend-card" role="dialog" aria-labelledby="hatchRibbon">
-      <div class="ribbon" id="hatchRibbon">Ny ven!</div>
-      <div class="friend-emoji" id="hatchEmoji"></div>
-      <div class="letters mini" id="hatchName"></div>
-      <p id="hatchInfo"></p>
+  <div class="overlay" id="discovery" hidden>
+    <div class="friend-card" role="dialog" aria-labelledby="discoveryRibbon">
+      <div class="ribbon" id="discoveryRibbon">Ny ven!</div>
+      <div class="friend-emoji" id="discoveryEmoji"></div>
+      <div class="letters mini" id="discoveryName"></div>
+      <p id="discoveryInfo"></p>
       <p class="king" id="kingNote" hidden>👑 Ari er blevet Junglens Konge!</p>
-      <p>+3 ⭐</p>
+      <p>+3 ⭐ · I fulgte alle fodsporene!</p>
       <div class="btn-row">
-        <button class="next" id="hatchBook" type="button">📖 Junglebogen</button>
-        <button class="next primary" id="hatchNext" type="button">Nyt æg ▶</button>
+        <button class="next" id="discoveryBook" type="button">📖 Junglebogen</button>
+        <button class="next primary" id="discoveryNext" type="button">Følg et nyt spor ▶</button>
       </div>
     </div>
   </div>
@@ -665,12 +630,10 @@
   <script>
     const WORD_SETS = {
       3: [
-        ["SOL", "☀️"], ["BIL", "🚗"], ["HUS", "🏠"], ["MUS", "🐭"], ["SKO", "👟"], ["TOG", "🚆"], ["BOG", "📖"],
-        ["KAT", "🐱"], ["HAT", "🎩"], ["ABE", "🐵"], ["BÅD", "⛵"], ["HAJ", "🦈"], ["ØRE", "👂"], ["SKY", "☁️"],
-        ["TRÆ", "🌳"], ["BUS", "🚌"], ["FOD", "🦶"], ["ULV", "🐺"], ["ØJE", "👁️"], ["ILD", "🔥"], ["FLY", "✈️"],
-        ["DUE", "🕊️"], ["BRO", "🌉"], ["AND", "🦆"], ["RIS", "🍚"], ["FÅR", "🐑"], ["GED", "🐐"], ["RÆV", "🦊"],
-        ["BAD", "🛁"], ["SNE", "❄️"], ["ØRN", "🦅"], ["HAV", "🌊"], ["SKE", "🥄"], ["OST", "🧀"], ["LYS", "🕯️"],
-        ["NAT", "🌃"], ["VEJ", "🛣️"], ["DØR", "🚪"], ["LÅS", "🔒"], ["LYN", "⚡"]
+        // Begynderord: ét bogstav pr. lyd, uden stumme bogstaver eller konsonantgrupper.
+        ["SOL", "☀️"], ["KAT", "🐱"], ["HUS", "🏠"], ["MUS", "🐭"], ["BUS", "🚌"],
+        ["BIL", "🚗"], ["RIS", "🍚"], ["LAM", "🐑"], ["KAM", "🪮"], ["HAT", "🎩"],
+        ["LIM", "🧴"], ["TAL", "🔢"], ["PIL", "➡️"]
       ],
       4: [
         ["HUND", "🐶"], ["KAGE", "🍰"], ["BOLD", "⚽"], ["MÅNE", "🌙"], ["FISK", "🐟"],
@@ -730,16 +693,20 @@
     const load = (key, fallback) => { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; } };
     const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* ingen lagring */ } };
 
-    let size = [3, 4, 5].includes(load("leo-size", 4)) ? load("leo-size", 4) : 4;
+    const phonicsDefaultApplied = load("leo-phonics-default-v1", false);
+    let size = phonicsDefaultApplied && [3, 4, 5].includes(load("leo-size", 3)) ? load("leo-size", 3) : 3;
+    if (!phonicsDefaultApplied) {
+      save("leo-size", 3);
+      save("leo-phonics-default-v1", true);
+    }
     let WORDS = WORD_SETS[size];
     let stars = load("leo-stars", 0);
     let friends = load("leo-friends", {});
     let order = load("leo-order", []);
-    let eggs = load("leo-eggs", { 3: 0, 4: 0, 5: 0 });
     let misses = load("leo-misses", {});
     let delivered = load("leo-delivered", 0);
-    let progress = Math.min(load("leo-progress", 0), GOAL - 1);
-    let eggFriendId = load("leo-egg", "");
+    let progress = Math.max(0, Math.min(Number(load("leo-progress", 0)) || 0, GOAL - 1));
+    let trailFriendId = load("leo-trail-friend", load("leo-egg", ""));
     let muted = !Topbar.soundOn();
     let streak = 0;
     let target = null;
@@ -793,7 +760,6 @@
     const chime = () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .09, .28));
     const oops = () => { tone(330, 0, .2, "sine", .12); tone(262, .15, .3, "sine", .12); };
     const nam = () => { tone(520, 0, .09, "sine", .22); tone(330, .08, .12, "sine", .2); };
-    const crackSound = () => { tone(180, 0, .05, "square", .1); tone(120, .05, .06, "square", .08); };
     const fanfare = () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, i * .11, .35, "triangle", .18));
 
     function roarSound(big) {
@@ -931,42 +897,28 @@
       el.classList.add("pop");
     }
 
-    function mix(hex, other, t) {
-      const a = parseInt(hex.slice(1), 16);
-      const b = parseInt(other.slice(1), 16);
-      const ch = shift => Math.round(((a >> shift) & 255) * (1 - t) + ((b >> shift) & 255) * t);
-      return `rgb(${ch(16)}, ${ch(8)}, ${ch(0)})`;
-    }
-
-    function setEggColor() {
-      const f = friendOf(eggFriendId) || FRIENDS[0];
-      scene.style.setProperty("--egg", f.c);
-      scene.style.setProperty("--egg-hi", mix(f.c, "#ffffff", .65));
-      scene.style.setProperty("--egg-lo", mix(f.c, "#000000", .35));
-      $("chick").textContent = f.e;
-    }
-
-    function pickEggFriend() {
+    function pickTrailFriend() {
       const fresh = FRIENDS.filter(f => !friends[f.id]);
-      eggFriendId = pick(fresh.length ? fresh : FRIENDS).id;
-      save("leo-egg", eggFriendId);
+      trailFriendId = pick(fresh.length ? fresh : FRIENDS).id;
+      save("leo-trail-friend", trailFriendId);
+      $("trailFriend").textContent = friendOf(trailFriendId).e;
     }
 
-    function setEgg(p, animate) {
-      const frac = p / GOAL;
-      for (const id of ["crackDark", "crackLight"]) $(id).style.strokeDashoffset = 100 * (1 - frac);
-      $("br1").classList.toggle("on", p >= 3);
-      $("br2").classList.toggle("on", p >= 6);
-      $("br3").classList.toggle("on", p >= 8);
-      scene.style.setProperty("--glow", frac);
-      const body = $("eggBody");
-      body.classList.toggle("wobble", p >= 6);
-      if (animate && p > 0) {
-        crackSound();
-        body.classList.remove("jiggle");
-        void body.getBoundingClientRect();
-        body.classList.add("jiggle");
-      }
+    function moveLeoAlongTrail(p) {
+      const x = 26 + Math.min(p, GOAL) / GOAL * 278;
+      $("leoSpot").setAttribute("transform", `translate(${x} 92) scale(.96)`);
+    }
+
+    function setTrailProgress(p) {
+      const ratio = p / GOAL;
+      $("trailFriend").classList.toggle("peek", p >= 4 && p < GOAL);
+      $("trailGoal").classList.toggle("found", p >= GOAL);
+      $("trailGlow").style.opacity = String(p >= GOAL ? .9 : .12 + ratio * .62);
+      moveLeoAlongTrail(p);
+      [...$("sceneTrail").children].forEach((step, i) => {
+        step.classList.toggle("done", i < p);
+        step.classList.toggle("current", i === p && p < GOAL);
+      });
     }
 
     function renderFriends() {
@@ -1005,24 +957,49 @@
     function buildPath() {
       const path = $("path");
       path.replaceChildren();
+      const sceneTrail = $("sceneTrail");
+      sceneTrail.replaceChildren();
       for (let i = 0; i < GOAL; i++) {
         const dot = document.createElement("span");
-        dot.className = "dot";
-        dot.textContent = i === GOAL - 1 ? "🐣" : "🐾";
+        dot.className = `dot${i === progress ? " current" : ""}`;
+        dot.textContent = "🐾";
         path.append(dot);
+
+        const x = 210 + i * 29;
+        const y = i % 2 ? 245 : 263;
+        const step = document.createElementNS(NS, "g");
+        step.classList.add("scene-step");
+        step.setAttribute("transform", `translate(${x} ${y}) rotate(${i % 2 ? 22 : -22})`);
+        const pad = document.createElementNS(NS, "ellipse");
+        pad.setAttribute("cx", "0");
+        pad.setAttribute("cy", "2");
+        pad.setAttribute("rx", "5");
+        pad.setAttribute("ry", "7");
+        step.append(pad);
+        for (const [tx, ty] of [[-5, -7], [0, -10], [5, -7]]) {
+          const toe = document.createElementNS(NS, "circle");
+          toe.setAttribute("cx", String(tx));
+          toe.setAttribute("cy", String(ty));
+          toe.setAttribute("r", "2.5");
+          step.append(toe);
+        }
+        sceneTrail.append(step);
       }
     }
 
     function updatePath() {
-      [...$("path").children].forEach((dot, i) => dot.classList.toggle("done", i < progress));
-      $("path").setAttribute("aria-label", `${progress} af ${GOAL} ord`);
+      [...$("path").children].forEach((dot, i) => {
+        dot.classList.toggle("done", i < progress);
+        dot.classList.toggle("current", i === progress && progress < GOAL);
+      });
+      $("path").setAttribute("aria-label", `${progress} af ${GOAL} ord, følg fodsporene`);
+      setTrailProgress(progress);
     }
 
     function updateStats() {
       $("friendCount").textContent = `${distinct()}/${FRIENDS.length}`;
       for (const btn of document.querySelectorAll(".size")) {
         const n = Number(btn.dataset.size);
-        btn.querySelector("small").textContent = eggs[n] ? `🥚 ${eggs[n]}` : "\u00a0";
         btn.setAttribute("aria-pressed", n === size);
       }
     }
@@ -1288,7 +1265,6 @@
       progress++;
       save("leo-progress", progress);
       updatePath();
-      setEgg(progress, true);
       react("jump", 700);
       chime();
       $("letters").classList.add("all");
@@ -1325,7 +1301,7 @@
       if (progress >= GOAL) {
         await say(word);
         await delay(300);
-        if (id === runId) await hatch();
+        if (id === runId) await discoverFriend();
         return;
       }
       await Promise.all([say(word), delay(1700)]);
@@ -1348,41 +1324,31 @@
       locked = false;
     }
 
-    // ---------- Æg og venner ----------
-    async function hatch() {
+    // ---------- Spor og venner ----------
+    async function discoverFriend() {
       locked = true;
-      const friend = friendOf(eggFriendId) || FRIENDS[0];
+      const friend = friendOf(trailFriendId) || FRIENDS[0];
       const before = distinct();
       const isNew = !friends[friend.id];
       friends[friend.id] = (friends[friend.id] || 0) + 1;
       if (isNew) order.push(friend.id);
-      eggs[size] = (eggs[size] || 0) + 1;
       stars += 3;
       save("leo-friends", friends);
       save("leo-order", order);
-      save("leo-eggs", eggs);
       save("leo-stars", stars);
       save("leo-progress", 0);
       const king = before < KING && distinct() >= KING;
 
-      bubble("Ægget klækker!");
-      const body = $("eggBody");
-      body.classList.remove("wobble", "jiggle");
-      void body.getBoundingClientRect();
-      body.classList.add("shake-hard");
-      crackSound();
-      await delay(850);
-      body.classList.remove("shake-hard");
-      $("egg").classList.add("hatched");
+      bubble("Vi fandt en ven!");
       fanfare();
       confetti(60);
       leoRoar(false);
-      await delay(1900);
+      await delay(900);
 
-      $("hatchEmoji").textContent = friend.e;
-      $("hatchRibbon").textContent = friend.rare ? "✨ Sjælden ven!" : isNew ? "Ny ven!" : "Din ven kom igen!";
-      $("hatchRibbon").classList.toggle("rare", Boolean(friend.rare));
-      const name = $("hatchName");
+      $("discoveryEmoji").textContent = friend.e;
+      $("discoveryRibbon").textContent = friend.rare ? "✨ Sjælden ven!" : isNew ? "Ny ven!" : "Din ven kom igen!";
+      $("discoveryRibbon").classList.toggle("rare", Boolean(friend.rare));
+      const name = $("discoveryName");
       name.style.setProperty("--n", friend.name.length);
       name.replaceChildren(...[...friend.name].map((ch, i) => {
         const tile = document.createElement("div");
@@ -1391,33 +1357,26 @@
         tile.textContent = ch;
         return tile;
       }));
-      $("hatchInfo").textContent = isNew ? `Ven nr. ${distinct()} af ${FRIENDS.length}` : `Nu har du ${friends[friend.id]} af dem!`;
+      $("discoveryInfo").textContent = isNew ? `Ven nr. ${distinct()} af ${FRIENDS.length}` : `Nu har du ${friends[friend.id]} af dem!`;
       $("kingNote").hidden = !king;
-      $("hatch").hidden = false;
+      $("discovery").hidden = false;
       updateStats();
       Topbar.refreshStars(true);
       say(friend.name);
       if (king) setTimeout(() => leoRoar(true), 1200);
-      $("hatch").dataset.friend = friend.id;
+      $("discovery").dataset.friend = friend.id;
     }
 
-    function afterHatch(openBook) {
-      const id = $("hatch").dataset.friend;
-      $("hatch").hidden = true;
+    function afterDiscovery(openBook) {
+      const id = $("discovery").dataset.friend;
+      $("discovery").hidden = true;
       progress = 0;
-      pickEggFriend();
-      $("egg").classList.remove("hatched");
-      setEggColor();
-      setEgg(0, false);
-      const body = $("eggBody");
-      body.classList.remove("drop");
-      void body.getBoundingClientRect();
-      body.classList.add("drop");
+      pickTrailFriend();
       updatePath();
       renderFriends();
       updateLeo();
       updateStats();
-      bubble("Nyt æg! Hvem mon er i det?");
+      bubble("Følg de nye spor, Ari!");
       newWord();
       if (openBook) showBook(id);
     }
@@ -1476,15 +1435,14 @@
     $("bookBtn").addEventListener("click", () => showBook());
     $("bookClose").addEventListener("click", () => { $("book").hidden = true; });
     $("book").addEventListener("click", e => { if (e.target === $("book")) $("book").hidden = true; });
-    $("hatchNext").addEventListener("click", () => afterHatch(false));
-    $("hatchBook").addEventListener("click", () => afterHatch(true));
+    $("discoveryNext").addEventListener("click", () => afterDiscovery(false));
+    $("discoveryBook").addEventListener("click", () => afterDiscovery(true));
     leo.addEventListener("click", () => { audio(); leoRoar(false); });
 
     buildMane();
     buildPath();
-    if (!friendOf(eggFriendId)) pickEggFriend();
-    setEggColor();
-    setEgg(progress, false);
+    if (!friendOf(trailFriendId)) pickTrailFriend();
+    else $("trailFriend").textContent = friendOf(trailFriendId).e;
     updatePath();
     renderFriends();
     updateLeo();
