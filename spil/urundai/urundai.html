@@ -240,6 +240,61 @@
     .dict { gap: 12px; }
     .head { position: sticky; top: 0; z-index: 3; padding: 4px 0 6px; background: linear-gradient(#0a2a1be6, #0a2a1b00); }
     .mute-note { background: #fff1c9; color: #7a4a00; box-shadow: inset 0 0 0 2px #f1d58a; }
+
+    /* ===== Design 2027 (samme sprog som Hej Haj): glas, dybde, rolige farver og blød bevægelse i popups ===== */
+    .overlay .btn { border: 0; border-radius: 18px; min-height: 56px; padding: 10px 26px; background: linear-gradient(135deg, #fde68a, #fbbf24); color: #3b2a00; font-weight: 800; letter-spacing: 0; box-shadow: 0 10px 24px #fbbf2459, inset 0 1px 0 #ffffff99; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), box-shadow .2s, filter .2s; }
+    .overlay .btn::after { display: none; }
+    .overlay .btn:active { transform: scale(.96); box-shadow: 0 4px 12px #fbbf244d; }
+    .overlay .btn.green { background: linear-gradient(135deg, #bef264, #4ade80 55%, #2dd4bf); color: #052e16; box-shadow: 0 12px 28px #4ade8066, inset 0 1px 0 #ffffff8c; }
+    .overlay .btn.green:active { box-shadow: 0 4px 12px #4ade8055; }
+    .overlay .btn.ghost { background: #ffffff1a; border: 1px solid #ffffff38; color: #fff; box-shadow: none; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .overlay { background: radial-gradient(80% 55% at 50% 0%, #4ade8030, transparent 65%), #030f08c7; backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); }
+    .card { color: #fff; border: 1px solid #ffffff2b; background: linear-gradient(165deg, #ffffff29, #ffffff0a 45%), #0a2a1cb8; box-shadow: 0 40px 90px #0000008c, 0 0 0 1px #ffffff0a, inset 0 1px 0 #ffffff47; backdrop-filter: blur(30px) saturate(1.5); -webkit-backdrop-filter: blur(30px) saturate(1.5); animation: sheetIn .55s cubic-bezier(.16, 1, .3, 1); }
+    .card::before { display: none; }
+    .card.quiz .left { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+    @keyframes sheetIn { from { transform: translateY(26px) scale(.96); opacity: 0; filter: blur(6px); } }
+    .card h3 { color: #fff; font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; }
+    .eyebrow { margin: 0; text-align: center; color: #d9f99dcc; font-size: .7rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .why { background: #fb718524; border: 1px solid #fb71855c; box-shadow: none; color: #ffe4e6; font-size: .86rem; font-weight: 700; }
+    .why svg { width: 46px; height: 46px; }
+    .wordbtn { gap: 6px; min-width: 240px; padding: 14px 28px; background: linear-gradient(180deg, #ffffff22, #ffffff0a); border: 1px solid #ffffff33; border-radius: 28px; box-shadow: 0 16px 40px #0000004d, inset 0 1px 0 #ffffff33; color: #fff; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); }
+    .wordbtn:active { transform: scale(.97); box-shadow: 0 8px 20px #0000004d, inset 0 1px 0 #ffffff33; }
+    .wordbtn .tw { background: linear-gradient(180deg, #fff 25%, #fde68a); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; line-height: 1.5; filter: drop-shadow(0 4px 20px #fde68a59); }
+    .wordbtn .rm { padding: 3px 14px; background: #ffffff1f; color: #d9f99d; font-size: .95rem; letter-spacing: .02em; }
+    .wave { display: flex; align-items: center; gap: 3px; height: 20px; }
+    .wave i { width: 3px; height: 7px; border-radius: 2px; background: #bef264; opacity: .7; }
+    .wordbtn.speaking .wave i { opacity: 1; animation: wv .9s ease-in-out infinite; }
+    .wave i:nth-child(2) { animation-delay: .12s !important; }
+    .wave i:nth-child(3) { animation-delay: .24s !important; }
+    .wave i:nth-child(4) { animation-delay: .36s !important; }
+    .wave i:nth-child(5) { animation-delay: .48s !important; }
+    @keyframes wv { 0%, 100% { height: 6px; } 50% { height: 20px; } }
+    .banner { color: #86efac; font-size: 1.1rem; font-weight: 800; }
+    .banner:not(:empty) { background: #22c55e29; border: 1px solid #22c55e66; box-shadow: none; border-radius: 999px; }
+    .banner.bad { color: #fecdd3; }
+    .banner.bad:not(:empty) { background: #fb718529; border-color: #fb718566; box-shadow: none; }
+    .mute-note { background: #fbbf2424; color: #fde68a; box-shadow: none; border: 1px solid #fbbf2455; }
+    .tile { border: 0; border-radius: 26px; background: linear-gradient(180deg, #fff, #f3f8e6); box-shadow: 0 14px 30px #00000059, inset 0 -4px 0 #3f6b1a20; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), box-shadow .25s, opacity .3s, filter .3s; }
+    .tile:hover { transform: translateY(-3px); }
+    .tile:active { transform: scale(.95); box-shadow: 0 6px 14px #00000059; }
+    .tile.right { background: linear-gradient(180deg, #f2fff9, #c6f6df); box-shadow: 0 0 0 4px #34d399, 0 0 44px #34d39999, 0 14px 30px #00000059; animation: yes .6s ease; }
+    .tile.right::after { content: "✓"; position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #22c55e; color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 4px 10px #0004; }
+    .tile.wrong { background: linear-gradient(180deg, #fff6f7, #ffe0e4); box-shadow: 0 0 0 4px #fb7185, 0 0 40px #fb718580; }
+    .tile.dim { opacity: .35; filter: saturate(.55); }
+    .mcard { border: 0; background: linear-gradient(180deg, #fff, #f3f8e6); box-shadow: 0 14px 30px #0000004d; color: #14281b; }
+    .mcard .t { color: #14281b; }
+    .mcard .r { color: #0f766e; }
+    .mcard .d { color: #64748b; }
+    .mcard.on { background: linear-gradient(180deg, #fff, #f4ffd6); box-shadow: 0 0 0 3px #bef264, 0 0 36px #bef26480, 0 14px 30px #0000004d; }
+    .badge { background: #bef26433; color: #3f6212; letter-spacing: .08em; }
+    .badge.new { background: #34d3992e; color: #047857; }
+    .hintline { color: #ffffff99; font-size: .85rem; }
+    .chip { background: #ffffff1f; border: 1px solid #ffffff33; box-shadow: none; color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .chip .pbox { background: #fff; border-radius: 12px; padding: 2px; }
+    #wordPop { background: #0a2a1c94; backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border: 1px solid #ffffff38; color: #fff; box-shadow: 0 14px 34px #00000059; }
+    #wordPop .pbox { background: #fff; border-radius: 16px; padding: 3px; }
+    #wordPop .rm { color: #d9f99d; }
+    #wordPop .badge { margin-bottom: 1px; }
     @media (max-width: 380px) { .card { padding: 16px 10px 12px; } .choices { gap: 8px; } .btn { padding: 8px 16px; } .hud .title { padding: 4px 8px; } }
 
     /* Tamilsk tekst må aldrig stikke ud: den holdes på én linje og krympes af fitAll() til den passer i sin ramme */
@@ -293,6 +348,9 @@
       .mcard { padding: 4px 4px 6px; }
       .mcard .t { font-size: 1.4rem; }
       .hintline { display: none; }
+      #meet .eyebrow { display: none; }
+      .mcards.many .mcard { flex: 1 1 calc(25% - 8px); max-width: 150px; }
+      .mcards.many .mcard .pbox { width: min(70%, 18dvh); }
       .card h3 { font-size: 1.2rem; }
       .doorart { width: 70px; }
     }
@@ -340,6 +398,7 @@
 
   <div class="overlay" id="meet" hidden>
     <div class="card">
+      <p class="eyebrow">Dagens ord</p>
       <h3 id="meetTitle">Nye ord!</h3>
       <div class="mcards" id="meetCards"></div>
       <p class="mute-note" id="meetNote" hidden></p>
@@ -352,8 +411,10 @@
     <div class="card quiz">
       <div class="left">
         <div class="why"><span id="quizIcon"></span><span id="quizWhy"></span></div>
+        <p class="eyebrow">Hvilket billede passer til ordet?</p>
         <button class="wordbtn" id="quizWord" type="button" aria-label="Hør ordet igen">
-          <span class="row"><svg class="spk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z" fill="#8a6a12"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" stroke="#8a6a12" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span class="tw" id="quizTa"></span></span>
+          <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="tw" id="quizTa"></span>
           <span class="rm" id="quizRom"></span>
         </button>
         <div class="banner" id="quizBanner"></div>
@@ -372,7 +433,7 @@
       <div class="learned" id="doneWords"></div>
       <div class="actions">
         <button class="btn green" id="doneNext" type="button">Næste bane ▶</button>
-        <button class="btn ghost" id="doneHome" type="button" style="color:#6b3a10;border-color:#d8c690;background:#fff6">Hjem</button>
+        <button class="btn ghost" id="doneHome" type="button">Hjem</button>
       </div>
     </div>
   </div>
@@ -549,6 +610,7 @@
     }
     function stopSpeech() {
       speechToken++;
+      $("quizWord").classList.remove("speaking");
       clip.onended = null;
       clip.onerror = null;
       clip.onplaying = null;
@@ -566,6 +628,7 @@
         const finish = (ok) => {
           if (finished) return;
           finished = true;
+          if (token === speechToken) $("quizWord").classList.remove("speaking");
           clearTimeout(safety);
           clearTimeout(endTimer);
           if (speechDone === done) speechDone = null;
@@ -573,6 +636,7 @@
         };
         const done = (ok) => finish(ok);
         speechDone = done;
+        $("quizWord").classList.add("speaking");
         if (muted) { setTimeout(() => finish(true), 500); return; }
         clip.onended = () => finish(true);
         clip.onerror = () => setTimeout(() => finish(true), 300);
