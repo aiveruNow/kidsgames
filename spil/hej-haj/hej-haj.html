@@ -106,8 +106,10 @@
     #cv { position: absolute; inset: 0; display: block; }
     #startHint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 10px 22px; border-radius: 999px; background: linear-gradient(#ffe08a, #f5b83d); color: #4a2f00; font-weight: 900; white-space: nowrap; box-shadow: 0 5px 0 #b57b05, 0 10px 18px #0005; pointer-events: none; animation: pulse 1.2s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: .85; } 50% { opacity: 1; transform: translateX(-50%) scale(1.06); } }
-    /* Under spillet fylder banen hele skærmen under topbaren (ingen ramme) */
-    body.playing .app { padding: var(--tb-h, 54px) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+    /* Under spillet fylder banen hele skærmen under topbaren (ingen ramme). Den er fast placeret (samme koordinater som baggrunden),
+       så den også rækker helt ned på iPhone, hvor sidens højde ellers kan afvige fra det synlige. */
+    body.playing .app { padding: 0; }
+    body.playing #play { position: fixed; left: 0; right: 0; top: var(--tb-h, 54px); bottom: 0; height: auto; padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left); z-index: 1; }
     @media (max-width: 520px) {
       .hud { gap: 6px; }
       #startHint { font-size: .9rem; padding: 8px 16px; }
