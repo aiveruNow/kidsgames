@@ -91,9 +91,9 @@
     .card-w.unseen .q { display: grid; place-items: center; flex: 1; color: #fff9; font-size: 2.4rem; font-weight: 900; }
 
     /* Banen */
-    #play { gap: 6px; overflow: hidden; }
-    .hud { display: flex; align-items: center; gap: 10px; flex: none; padding: 2px 0; color: #fff; }
-    .hud .back { width: 40px; height: 40px; font-size: 1.3rem; }
+    #play { position: relative; gap: 0; overflow: hidden; }
+    .hud { position: absolute; left: 8px; right: 8px; top: 8px; z-index: 6; display: flex; align-items: center; gap: 10px; padding: 0; color: #fff; pointer-events: none; }
+    .hud .back { width: 40px; height: 40px; font-size: 1.3rem; pointer-events: auto; }
     .hud .title { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 14px; background: #0000004d; font-size: 1.05rem; font-weight: 900; white-space: nowrap; text-shadow: 0 2px 0 #0006; }
     .prog { position: relative; flex: 1; min-width: 60px; height: 26px; border-radius: 999px; background: #0000004d; box-shadow: inset 0 0 0 2px #ffffff40; overflow: hidden; }
     .prog i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 999px; background: linear-gradient(#ffe08a, #f5b83d); transition: width .3s; }
@@ -101,19 +101,19 @@
     .pips { display: flex; gap: 2px; padding: 4px 8px; border-radius: 12px; background: #0000004d; }
     .pips svg { width: 20px; height: 20px; transition: opacity .3s, filter .3s; }
     .pips svg.off { opacity: .25; filter: grayscale(1); }
-    #stage { position: relative; flex: 1; min-height: 0; touch-action: none; border-radius: 20px; background: center / cover no-repeat #0b4f6c; box-shadow: inset 0 0 0 3px #ffffff30, 0 0 0 3px #f5b83d55, 0 10px 26px #0007; overflow: hidden; }
+    #stage { position: relative; flex: 1; min-height: 0; touch-action: none; border-radius: 0; background: linear-gradient(#38bdf8, #1c88b8 45%, #0a4466); overflow: hidden; }
     #cv { position: absolute; inset: 0; display: block; }
     #startHint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 10px 22px; border-radius: 999px; background: linear-gradient(#ffe08a, #f5b83d); color: #4a2f00; font-weight: 900; white-space: nowrap; box-shadow: 0 5px 0 #b57b05, 0 10px 18px #0005; pointer-events: none; animation: pulse 1.2s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: .85; } 50% { opacity: 1; transform: translateX(-50%) scale(1.06); } }
+    /* Under spillet fylder banen hele skærmen under topbaren (ingen ramme) */
+    body.playing .app { padding: var(--tb-h, 54px) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
     @media (max-width: 520px) {
-      .app { padding-left: 4px; padding-right: 4px; padding-bottom: 4px; }
-      #stage { border-radius: 14px; }
       .hud { gap: 6px; }
       #startHint { font-size: .9rem; padding: 8px 16px; }
     }
 
     /* Ordkort, der dukker op under spillet */
-    #wordPop { position: absolute; left: 50%; top: 8px; z-index: 5; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 16px); min-width: 0; padding: 6px 16px 6px 8px; border: 3px solid var(--gold); border-radius: 22px; background: #fffdf5f2; box-shadow: 0 8px 20px #0006; color: var(--ink); pointer-events: none; transform: translateX(-50%); animation: popin .3s cubic-bezier(.2, 1.5, .4, 1); }
+    #wordPop { position: absolute; left: 50%; top: 58px; z-index: 5; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 16px); min-width: 0; padding: 6px 16px 6px 8px; border: 3px solid var(--gold); border-radius: 22px; background: #fffdf5f2; box-shadow: 0 8px 20px #0006; color: var(--ink); pointer-events: none; transform: translateX(-50%); animation: popin .3s cubic-bezier(.2, 1.5, .4, 1); }
     #wordPop .pbox { width: 52px; flex: none; }
     #wordPop > div { min-width: 0; }
     #wordPop .tw { font-family: var(--tamil); font-size: 1.7rem; font-weight: 800; line-height: 1.2; }
@@ -271,7 +271,7 @@
         <div class="prog" id="prog" aria-hidden="true"><i id="progFill"></i><span id="progText"></span></div>
         <div class="pips" id="pips" aria-hidden="true"></div>
       </div>
-      <div id="stage"><canvas id="cv"></canvas><div id="wordPop" hidden></div><div id="startHint" hidden>Træk i en retning for at svømme!</div></div>
+      <div id="stage"><canvas id="cv"></canvas><div id="wordPop" hidden></div><div id="startHint" hidden>Træk op og ned for at svømme!</div></div>
     </section>
   </main>
 
@@ -567,6 +567,7 @@
       screen = name;
       for (const s of SCREENS) $(s).hidden = s !== name;
       if (name === "play") resize();
+      document.body.classList.toggle("playing", name === "play");
     }
     // Urundais junglescene i havfarver: bladene bliver til tang og tempeltårnene til ruiner
     const seaUri = (wide) => `url("${Art.dataUri(Art.scene("#38bdf8", "#0a4466", wide))}")`;
@@ -617,15 +618,17 @@
     let fish = [];
     let particles = [];
     let bubbles = [];
-    const pointer = { active: false, x: 0, y: 0, ax: 0, ay: 0 };
-    let JOY_MAX = 14; // joystickens radius og dødzone i pixel (sættes i resize)
-    let JOY_DEAD = 2;
-    const keys = { x: 0, y: 0, down: new Set() };
+    const pointer = { active: false, y: 0, y0: 0, ty0: 0 };
+    const keys = { y: 0, down: new Set() };
 
     const SMALL_COLORS = ["#ffd54f", "#ff8a65", "#81d4fa", "#a5d6a7", "#f48fb1", "#ce93d8", "#ffcc80", "#80cbc4"];
     const BIG_COLORS = ["#c62828", "#7b1fa2", "#d84315", "#455a64"];
-    const R0 = 7.5; // hajens startradius i enheder (1 enhed = 1 % af den korteste side)
+    const R0 = 5.5; // hajens startradius i enheder (1 enhed = 1 % af den korteste side)
+    const TOP = 50; // øverste pixels på banen er til HUD'en
+    const SHARK_X = .2; // hajen står stille her (andel af bredden), og verden scroller mod venstre
     const sharkRadius = () => R0 * (1 + .5 * G.eaten / G.need) * u;
+    let scrollX = 0;
+    const GAIN = 1.5; // fingerens lodrette træk ganges, så en hel skærm ikke kræver et helt tommelfingerslag
 
     function resize() {
       const w = stage.clientWidth;
@@ -642,13 +645,10 @@
       cv.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       u = Math.min(SW, SH) / 100;
-      JOY_MAX = Math.max(46, 13 * u);
-      JOY_DEAD = JOY_MAX * .12;
-      stage.style.backgroundImage = seaUri(SW > SH);
       if (!bubbles.length) for (let i = 0; i < 16; i++) bubbles.push({ x: Math.random() * SW, y: Math.random() * SH, r: .4 + Math.random() * 1.2, sp: 3 + Math.random() * 6 });
-      if (sh) { sh.x *= SW / ox; sh.y *= SH / oy; }
-      for (const f of fish) { f.x *= SW / ox; f.y *= SH / oy; }
-      if (first && G) { sh.R = sharkRadius(); sh.x = SW / 2; sh.y = SH / 2; fish = []; fillFish(); }
+      if (sh) { sh.x = SW * SHARK_X; sh.y = clamp(sh.y * SH / oy, TOP + sh.R, SH - sh.R); sh.ty = sh.y; }
+      for (const f of fish) { f.x *= SW / ox; f.y = clamp(f.y * SH / oy, TOP + f.r, SH - f.r); }
+      if (first && G) { sh.R = sharkRadius(); sh.x = SW * SHARK_X; sh.y = sh.ty = (TOP + SH) / 2; fish = []; fillFish(); }
     }
 
     const fishCounts = () => ({ small: 6, big: Math.min(5, 1 + Math.floor((G.n - 1) / 2)) });
@@ -656,17 +656,17 @@
     // Mere tid på en smal telefonskærm: fiskene er 15 % langsommere, og bane 1 har kun én langsom stor fisk
     const speedFactor = () => FACT[speedKey] * Math.min(1.25, 1 + .03 * (G.n - 1)) * (SW < SH ? .85 : 1);
 
+    // Alle fisk kommer ind fra højre og svømmer mod venstre. spread = fordelt ud over banen ved start (kun til højre for hajen).
     function spawnFish(big, spread) {
       // Store fisk er altid mindst 1,2 × hajens slutstørrelse
-      const r = (big ? (1.2 + Math.random() * .3) * R0 * 1.5 :  (.45 + Math.random() * .4) * R0 * (1 + .5 * G.eaten / G.need)) * u;
+      const r = (big ? (1.2 + Math.random() * .3) * R0 * 1.5 : (.45 + Math.random() * .4) * R0 * (1 + .5 * G.eaten / G.need)) * u;
       let f = null;
       for (let tries = 0; tries < 24; tries++) {
-        const face = Math.random() < .5 ? 1 : -1;
-        const x = spread ? r + Math.random() * Math.max(1, SW - 2 * r) : (face > 0 ? -r * 2.4 : SW + r * 2.4) - (big ? face * 24 * u : 0);
-        const y = Math.min(SH - r * 1.1, r * 1.1 + Math.random() * Math.max(1, SH - r * 2.2));
-        f = { x, y, r, face, big, phase: Math.random() * 6.28, freq: 1 + Math.random() * 1.5, amp: (big ? 1.5 : 3.5) * u * Math.random(), speed: (big ? 11 + Math.random() * 9 : 9 + Math.random() * 12) * u, color: big ? BIG_COLORS[rnd(BIG_COLORS.length)] : SMALL_COLORS[rnd(SMALL_COLORS.length)] };
-        const safe = (big ? 30 : 10) * u + r + sh.R;
-        if (Math.hypot(x - sh.x, y - sh.y) > safe) break;
+        const x = spread ? SW * .5 + Math.random() * SW * 1.2 : SW + r * 2.4 + Math.random() * 14 * u;
+        const y = TOP + r + Math.random() * Math.max(1, SH - TOP - 2 * r);
+        f = { x, y, r, face: -1, big, phase: Math.random() * 6.28, freq: 1 + Math.random() * 1.5, amp: (big ? 1.5 : 3.5) * u * Math.random(), speed: (big ? 14 + Math.random() * 8 : 13 + Math.random() * 10) * u, color: big ? BIG_COLORS[rnd(BIG_COLORS.length)] : SMALL_COLORS[rnd(SMALL_COLORS.length)] };
+        // to store fisk må ikke ligge oven i hinanden, så der altid er et hul at svømme igennem
+        if (!fish.some((o) => o.big && big && Math.abs(o.x - x) < r * 3 && Math.abs(o.y - y) < (o.r + r) * 1.4)) break;
       }
       fish.push(f);
     }
@@ -684,16 +684,16 @@
         reviewWords: keepReview || pickWeighted(seenIds(), 2, fresh),
         bigColor: BIG_COLORS[0]
       };
-      sh = { x: SW / 2, y: SH / 2, vx: 0, vy: 0, face: 1, tilt: 0, R: R0 * u, chew: 0 };
+      sh = { x: SW * SHARK_X, y: (TOP + SH) / 2, ty: (TOP + SH) / 2, vy: 0, face: 1, tilt: 0, R: R0 * u, chew: 0 };
       resetActors();
       $("playTitle").textContent = `Bane ${n}`;
       renderFoot();
     }
 
     function resetActors() {
-      sh.x = SW / 2;
-      sh.y = SH / 2;
-      sh.vx = sh.vy = 0;
+      sh.x = SW * SHARK_X;
+      sh.y = sh.ty = (TOP + SH) / 2;
+      sh.vy = 0;
       sh.R = sharkRadius();
       fish = [];
       particles = [];
@@ -831,51 +831,29 @@
       confetti();
     }
 
+    // Hajen står stille i siden og svømmer kun op og ned. Fingerens lodrette træk flytter hajen 1:1 (gange GAIN),
+    // uanset hvor på skærmen fingeren sættes, så fingeren aldrig behøver at dække hajen.
     function moveShark(dt) {
-      // Flydende joystick: retningen er fingerens retning væk fra stedet, hvor den blev sat ned. Fingeren dækker derfor aldrig hajen.
-      let dvx = 0;
-      let dvy = 0;
-      if (pointer.active) {
-        let dx = pointer.x - pointer.ax;
-        let dy = pointer.y - pointer.ay;
-        const d = Math.hypot(dx, dy);
-        if (d > JOY_MAX) { // trækkes fingeren længere, følger udgangspunktet med, så en ny retning kan tages med det samme
-          pointer.ax += dx / d * (d - JOY_MAX);
-          pointer.ay += dy / d * (d - JOY_MAX);
-          dx = pointer.x - pointer.ax;
-          dy = pointer.y - pointer.ay;
-        }
-        const dd = Math.hypot(dx, dy);
-        if (dd > JOY_DEAD) {
-          const sp = 46 * u * Math.min(1, (dd - JOY_DEAD) / (JOY_MAX * .7));
-          dvx = dx / dd * sp;
-          dvy = dy / dd * sp;
-        }
-      } else if (keys.x || keys.y) {
-        const d = Math.hypot(keys.x, keys.y);
-        dvx = keys.x / d * 46 * u;
-        dvy = keys.y / d * 46 * u;
-      }
-      const k = Math.min(1, dt * 5);
-      sh.vx += (dvx - sh.vx) * k;
-      sh.vy += (dvy - sh.vy) * k;
-      sh.x = clamp(sh.x + sh.vx * dt, sh.R, SW - sh.R);
-      sh.y = clamp(sh.y + sh.vy * dt, sh.R * .7, SH - sh.R * .7);
-      if (Math.abs(sh.vx) > 2 * u) sh.face = sh.vx > 0 ? 1 : -1;
-      const sp = Math.hypot(sh.vx, sh.vy);
-      const want = sp > 3 * u ? clamp(Math.atan2(sh.vy, Math.abs(sh.vx) + 1e-3), -.7, .7) : 0;
-      sh.tilt += (want - sh.tilt) * Math.min(1, dt * 6);
+      if (pointer.active) sh.ty = sh.ty0 + GAIN * (pointer.y - pointer.y0);
+      else if (keys.y) sh.ty += keys.y * 60 * u * dt;
+      sh.ty = clamp(sh.ty, TOP + sh.R, SH - sh.R * .7);
+      const prev = sh.y;
+      const vmax = 110 * u;
+      sh.y = clamp(sh.y + clamp((sh.ty - sh.y) * 12, -vmax, vmax) * dt, TOP + sh.R, SH - sh.R * .7);
+      sh.vy = (sh.y - prev) / Math.max(dt, 1e-3);
+      sh.tilt += (clamp(sh.vy / (60 * u), -.6, .6) - sh.tilt) * Math.min(1, dt * 8);
     }
 
     function updateFish(dt) {
       const f0 = speedFactor();
       const h = homing();
+      scrollX += 9 * u * f0 * dt;
       for (const f of [...fish]) {
-        f.x += f.face * f.speed * f0 * (f.big && G.n === 1 ? .6 : 1) * dt;
+        f.x -= f.speed * f0 * (f.big && G.n === 1 ? .6 : 1) * dt;
         let vy = Math.cos(time * f.freq + f.phase) * f.amp * f.freq;
-        if (f.big && h) vy += clamp(sh.y - f.y, -8 * u, 8 * u) * h;
-        f.y = clamp(f.y + vy * dt, f.r * .8, SH - f.r * .8);
-        if ((f.face > 0 && f.x > SW + f.r * 2.6) || (f.face < 0 && f.x < -f.r * 2.6)) {
+        if (f.big && h && f.x > sh.x) vy += clamp(sh.y - f.y, -8 * u, 8 * u) * h;
+        f.y = clamp(f.y + vy * dt, TOP + f.r * .8, SH - f.r * .8);
+        if (f.x < -f.r * 2.6) {
           fish.splice(fish.indexOf(f), 1);
           spawnFish(f.big, false);
         }
@@ -894,7 +872,7 @@
 
     function update(dt) {
       time += dt;
-      for (const b of bubbles) { b.y -= b.sp * u * dt; if (b.y < -b.r * u) { b.y = SH + b.r * u; b.x = Math.random() * SW; } }
+      for (const b of bubbles) { b.y -= b.sp * u * dt; b.x -= (state === "play" ? 6 : 1.5) * u * dt; if (b.y < -b.r * u || b.x < -5) { b.y = SH + b.r * u; b.x = SW * (.3 + Math.random() * .8); } }
       for (const p of particles) { p.x += p.vx * u * dt * 6; p.y += p.vy * u * dt * 6; p.vy -= dt * .4; p.life -= dt * 1.4; }
       particles = particles.filter((p) => p.life > 0);
       if (!G || !sh) return;
@@ -909,14 +887,14 @@
         moveShark(dt);
       } else if (state === "dying") {
         G.dyT += dt;
-        sh.vx *= .9;
         sh.vy = sh.vy * .9 - 3 * u * dt;
         sh.y += sh.vy * dt;
         if (G.dyT > 1.1) openQuiz();
       } else if (state === "won") {
         G.wonT += dt;
         moveShark(dt);
-        for (const f of fish) { if (f.big) { f.x += f.face * f.speed * 2.5 * dt; f.y -= 6 * u * dt; } }
+        scrollX += 9 * u * dt;
+        for (const f of fish) { if (f.big) { f.x -= f.speed * 2.5 * dt; f.y -= 6 * u * dt; } }
         if (G.wonT > 2.2) levelDone();
       }
     }
@@ -1226,9 +1204,46 @@
       ctx.restore();
     }
 
+    const wrap = (x, w) => ((x % w) + w) % w;
+    // Baggrund der scroller mod venstre i flere lag (langsomt langt væk, hurtigere tæt på): ruiner, tang og sand
+    function drawFarLayers() {
+      const T = 70 * u;
+      const cnt = Math.ceil(SW / T) + 2;
+      ctx.fillStyle = "rgba(8,64,100,.42)";
+      for (let i = 0; i < cnt; i++) {
+        const x = wrap(i * T - scrollX * .3, cnt * T) - T;
+        const base = SH - 2 * u;
+        const tiers = [[26, 5], [21, 5], [16, 5], [11, 4], [6, 4]];
+        let y = base;
+        for (const [w, h] of tiers) { y -= h * u; ctx.fillRect(x - w * u / 2 + 18 * u, y, w * u, h * u + 1); }
+        ctx.beginPath(); ctx.arc(x + 18 * u, y, 3 * u, Math.PI, 0); ctx.fill();
+      }
+    }
+    function drawNearLayers() {
+      const S = 17 * u;
+      const cnt = Math.ceil(SW / S) + 3;
+      ctx.lineCap = "round";
+      for (let i = 0; i < cnt; i++) {
+        const x = wrap(i * S - scrollX * .8, cnt * S) - S;
+        const h = (6 + (i * 37) % 7) * u;
+        const sway = Math.sin(time * 1.6 + i) * u * 1.2;
+        ctx.strokeStyle = i % 2 ? "#2e9a4f" : "#1f7a3d";
+        ctx.lineWidth = u * 1.6;
+        ctx.beginPath(); ctx.moveTo(x, SH - 2 * u); ctx.quadraticCurveTo(x + sway, SH - 2 * u - h * .55, x + sway * 1.6, SH - 2 * u - h); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + u * 2.2, SH - 2 * u); ctx.quadraticCurveTo(x + u * 2.2 - sway, SH - 2 * u - h * .4, x + u * 2.2 - sway * 1.3, SH - 2 * u - h * .75); ctx.stroke();
+      }
+      ctx.fillStyle = "#d8b865";
+      ctx.beginPath();
+      ctx.moveTo(0, SH);
+      for (let xx = 0; xx <= SW + 8; xx += 8) ctx.lineTo(xx, SH - 2.6 * u + Math.sin((xx + scrollX * .8) / (9 * u)) * u * .8);
+      ctx.lineTo(SW + 8, SH);
+      ctx.closePath();
+      ctx.fill();
+    }
+
     function draw() {
       ctx.clearRect(0, 0, SW, SH);
-      // Lysstråler og bobler
+      // Lysstråler, ruiner og bobler
       ctx.save();
       for (let i = 0; i < 3; i++) {
         const x = SW * (.2 + i * .3) + Math.sin(time * .3 + i) * u * 6;
@@ -1238,23 +1253,24 @@
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + SW * .1, 0); ctx.lineTo(x + SW * .3, SH); ctx.lineTo(x + SW * .1, SH); ctx.fill();
       }
+      drawFarLayers();
       ctx.strokeStyle = "rgba(255,255,255,.5)";
       ctx.fillStyle = "rgba(255,255,255,.12)";
       ctx.lineWidth = 1.5;
       for (const b of bubbles) { ctx.beginPath(); ctx.arc(b.x, b.y, b.r * u, 0, 6.3); ctx.fill(); ctx.stroke(); }
+      drawNearLayers();
       ctx.restore();
       if (!G || !sh) return;
       for (const f of fish) drawFish(f);
-      // Advarsel: en rød pil ved kanten, før en stor fisk svømmer ind
+      // Advarsel: en rød pil ved højre kant, før en stor fisk svømmer ind
       for (const f of fish) {
-        if (!f.big || (f.x > -f.r * .6 && f.x < SW + f.r * .6)) continue;
-        const left = f.x < 0;
-        const ex = left ? u * 5 : SW - u * 5;
-        const ey = clamp(f.y, u * 6, SH - u * 6);
+        if (!f.big || f.x < SW + f.r * .6) continue;
+        const ex = SW - u * 5;
+        const ey = clamp(f.y, TOP + u * 4, SH - u * 6);
         const pulse = .6 + .4 * Math.sin(time * 10);
         ctx.save();
         ctx.translate(ex, ey);
-        ctx.scale(left ? 1 : -1, 1);
+        ctx.scale(-1, 1);
         ctx.globalAlpha = pulse;
         ctx.fillStyle = "#ff3b30";
         ctx.strokeStyle = "#fff";
@@ -1276,20 +1292,6 @@
         ctx.stroke();
         ctx.restore();
       }
-      if (pointer.active && (state === "play" || state === "ready")) {
-        let dx = pointer.x - pointer.ax;
-        let dy = pointer.y - pointer.ay;
-        const d = Math.hypot(dx, dy);
-        if (d > JOY_MAX) { dx *= JOY_MAX / d; dy *= JOY_MAX / d; }
-        ctx.save();
-        ctx.strokeStyle = "rgba(255,255,255,.5)";
-        ctx.fillStyle = "rgba(255,255,255,.12)";
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(pointer.ax, pointer.ay, JOY_MAX, 0, 6.3); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "rgba(255,224,138,.8)";
-        ctx.beginPath(); ctx.arc(pointer.ax + dx, pointer.ay + dy, JOY_MAX * .38, 0, 6.3); ctx.fill();
-        ctx.restore();
-      }
       for (const p of particles) {
         ctx.globalAlpha = Math.max(0, p.life);
         ctx.fillStyle = p.c;
@@ -1307,19 +1309,15 @@
       requestAnimationFrame(frame);
     }
 
-    // ---------- Styring: hold en finger nede og træk i en retning, så svømmer hajen den vej ----------
-    const setPointer = (e) => {
-      const rect = cv.getBoundingClientRect();
-      pointer.x = e.clientX - rect.left;
-      pointer.y = e.clientY - rect.top;
-    };
+    // ---------- Styring: træk fingeren op og ned, så svømmer hajen op og ned (hajen står stille i siden) ----------
+    const setPointer = (e) => { pointer.y = e.clientY - cv.getBoundingClientRect().top; };
     const startPlay = () => { if (state === "ready") { state = "play"; G.grace = 1.5; $("startHint").hidden = true; } };
     stage.addEventListener("pointerdown", (e) => {
       if (!G) return;
       pointer.active = true;
       setPointer(e);
-      pointer.ax = pointer.x;
-      pointer.ay = pointer.y;
+      pointer.y0 = pointer.y;
+      sh.ty0 = sh.ty;
       try { stage.setPointerCapture(e.pointerId); } catch { /* ikke vigtigt */ }
       startPlay();
     });
@@ -1327,12 +1325,10 @@
     const endPointer = () => { pointer.active = false; };
     stage.addEventListener("pointerup", endPointer);
     stage.addEventListener("pointercancel", endPointer);
-    const KEYMAP = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] };
+    const KEYMAP = { ArrowUp: -1, ArrowDown: 1, w: -1, s: 1 };
     function syncKeys() {
-      keys.x = 0;
       keys.y = 0;
-      for (const k of keys.down) { keys.x += KEYMAP[k][0]; keys.y += KEYMAP[k][1]; }
-      keys.x = clamp(keys.x, -1, 1);
+      for (const k of keys.down) keys.y += KEYMAP[k];
       keys.y = clamp(keys.y, -1, 1);
     }
     document.addEventListener("keydown", (e) => {
