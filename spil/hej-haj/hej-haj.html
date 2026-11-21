@@ -99,9 +99,6 @@
     .prog { position: relative; flex: 1; min-width: 60px; height: 26px; border-radius: 999px; background: #0000004d; box-shadow: inset 0 0 0 2px #ffffff40; overflow: hidden; }
     .prog i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 999px; background: linear-gradient(#ffe08a, #f5b83d); transition: width .3s; }
     .prog span { position: absolute; inset: 0; display: grid; place-items: center; font-size: .85rem; font-weight: 900; color: #fff; text-shadow: 0 1px 2px #000a; font-variant-numeric: tabular-nums; }
-    .pips { display: flex; gap: 2px; padding: 4px 8px; border-radius: 12px; background: #0000004d; }
-    .pips svg { width: 20px; height: 20px; transition: opacity .3s, filter .3s; }
-    .pips svg.off { opacity: .25; filter: grayscale(1); }
     #stage { position: relative; flex: 1; min-height: 0; touch-action: none; border-radius: 0; background: linear-gradient(#38bdf8, #1c88b8 45%, #0a4466); overflow: hidden; }
     #cv { position: absolute; inset: 0; display: block; }
     #startHint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 10px 22px; border-radius: 999px; background: linear-gradient(#ffe08a, #f5b83d); color: #4a2f00; font-weight: 900; white-space: nowrap; box-shadow: 0 5px 0 #b57b05, 0 10px 18px #0005; pointer-events: none; animation: pulse 1.2s ease-in-out infinite; }
@@ -183,23 +180,8 @@
     .mcard .d { font-size: .95rem; color: #9b92bb; font-weight: 700; }
     .hintline { margin: 0; color: var(--soft); font-weight: 700; text-align: center; }
 
-    .doorart { width: 130px; flex: none; animation: glow 2s ease-in-out infinite alternate; }
-    .doorart svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 14px #7dd3fc); }
-    .stars3 { display: flex; gap: 6px; }
-    .stars3 svg { width: clamp(52px, 14vw, 70px); height: auto; opacity: .25; filter: grayscale(1) drop-shadow(0 3px 0 #b57b0555); transform: scale(.6); }
-    .stars3 svg.on { opacity: 1; filter: drop-shadow(0 3px 0 #b57b0555); animation: starpop .6s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: var(--d); }
-    @keyframes starpop { from { transform: scale(0) rotate(-180deg); } to { transform: scale(1) rotate(0); } }
-    .learned { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-    .chip { display: flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; padding: 4px 16px 4px 6px; border: 0; border-radius: 999px; background: #fff; box-shadow: 0 0 0 2px #e6d6a3, 0 3px 0 #d3bd7c; font-weight: 800; }
-    .chip:active { transform: translateY(2px); }
-    .chip .pbox { width: 36px; }
-    .chip .ta { flex: 0 1 auto; font-size: 1.15rem; }
-    .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-    .petal { position: fixed; top: -30px; z-index: 41; pointer-events: none; border-radius: 50% 0 50% 0; animation: fall linear forwards; }
-    @keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
-
     /* Tamilsk tekst må aldrig stikke ud: den holdes på én linje og krympes af fitAll() */
-    .card-w .t, .mcard .t, .wordbtn .tw, #wordPop .tw, .chip .ta { display: block; max-width: 100%; min-width: 0; white-space: nowrap; text-align: center; }
+    .card-w .t, .mcard .t, .wordbtn .tw, #wordPop .tw { display: block; max-width: 100%; min-width: 0; white-space: nowrap; text-align: center; }
 
     #settings { display: grid; gap: 10px; }
     /* Fejlsøgning: tal om skærmen og en rød ramme om banens kanter */
@@ -207,6 +189,72 @@
     #probe { position: fixed; left: 0; top: 0; bottom: 0; width: 1px; visibility: hidden; pointer-events: none; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
     #settings label { display: grid; gap: 4px; font-weight: 800; color: #27426f; }
     #settings select, #settings button { min-height: 44px; padding: 6px 10px; border: 2px solid #dfe7f3; border-radius: 12px; background: #f7faff; color: #27426f; font: inherit; font-weight: 700; }
+
+    /* ===== Design 2027: glas, dybde, rolige farver og blød bevægelse ===== */
+    .btn { border: 0; border-radius: 18px; min-height: 56px; padding: 10px 26px; background: linear-gradient(135deg, #fde68a, #fbbf24); color: #3b2a00; font-weight: 800; letter-spacing: 0; box-shadow: 0 10px 24px #fbbf2459, inset 0 1px 0 #ffffff99; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), box-shadow .2s, filter .2s; }
+    .btn::after { display: none; }
+    .btn:active { transform: scale(.96); box-shadow: 0 4px 12px #fbbf244d; }
+    .btn.green { background: linear-gradient(135deg, #5eead4, #22d3ee 55%, #38bdf8); color: #032a33; box-shadow: 0 12px 28px #22d3ee66, inset 0 1px 0 #ffffff8c; }
+    .btn.green:active { box-shadow: 0 4px 12px #22d3ee55; }
+    .btn.ghost { background: #ffffff1a; border: 1px solid #ffffff38; color: #fff; box-shadow: none; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .back, .hud .title, .prog { background: #081c3273; border: 1px solid #ffffff24; backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
+    .hud .title { font-size: .95rem; font-weight: 800; letter-spacing: .01em; }
+    .prog { height: 30px; box-shadow: none; }
+    .prog i { background: linear-gradient(90deg, #5eead4, #a3e635); box-shadow: 0 0 18px #5eead499; }
+    .prog span { font-size: .8rem; }
+
+    .overlay { background: radial-gradient(80% 55% at 50% 0%, #22d3ee2e, transparent 65%), #030c1ac7; backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); }
+    .card { color: #fff; border: 1px solid #ffffff2b; background: linear-gradient(165deg, #ffffff29, #ffffff0a 45%), #0a1e36b8; box-shadow: 0 40px 90px #0000008c, 0 0 0 1px #ffffff0a, inset 0 1px 0 #ffffff47; backdrop-filter: blur(30px) saturate(1.5); -webkit-backdrop-filter: blur(30px) saturate(1.5); animation: sheetIn .55s cubic-bezier(.16, 1, .3, 1); }
+    .card::before { display: none; }
+    .card.quiz .left { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+    @keyframes sheetIn { from { transform: translateY(26px) scale(.96); opacity: 0; filter: blur(6px); } }
+    .card h3 { color: #fff; font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; }
+    .eyebrow { margin: 0; text-align: center; color: #bae6fdcc; font-size: .7rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .why { background: #fb718524; border: 1px solid #fb71855c; box-shadow: none; color: #ffe4e6; font-size: .82rem; font-weight: 700; }
+    .why .whyicon { display: grid; place-items: center; width: 54px; flex: none; }
+    .why svg { width: 52px; height: 34px; }
+    .wordbtn { gap: 6px; min-width: 240px; padding: 14px 28px; background: linear-gradient(180deg, #ffffff22, #ffffff0a); border: 1px solid #ffffff33; border-radius: 28px; box-shadow: 0 16px 40px #0000004d, inset 0 1px 0 #ffffff33; color: #fff; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); }
+    .wordbtn:active { transform: scale(.97); box-shadow: 0 8px 20px #0000004d, inset 0 1px 0 #ffffff33; }
+    .wordbtn .tw { background: linear-gradient(180deg, #fff 25%, #a5f3fc); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; line-height: 1.5; filter: drop-shadow(0 4px 20px #5eead459); }
+    .wordbtn .rm { padding: 3px 14px; background: #ffffff1f; color: #bae6fd; font-size: .95rem; letter-spacing: .02em; }
+    .wave { display: flex; align-items: center; gap: 3px; height: 20px; }
+    .wave i { width: 3px; height: 7px; border-radius: 2px; background: #5eead4; opacity: .7; }
+    .wordbtn.speaking .wave i { opacity: 1; animation: wv .9s ease-in-out infinite; }
+    .wave i:nth-child(2) { animation-delay: .12s !important; }
+    .wave i:nth-child(3) { animation-delay: .24s !important; }
+    .wave i:nth-child(4) { animation-delay: .36s !important; }
+    .wave i:nth-child(5) { animation-delay: .48s !important; }
+    @keyframes wv { 0%, 100% { height: 6px; } 50% { height: 20px; } }
+    .banner { color: #86efac; font-size: 1.1rem; font-weight: 800; }
+    .banner:not(:empty) { background: #22c55e29; border: 1px solid #22c55e66; box-shadow: none; border-radius: 999px; }
+    .banner.bad { color: #fecdd3; }
+    .banner.bad:not(:empty) { background: #fb718529; border-color: #fb718566; box-shadow: none; }
+    .mute-note { background: #fbbf2424; color: #fde68a; box-shadow: none; border: 1px solid #fbbf2455; }
+    .tile { border: 0; border-radius: 26px; background: linear-gradient(180deg, #fff, #e4f3ff); box-shadow: 0 14px 30px #00000059, inset 0 -4px 0 #0e749020; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), box-shadow .25s, opacity .3s, filter .3s; }
+    .tile:hover { transform: translateY(-3px); }
+    .tile:active { transform: scale(.95); box-shadow: 0 6px 14px #00000059; }
+    .tile.right { background: linear-gradient(180deg, #f2fff9, #c6f6df); box-shadow: 0 0 0 4px #34d399, 0 0 44px #34d39999, 0 14px 30px #00000059; animation: yes .6s ease; }
+    .tile.right::after { content: "✓"; position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #22c55e; color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 4px 10px #0004; }
+    .tile.wrong { background: linear-gradient(180deg, #fff6f7, #ffe0e4); box-shadow: 0 0 0 4px #fb7185, 0 0 40px #fb718580; }
+    .tile.dim { opacity: .35; filter: saturate(.55); }
+    .mcard { border: 0; background: linear-gradient(180deg, #fff, #e6f4ff); box-shadow: 0 14px 30px #0000004d; color: #0b1b2e; }
+    .mcard .t { color: #0b1b2e; }
+    .mcard .r { color: #0e7490; }
+    .mcard .d { color: #64748b; }
+    .mcard.on { background: linear-gradient(180deg, #fff, #dffbf5); box-shadow: 0 0 0 3px #5eead4, 0 0 36px #5eead480, 0 14px 30px #0000004d; }
+    .badge { background: #7dd3fc33; color: #0369a1; letter-spacing: .08em; }
+    .badge.new { background: #34d3992e; color: #047857; }
+    .hintline { color: #ffffff99; font-size: .85rem; }
+    #wordPop { background: #081c3294; backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border: 1px solid #ffffff38; color: #fff; box-shadow: 0 14px 34px #00000059; }
+    #wordPop .pbox { background: #fff; border-radius: 16px; padding: 3px; }
+    #wordPop .rm { color: #bae6fd; }
+    #wordPop .badge { margin-bottom: 1px; }
+    #startHint { background: #081c32a6; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid #ffffff38; color: #fff; box-shadow: 0 12px 30px #00000059; font-weight: 800; }
+    /* Ny størrelse: midt på banen, uden at stoppe spillet */
+    #toast { position: absolute; left: 50%; top: 30%; z-index: 7; display: grid; gap: 2px; padding: 14px 28px; border-radius: 24px; text-align: center; pointer-events: none; background: #081c3299; border: 1px solid #ffffff38; backdrop-filter: blur(18px) saturate(1.5); -webkit-backdrop-filter: blur(18px) saturate(1.5); box-shadow: 0 20px 50px #00000066; animation: toastIn 2.3s cubic-bezier(.16, 1, .3, 1) both; }
+    #toast b { font-size: 1.9rem; letter-spacing: -.02em; background: linear-gradient(180deg, #fff, #fde047); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+    #toast span { color: #fde68a; font-weight: 800; }
+    @keyframes toastIn { 0% { opacity: 0; transform: translate(-50%, 14px) scale(.85); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 20% { transform: translate(-50%, 0) scale(1); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -12px); } }
 
     @media (max-width: 380px) { .card { padding: 16px 10px 12px; } .choices { gap: 8px; } .btn { padding: 8px 16px; } .hud .title { padding: 4px 8px; } }
     @media (min-width: 700px) { .card { width: min(100%, 640px); padding: 22px 22px 20px; } .tile { border-radius: 30px; } .mcard .pbox { width: 78%; } .btn { font-size: 1.3rem; } }
@@ -238,9 +286,8 @@
       .mcard .t { font-size: 1.4rem; }
       .hintline { display: none; }
       .btn.big { min-height: 56px; font-size: 1.3rem; }
-      .doorart { width: 80px; }
     }
-    @media (prefers-reduced-motion: reduce) { .mascot, .wordbtn .spk, .temple, .doorart, #startHint, .overlay, .card, .mcard, .banner, .tile, .stars3 svg.on { animation: none !important; } }
+    @media (prefers-reduced-motion: reduce) { .mascot, .wave i, #toast, .temple, #startHint, .overlay, .card, .mcard, .banner, .tile { animation: none !important; } }
   </style>
 </head>
 <body>
@@ -275,48 +322,37 @@
         <button class="back" id="playBack" type="button" aria-label="Tilbage">←</button>
         <div class="title"><span id="playTitle"></span></div>
         <div class="prog" id="prog" aria-hidden="true"><i id="progFill"></i><span id="progText"></span></div>
-        <div class="pips" id="pips" aria-hidden="true"></div>
       </div>
-      <div id="stage"><canvas id="cv"></canvas><div id="wordPop" hidden></div><div id="startHint" hidden>Træk op og ned for at svømme!</div></div>
+      <div id="stage"><canvas id="cv"></canvas><div id="toast" hidden></div><div id="wordPop" hidden></div><div id="startHint" hidden>Træk op og ned for at svømme!</div></div>
     </section>
   </main>
 
   <div class="overlay" id="meet" hidden>
     <div class="card">
+      <p class="eyebrow">Dagens ord</p>
       <h3 id="meetTitle">Nye ord!</h3>
       <div class="mcards" id="meetCards"></div>
       <p class="mute-note" id="meetNote" hidden></p>
-      <p class="hintline">Tryk på et ord for at høre det igen.</p>
-      <button class="btn green" id="meetGo" type="button">Lad os svømme! ▶</button>
+      <p class="hintline">Tryk på et ord for at høre det igen</p>
+      <button class="btn green" id="meetGo" type="button">Lad os svømme</button>
     </div>
   </div>
 
   <div class="overlay" id="quiz" hidden>
     <div class="card quiz">
       <div class="left">
-        <div class="why"><span id="quizIcon"></span><span id="quizWhy"></span></div>
+        <div class="why"><span class="whyicon" id="quizIcon"></span><span id="quizWhy"></span></div>
+        <p class="eyebrow">Hvilket billede passer til ordet?</p>
         <button class="wordbtn" id="quizWord" type="button" aria-label="Hør ordet igen">
-          <span class="row"><svg class="spk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z" fill="#8a6a12"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" stroke="#8a6a12" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span class="tw" id="quizTa"></span></span>
+          <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="tw" id="quizTa"></span>
           <span class="rm" id="quizRom"></span>
         </button>
         <div class="banner" id="quizBanner"></div>
         <p class="mute-note" id="quizNote" hidden></p>
-        <button class="btn" id="quizRetry" type="button" hidden>↻ Prøv banen igen</button>
+        <button class="btn" id="quizRetry" type="button" hidden>↻ Prøv igen</button>
       </div>
       <div class="choices" id="quizChoices"></div>
-    </div>
-  </div>
-
-  <div class="overlay" id="done" hidden>
-    <div class="card">
-      <div class="doorart" id="doneArt"></div>
-      <h3 id="doneTitle">Hajen er blevet stor!</h3>
-      <div class="stars3" id="doneStars"></div>
-      <div class="learned" id="doneWords"></div>
-      <div class="actions">
-        <button class="btn green" id="doneNext" type="button">Næste bane ▶</button>
-        <button class="btn ghost" id="doneHome" type="button" style="color:#6b3a10;border-color:#d8c690;background:#fff6">Hjem</button>
-      </div>
     </div>
   </div>
 
@@ -349,7 +385,7 @@
       </select>
     </label>
     <button id="optDebug" type="button">🛠 Vis skærmmål (fejlsøgning)</button>
-    <button id="optReset" type="button">↺ Start forfra fra bane 1</button>
+    <button id="optReset" type="button">↺ Start forfra som baby-haj</button>
   </div>
 
   <div id="dbg" hidden></div>
@@ -448,7 +484,7 @@
     // Lange tamilske ord får mindre skrift, så de kan være i kortene
     const lenCls = (txt) => (txt.length >= 11 ? "xlong" : txt.length >= 8 ? "long" : "");
     // Krymper tamilsk tekst, til den passer i sin ramme (aldrig ud over kanten)
-    const FIT = ".card-w .t, .mcard .t, .wordbtn .tw, #wordPop .tw, .chip .ta";
+    const FIT = ".card-w .t, .mcard .t, .wordbtn .tw, #wordPop .tw";
     function fitAll() {
       for (const el of document.querySelectorAll(FIT)) {
         el.style.fontSize = "";
@@ -499,6 +535,7 @@
       if (speechDone) { const d = speechDone; speechDone = null; d(false); }
     }
     // Svarer true, når klippet er spillet til ende, og false, hvis noget andet afbrød det eller afspilningen blev afvist
+    const setSpeaking = (on) => $("quizWord").classList.toggle("speaking", on);
     function speak(id) {
       stopSpeech();
       const token = speechToken;
@@ -506,9 +543,11 @@
         let finished = false;
         let safety = 0;
         let endTimer = 0;
+        setSpeaking(true);
         const finish = (ok) => {
           if (finished) return;
           finished = true;
+          setSpeaking(false);
           clearTimeout(safety);
           clearTimeout(endTimer);
           if (speechDone === done) speechDone = null;
@@ -574,7 +613,8 @@
       wrong: () => tone(220, .28, "triangle", .1, 0, -90),
       right: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .22, "triangle", .12, i * .09)),
       fanfare: () => [523, 659, 784, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .28, "triangle", .13, i * .12)),
-      pop: () => { tone(480, .1, "triangle", .12, 0, 380); tone(760, .12, "triangle", .08, .08); }
+      pop: () => { tone(480, .1, "triangle", .12, 0, 380); tone(760, .12, "triangle", .08, .08); },
+      levelup: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .2, "triangle", .12, i * .07))
     };
     const buzz = (ms) => { if (!muted && navigator.vibrate) navigator.vibrate(ms); };
 
@@ -595,7 +635,7 @@
     $("temple").innerHTML = Art.gopuram();
 
     function renderHome() {
-      $("playBtn").textContent = nextLevel > 1 ? `▶ Spil · bane ${nextLevel}` : "▶ Spil";
+      $("playBtn").textContent = nextLevel > 1 ? `▶ Spil · størrelse ${nextLevel}` : "▶ Spil";
       $("dictCount").textContent = `(${seenCount()}/${ALL.length})`;
     }
 
@@ -641,11 +681,17 @@
 
     const SMALL_COLORS = ["#ffd54f", "#ff8a65", "#81d4fa", "#a5d6a7", "#f48fb1", "#ce93d8", "#ffcc80", "#80cbc4"];
     const BIG_COLORS = ["#c62828", "#7b1fa2", "#d84315", "#455a64"];
-    const R0 = 5.5; // hajens startradius i enheder (1 enhed = 1 % af den korteste side)
+    // Hajen starter som en baby og vokser, hver gang den spiser. Størrelsen er i enheder (1 enhed = 1 % af den korteste side).
+    const R_BASE = 3.8;
+    const R_STEP = .75; // vækst pr. størrelse (højst 10 størrelser, så hajen ender omkring 11 enheder)
     const TOP = 50; // øverste pixels på banen er til HUD'en
     const SHARK_X = .2; // hajen står stille her (andel af bredden), og verden scroller mod venstre
-    const sharkRadius = () => R0 * (1 + .5 * G.eaten / G.need) * u;
+    const needFor = (n) => 5 + n; // fisk der skal spises for at vokse til næste størrelse
+    const sharkRadius = () => (R_BASE + R_STEP * Math.min(10, (G.n - 1) + G.eaten / G.need)) * u;
     let scrollX = 0;
+    let eatFx = []; // fisk der suges ind i munden
+    let floaters = []; // "+1" der svæver op
+    let rings = []; // lyde-ringe
     const GAIN = 1.5; // fingerens lodrette træk ganges, så en hel skærm ikke kræver et helt tommelfingerslag
 
     function resize() {
@@ -673,42 +719,52 @@
       if (first && G) { sh.R = sharkRadius(); sh.x = SW * SHARK_X; sh.y = sh.ty = (TOP + SH) / 2; fish = []; fillFish(); }
     }
 
-    const fishCounts = () => ({ small: 8, big: Math.min(5, 1 + Math.floor((G.n - 1) / 2)) });
+    const evilTarget = () => Math.min(5, 1 + Math.floor((G.n - 1) / 2));
     const homing = () => Math.min(.6, .12 * (G.n - 1));
-    // Mere tid på en smal telefonskærm: fiskene er 15 % langsommere, og bane 1 har kun én langsom stor fisk
-    const speedFactor = () => FACT[speedKey] * Math.min(1.25, 1 + .03 * (G.n - 1)) * (SW < SH ? .85 : 1);
+    // Mere tid på en smal telefonskærm: fiskene er 15 % langsommere, og på første størrelse er den ene onde fisk langsom
+    const speedFactor = () => FACT[speedKey] * Math.min(1.3, 1 + .03 * (G.n - 1)) * (SW < SH ? .85 : 1);
 
     // Alle fisk kommer ind fra højre og svømmer mod venstre. spread = fordelt ud over banen ved start (kun til højre for hajen).
+    // Størrelsen er i forhold til hajens størrelse lige nu: onde fisk er kun en lille smule større end hajen, og når hajen vokser forbi dem, kan den spise dem.
     function spawnFish(big, spread) {
-      // Store fisk er altid mindst 1,2 × hajens slutstørrelse
-      const r = (big ? (1.2 + Math.random() * .3) * R0 * 1.5 : (.45 + Math.random() * .4) * R0 * (1 + .5 * G.eaten / G.need)) * u;
+      const r = sh.R * (big ? 1.2 + Math.random() * .25 : .35 + Math.random() * .5);
       let f = null;
       for (let tries = 0; tries < 24; tries++) {
         const x = spread ? SW * .45 + Math.random() * SW * .9 : SW + r * 2.4 + Math.random() * 8 * u;
         const y = TOP + r + Math.random() * Math.max(1, SH - TOP - 2 * r);
-        f = { x, y, r, face: -1, big, phase: Math.random() * 6.28, freq: 1 + Math.random() * 1.5, amp: (big ? 1.5 : 3.5) * u * Math.random(), speed: (big ? 22 + Math.random() * 11 : 20 + Math.random() * 12) * u, color: big ? BIG_COLORS[rnd(BIG_COLORS.length)] : SMALL_COLORS[rnd(SMALL_COLORS.length)] };
-        // to store fisk må ikke ligge oven i hinanden, så der altid er et hul at svømme igennem
+        f = { x, y, r, face: -1, big, chomp: 0, phase: Math.random() * 6.28, freq: 1 + Math.random() * 1.5, amp: (big ? 1.5 : 3.5) * u * Math.random(), speed: (big ? 22 + Math.random() * 11 : 20 + Math.random() * 12) * u, color: big ? BIG_COLORS[rnd(BIG_COLORS.length)] : SMALL_COLORS[rnd(SMALL_COLORS.length)] };
+        // to onde fisk må ikke ligge oven i hinanden, så der altid er et hul at svømme igennem
         if (!fish.some((o) => o.big && big && Math.abs(o.x - x) < r * 3 && Math.abs(o.y - y) < (o.r + r) * 1.4)) break;
       }
       fish.push(f);
     }
     function fillFish() {
-      const c = fishCounts();
-      for (let i = 0; i < c.small; i++) spawnFish(false, true);
-      for (let i = 0; i < c.big; i++) spawnFish(true, true);
+      for (let i = 0; i < 8; i++) spawnFish(false, true);
+      for (let i = 0; i < evilTarget(); i++) spawnFish(true, true);
+    }
+    // Holder antallet af onde og spiselige fisk oppe, så der altid kommer nye ind fra højre
+    let spawnCd = 0;
+    function ensureFish(dt) {
+      spawnCd -= dt;
+      if (spawnCd > 0) return;
+      let evil = 0;
+      let food = 0;
+      for (const f of fish) { if (f.big) evil++; else food++; }
+      if (evil < evilTarget()) { spawnFish(true, false); spawnCd = .5; }
+      else if (food < 8) { spawnFish(false, false); spawnCd = .22; }
     }
 
     function loadLevel(n, keepWords, keepReview) {
       const fresh = keepWords || shuffle(ALL.filter((id) => !ws(id).seen)).slice(0, 2);
       G = {
-        n, need: Math.min(22, 8 + 2 * n), eaten: 0, caught: 0, grace: 0, wonT: 0, dyT: 0,
+        n, need: needFor(n), eaten: 0, total: 0, caught: 0, diedTier: 0, grace: 0, dyT: 0, killer: null,
         newWords: fresh,
         reviewWords: keepReview || pickWeighted(seenIds(), 2, fresh),
         bigColor: BIG_COLORS[0]
       };
-      sh = { x: SW * SHARK_X, y: (TOP + SH) / 2, ty: (TOP + SH) / 2, vy: 0, face: 1, tilt: 0, R: R0 * u, chew: 0 };
+      sh = { x: SW * SHARK_X, y: (TOP + SH) / 2, ty: (TOP + SH) / 2, vy: 0, face: 1, tilt: 0, R: R_BASE * u, chew: 0, pop: 0, dscale: 1 };
+      sh.R = sharkRadius();
       resetActors();
-      $("playTitle").textContent = `Bane ${n}`;
       renderFoot();
     }
 
@@ -716,9 +772,13 @@
       sh.x = SW * SHARK_X;
       sh.y = sh.ty = (TOP + SH) / 2;
       sh.vy = 0;
+      sh.dscale = 1;
       sh.R = sharkRadius();
       fish = [];
       particles = [];
+      eatFx = [];
+      floaters = [];
+      rings = [];
       fillFish();
       G.grace = 0;
     }
@@ -742,11 +802,11 @@
 
     // Ordkort under spillet: gentagelse uden at afbryde
     let popTimer = 0;
-    function wordPop(id) {
+    function wordPop(id, isNew) {
       const el = $("wordPop");
       const w = WORDS[id];
       el.replaceChildren(picBox(id));
-      el.insertAdjacentHTML("beforeend", `<div><span class="tw ${lenCls(w.ta)}">${w.ta}</span><span class="rm rom">${w.rom}</span></div>`);
+      el.insertAdjacentHTML("beforeend", `<div>${isNew ? `<span class="badge new">Nyt ord</span>` : ""}<span class="tw ${lenCls(w.ta)}">${w.ta}</span><span class="rm rom">${w.rom}</span></div>`);
       el.hidden = false;
       el.style.animation = "none";
       void el.offsetWidth;
@@ -759,14 +819,11 @@
     }
     function hidePop() { clearTimeout(popTimer); $("wordPop").hidden = true; }
 
-    function renderFoot() {
-      const lit = Math.max(0, 3 - G.caught);
-      $("pips").innerHTML = [0, 1, 2].map((i) => starSvg(i < lit ? "" : "off")).join("");
-      renderProg();
-    }
+    function renderFoot() { renderProg(); }
     function renderProg() {
-      $("progFill").style.width = `${Math.round(100 * G.eaten / G.need)}%`;
-      $("progText").textContent = `🐟 ${G.eaten} / ${G.need}`;
+      $("playTitle").textContent = `Størrelse ${G.n}`;
+      $("progFill").style.width = `${Math.min(100, Math.round(100 * G.eaten / G.need))}%`;
+      $("progText").textContent = `${G.eaten} / ${G.need}`;
     }
 
     // ---------- Mød ordene ----------
@@ -820,38 +877,79 @@
     });
 
     // ---------- Spillet ----------
+    // Lille lyd-ring, der breder sig fra hajens mund
+    const ring = (x, y, r, color = "255,255,255") => rings.push({ x, y, r, life: 1, color });
+    const floatText = (x, y, text, color = "#fff") => floaters.push({ x, y, text, life: 1, color });
     function eat(f) {
       fish.splice(fish.indexOf(f), 1);
-      G.eaten++;
-      sh.chew = .25;
-      burst(f.x, f.y, 10, [f.color, "#fff", "#bae6fd"]);
+      const w = f.r > sh.R * .65 ? 2 : 1; // en stor fisk giver dobbelt vækst
+      G.eaten += w;
+      G.total++;
+      sh.chew = .35;
+      eatFx.push({ x: f.x, y: f.y, r: f.r, color: f.color, phase: f.phase, t: 0 });
+      floatText(sh.x + sh.R * .6, sh.y - sh.R * 1.3, `+${w}`, w > 1 ? "#fde047" : "#fff");
+      ring(sh.x + sh.R * .9, sh.y, sh.R * .5);
+      burst(sh.x + sh.R * .9, sh.y, 6, ["#fff", "#bae6fd", f.color]);
       sfx.eat();
       buzz(15);
       renderProg();
-      if (G.eaten >= G.need) { win(); return; }
-      spawnFish(false, false);
-      if (G.eaten % 4 === 0) { const w = pickWeighted(seenIds(), 1)[0]; if (w) wordPop(w); }
+      if (G.eaten >= G.need) { tierUp(); return; }
+      if (G.total % 4 === 0) { const wd = pickWeighted(seenIds(), 1)[0]; if (wd) wordPop(wd); }
     }
 
+    // Hajen er blevet en størrelse større: ingen pause, bare en stjerne og et nyt ord undervejs
+    function tierUp() {
+      const perfect = G.diedTier === 0;
+      const got = perfect ? 2 : 1;
+      G.eaten = Math.max(0, G.eaten - G.need);
+      G.n++;
+      G.need = needFor(G.n);
+      G.diedTier = 0;
+      nextLevel = G.n;
+      write("level", nextLevel);
+      stars += got;
+      write("stars", stars);
+      Topbar.refreshStars(true);
+      sh.pop = 1;
+      for (let i = 0; i < 3; i++) ring(sh.x, sh.y, sh.R * (.8 + i * .5), "253,224,71");
+      burst(sh.x, sh.y, 22, ["#fde047", "#fff", "#7dd3fc", "#34d399"]);
+      sfx.levelup();
+      buzz(40);
+      toast(`Størrelse ${G.n}`, perfect ? "Ingen ædt! +2 ⭐" : "+1 ⭐");
+      renderProg();
+      const nw = shuffle(ALL.filter((id) => !ws(id).seen))[0];
+      if (nw) { const st = ws(nw); st.seen = true; st.t = Date.now(); saveWords(); wordPop(nw, true); }
+    }
+    let toastTimer = 0;
+    function toast(title, sub) {
+      const el = $("toast");
+      el.innerHTML = `<b>${title}</b><span>${sub}</span>`;
+      el.hidden = false;
+      el.style.animation = "none";
+      void el.offsetWidth;
+      el.style.animation = "";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.hidden = true; }, 2300);
+    }
+
+    // En stor fisk fanger hajen: skærmen ryster, hajen suges ind i munden, og fisken tygger
     function caught(f) {
       state = "dying";
       hidePop();
       stopSpeech();
       G.caught++;
+      G.diedTier++;
       G.dyT = 0;
+      G.killer = f;
       G.bigColor = f.color;
+      G.burped = false;
+      sh.dx0 = sh.x;
+      sh.dy0 = sh.y;
       renderFoot();
       sfx.caught();
       buzz(60);
       burst(sh.x, sh.y, 14, ["#7dd3fc", "#fff"]);
-    }
-
-    function win() {
-      state = "won";
-      hidePop();
-      G.wonT = 0;
-      sfx.fanfare();
-      confetti();
+      ring(sh.x, sh.y, sh.R, "255,80,80");
     }
 
     // To måder at styre på (⚙️): "tryk" = let tyngdekraft, hold fingeren for at stige og slip for at synke (som Big Shark), "traek" = træk op og ned.
@@ -884,15 +982,14 @@
       const h = homing();
       scrollX += 9 * u * f0 * dt;
       for (const f of [...fish]) {
-        f.x -= f.speed * f0 * (f.big && G.n === 1 ? .6 : 1) * dt;
+        f.big = f.r > sh.R; // vokser hajen forbi en fisk, bliver den spiselig
+        f.x -= f.speed * f0 * (f.big && G.n === 1 ? .65 : 1) * dt;
         let vy = Math.cos(time * f.freq + f.phase) * f.amp * f.freq;
         if (f.big && h && f.x > sh.x) vy += clamp(sh.y - f.y, -8 * u, 8 * u) * h;
         f.y = clamp(f.y + vy * dt, TOP + f.r * .8, SH - f.r * .8);
-        if (f.x < -f.r * 2.6) {
-          fish.splice(fish.indexOf(f), 1);
-          spawnFish(f.big, false);
-        }
+        if (f.x < -f.r * 2.6) fish.splice(fish.indexOf(f), 1);
       }
+      ensureFish(dt);
     }
 
     function collide() {
@@ -910,9 +1007,16 @@
       for (const b of bubbles) { b.y -= b.sp * u * dt; b.x -= (state === "play" ? 6 : 1.5) * u * dt; if (b.y < -b.r * u || b.x < -5) { b.y = SH + b.r * u; b.x = SW * (.3 + Math.random() * .8); } }
       for (const p of particles) { p.x += p.vx * u * dt * 6; p.y += p.vy * u * dt * 6; p.vy -= dt * .4; p.life -= dt * 1.4; }
       particles = particles.filter((p) => p.life > 0);
+      for (const s of eatFx) s.t += dt / .24;
+      eatFx = eatFx.filter((s) => s.t < 1);
+      for (const t of floaters) { t.y -= 12 * u * dt; t.life -= dt * 1.2; }
+      floaters = floaters.filter((t) => t.life > 0);
+      for (const r of rings) { r.r += 16 * u * dt; r.life -= dt * 2.4; }
+      rings = rings.filter((r) => r.life > 0);
       if (!G || !sh) return;
       sh.R += (sharkRadius() - sh.R) * Math.min(1, dt * 6);
       sh.chew = Math.max(0, sh.chew - dt);
+      sh.pop = Math.max(0, sh.pop - dt * 1.8);
       if (state === "play") {
         G.grace = Math.max(0, G.grace - dt);
         moveShark(dt);
@@ -922,15 +1026,23 @@
         if (controlMode !== "tryk") moveShark(dt); // med tyngdekraft hænger hajen stille, til spillet starter
       } else if (state === "dying") {
         G.dyT += dt;
-        sh.vy = sh.vy * .9 - 3 * u * dt;
-        sh.y += sh.vy * dt;
-        if (G.dyT > 1.1) openQuiz();
-      } else if (state === "won") {
-        G.wonT += dt;
-        moveShark(dt);
-        scrollX += 9 * u * dt;
-        for (const f of fish) { if (f.big) { f.x -= f.speed * 2.5 * dt; f.y -= 6 * u * dt; } }
-        if (G.wonT > 2.2) levelDone();
+        const k = G.killer;
+        const p = clamp(G.dyT / .55, 0, 1);
+        const e = p * p * (3 - 2 * p);
+        const mx = k.x - k.r * .85;
+        const my = k.y + k.r * .08;
+        sh.x = sh.dx0 + (mx - sh.dx0) * e; // hajen suges ind i fiskens mund
+        sh.y = sh.dy0 + (my - sh.dy0) * e;
+        sh.dscale = 1 - .93 * e;
+        k.x -= 6 * u * dt;
+        k.chomp = G.dyT < .45 ? Math.min(1, G.dyT / .25) : Math.max(0, 1 - (G.dyT - .45) / .35); // mund åben, så sluger den
+        if (G.dyT >= .55 && !G.burped) {
+          G.burped = true;
+          burst(mx, my, 16, ["#fff", "#bae6fd", "#7dd3fc"]);
+          ring(k.x, k.y, k.r * .8, "255,255,255");
+          floatText(k.x, k.y - k.r * 1.1, "SLURP!", "#fff");
+        }
+        if (G.dyT > 1.35) openQuiz();
       }
     }
 
@@ -977,7 +1089,7 @@
       $("quizBanner").className = "banner";
       $("quizRetry").hidden = true;
       $("quizIcon").innerHTML = fishSvg(G.bigColor, true);
-      $("quizWhy").textContent = "Du blev ædt af en stor fisk! Svar rigtigt for at svømme videre.";
+      $("quizWhy").textContent = "Du blev ædt af en større fisk";
       const box = $("quizChoices");
       box.replaceChildren();
       box.className = `choices n${n}`;
@@ -1056,58 +1168,11 @@
       beginReady();
     }
 
-    // Forkert svar: samme bane forfra, og hajen er lille igen
+    // Forkert svar: samme størrelse forfra, og hajen er lille igen
     function restartLevel() {
       loadLevel(G.n, G.newWords, G.reviewWords);
       beginReady();
     }
-
-    // ---------- Banen er klaret ----------
-    function levelDone() {
-      state = "done";
-      const got = G.caught === 0 ? 3 : G.caught === 1 ? 2 : 1;
-      stars += got;
-      write("stars", stars);
-      Topbar.refreshStars(true);
-      nextLevel = G.n + 1;
-      write("level", nextLevel);
-      $("doneArt").innerHTML = sharkSvg("sd");
-      $("doneTitle").textContent = G.caught === 0 ? "Helt perfekt! Hajen er blevet stor!" : "Hajen er blevet stor!";
-      const row = $("doneStars");
-      row.replaceChildren();
-      for (let i = 0; i < 3; i++) {
-        const holder = document.createElement("span");
-        holder.innerHTML = starSvg(i < got ? "on" : "");
-        if (i < got) holder.firstChild.style.setProperty("--d", `${.25 + i * .25}s`);
-        row.append(holder.firstChild);
-      }
-      const words = $("doneWords");
-      words.replaceChildren();
-      for (const id of G.newWords) {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "chip";
-        chip.append(picBox(id));
-        chip.insertAdjacentHTML("beforeend", `<span class="ta">${WORDS[id].ta}</span>`);
-        chip.addEventListener("click", () => { audio(); speak(id); });
-        words.append(chip);
-      }
-      $("done").hidden = false;
-      fitSoon();
-    }
-    function confetti() {
-      const colors = ["#fbbf24", "#f472b6", "#7dd3fc", "#fde047", "#34d399", "#fff"];
-      for (let i = 0; i < 30; i++) {
-        const s = document.createElement("span");
-        const size = 10 + rnd(12);
-        s.className = "petal";
-        s.style.cssText = `left:${rnd(100)}vw;width:${size}px;height:${size}px;background:${colors[rnd(colors.length)]};animation-duration:${2.2 + Math.random() * 2}s;animation-delay:${Math.random() * .8}s`;
-        document.body.append(s);
-        setTimeout(() => s.remove(), 5200);
-      }
-    }
-    $("doneNext").addEventListener("click", () => { $("done").hidden = true; startLevel(nextLevel); });
-    $("doneHome").addEventListener("click", () => { $("done").hidden = true; goHome(); });
 
     function goHome() {
       stopSpeech();
@@ -1150,7 +1215,7 @@
       ctx.beginPath();
       ctx.arc(0, 0, r * 2.4, 0, 6.3);
       ctx.fill();
-      ctx.scale(r, r);
+      ctx.scale(r * (1 + .12 * (f.chomp || 0)), r * (1 - .08 * (f.chomp || 0)));
       const dark = Art.dark(f.color, .25);
       const wag = Math.sin(time * 9 + f.phase) * .22;
       ctx.lineJoin = "round";
@@ -1189,8 +1254,12 @@
       if (f.big) {
         ctx.lineWidth = .1;
         ctx.beginPath(); ctx.moveTo(.22, -.45); ctx.lineTo(.78, -.28); ctx.stroke();
+        if (f.chomp > .05) { // åben mund, når den spiser hajen
+          ctx.fillStyle = "#3b0a0a";
+          ctx.beginPath(); ctx.moveTo(1, .02); ctx.quadraticCurveTo(.95, .2 + .55 * f.chomp, .3, .22 + .1 * f.chomp); ctx.quadraticCurveTo(.7, .02, 1, .02); ctx.fill();
+        }
         ctx.lineWidth = .07;
-        ctx.beginPath(); ctx.moveTo(.98, .06); ctx.quadraticCurveTo(.7, .4, .3, .22); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(.98, .06); ctx.quadraticCurveTo(.7, .4 + .3 * (f.chomp || 0), .3, .22); ctx.stroke();
         ctx.fillStyle = "#fff";
         ctx.beginPath(); ctx.moveTo(.86, .16); ctx.lineTo(.78, .3); ctx.lineTo(.7, .2); ctx.moveTo(.6, .22); ctx.lineTo(.52, .34); ctx.lineTo(.44, .22); ctx.fill();
       } else {
@@ -1206,11 +1275,12 @@
       const r = sh.R;
       ctx.save();
       ctx.translate(sh.x, sh.y);
-      if (state === "dying") { ctx.rotate(G.dyT * 7); ctx.globalAlpha = Math.max(0, 1 - G.dyT / 1.2); }
+      if (state === "dying") { ctx.rotate(G.dyT * 9); ctx.scale(sh.dscale, sh.dscale); ctx.globalAlpha = Math.min(1, sh.dscale * 4); }
       ctx.scale(sh.face, 1);
       ctx.rotate(sh.tilt);
-      const bite = sh.chew > 0 ? 1 + .12 * Math.sin(sh.chew * 12.6) : 1;
-      ctx.scale(r * bite, r);
+      const bite = sh.chew > 0 ? 1 + .12 * Math.sin(sh.chew * 9) : 1;
+      const popS = 1 + .25 * sh.pop * sh.pop; // lille hop, når hajen vokser
+      ctx.scale(r * bite * popS, r * popS);
       ctx.lineJoin = "round";
       ctx.fillStyle = "#2a6fb0";
       ctx.fill(path("dorsal"));
@@ -1232,7 +1302,15 @@
       ctx.strokeStyle = "#12263a";
       ctx.lineWidth = .04;
       ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(1.27, .13); ctx.quadraticCurveTo(.95, sh.chew > 0 ? .5 : .32, .6, .22); ctx.stroke();
+      if (sh.chew > 0 || state === "dying") { // åben mund med tænder, når hajen spiser
+        const open = state === "dying" ? 1 : Math.min(1, sh.chew * 4);
+        ctx.fillStyle = "#7f1d1d";
+        ctx.beginPath(); ctx.moveTo(1.3, .1); ctx.quadraticCurveTo(1.0, .1 + .55 * open, .55, .26); ctx.quadraticCurveTo(.95, .12, 1.3, .1); ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.beginPath(); ctx.moveTo(1.22, .12); ctx.lineTo(1.14, .26 * open + .1); ctx.lineTo(1.06, .13); ctx.moveTo(.98, .15); ctx.lineTo(.9, .3 * open + .12); ctx.lineTo(.82, .17); ctx.fill();
+      } else {
+        ctx.beginPath(); ctx.moveTo(1.27, .13); ctx.quadraticCurveTo(.95, .32, .6, .22); ctx.stroke();
+      }
       ctx.strokeStyle = "#1f5a92";
       ctx.lineWidth = .03;
       ctx.beginPath(); ctx.moveTo(.5, -.25); ctx.quadraticCurveTo(.46, -.1, .5, .05); ctx.moveTo(.38, -.26); ctx.quadraticCurveTo(.34, -.1, .38, .04); ctx.stroke();
@@ -1278,6 +1356,11 @@
 
     function draw() {
       ctx.clearRect(0, 0, SW, SH);
+      ctx.save();
+      if (G && state === "dying" && G.dyT < .4) { // skærmen ryster, når man bliver ædt
+        const k = (1 - G.dyT / .4) * u * 1.1;
+        ctx.translate((Math.random() - .5) * 2 * k, (Math.random() - .5) * 2 * k);
+      }
       // Lysstråler, ruiner og bobler
       ctx.save();
       for (let i = 0; i < 3; i++) {
@@ -1295,8 +1378,23 @@
       for (const b of bubbles) { ctx.beginPath(); ctx.arc(b.x, b.y, b.r * u, 0, 6.3); ctx.fill(); ctx.stroke(); }
       drawNearLayers();
       ctx.restore();
-      if (!G || !sh) return;
+      if (!G || !sh) { ctx.restore(); return; }
       for (const f of fish) drawFish(f);
+      // Fisk der suges ind i hajens mund (formindskes og drejer)
+      for (const s of eatFx) {
+        const e = s.t * s.t * (3 - 2 * s.t);
+        const mx = sh.x + sh.R * .85;
+        const my = sh.y + sh.R * .05;
+        ctx.save();
+        ctx.globalAlpha = 1 - e * .4;
+        drawFish({ x: s.x + (mx - s.x) * e, y: s.y + (my - s.y) * e, r: Math.max(.5, s.r * (1 - .9 * e)), face: -1, big: false, chomp: 0, color: s.color, phase: s.phase + s.t * 12 });
+        ctx.restore();
+      }
+      for (const rg of rings) {
+        ctx.strokeStyle = `rgba(${rg.color},${Math.max(0, rg.life) * .7})`;
+        ctx.lineWidth = Math.max(1.5, u * .5 * rg.life);
+        ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, 0, 6.3); ctx.stroke();
+      }
       // Advarsel: en rød pil ved højre kant, før en stor fisk svømmer ind
       for (const f of fish) {
         if (!f.big || f.x < SW + f.r * .6) continue;
@@ -1345,6 +1443,24 @@
         ctx.beginPath(); ctx.arc(p.x, p.y, p.s * p.life, 0, 6.3); ctx.fill();
       }
       ctx.globalAlpha = 1;
+      for (const t of floaters) { // "+1" og "SLURP!" der svæver op
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, t.life * 1.6);
+        ctx.font = `800 ${Math.round(u * 3.6)}px "Trebuchet MS", sans-serif`;
+        ctx.textAlign = "center";
+        ctx.lineWidth = Math.max(3, u * .7);
+        ctx.strokeStyle = "rgba(8,28,50,.75)";
+        ctx.lineJoin = "round";
+        ctx.strokeText(t.text, t.x, t.y);
+        ctx.fillStyle = t.color;
+        ctx.fillText(t.text, t.x, t.y);
+        ctx.restore();
+      }
+      ctx.restore();
+      if (G && state === "dying" && G.dyT < .5) { // kort rød blitz
+        ctx.fillStyle = `rgba(255,50,50,${.32 * (1 - G.dyT / .5)})`;
+        ctx.fillRect(0, 0, SW, SH);
+      }
     }
 
     let last = performance.now();
@@ -1471,9 +1587,11 @@
       pointer, answer, closeQuiz, startLevel, speak, wordState, ALL,
       get SW() { return SW; }, get SH() { return SH; },
       tick(sec) { for (let i = 0; i < sec * 60; i++) update(1 / 60); draw(); },
-      win, caught, eat, get stars() { return stars; }
+      tierUp, caught, eat, get stars() { return stars; }
     };
     if (qs.has("l")) startLevel(Math.max(1, Number(qs.get("l")) || 1));
+    // ?quiz=1 (sammen med ?l=) åbner quizzen direkte, til skærmbilleder
+    if (qs.has("quiz") && qs.has("l")) setTimeout(() => { $("meetGo").click(); state = "play"; pointer.active = false; G.grace = 0; const e = fish.find((f) => f.big); e.x = sh.x; e.y = sh.y; for (let i = 0; i < 100; i++) update(1 / 60); }, 800);
   })();
   </script>
 </body>
