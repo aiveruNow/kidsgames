@@ -6,8 +6,37 @@
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
 
-  const svg = (body, attrs = "") =>
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" ${attrs} aria-hidden="true" focusable="false">${body}</svg>`;
+  // Alle tegninger får et lys-filter (se REAL): blød skygge, form fra lys og skygge, glans og en fin kornethed, så de ser mere håndgribelige ud end flade ikoner.
+  // Hver tegning får sit eget filter-id, fordi flere SVG'er ligger i samme side.
+  let fid = 0;
+  const REAL = (id) =>
+    `<filter id="${id}" x="-12%" y="-12%" width="124%" height="130%" color-interpolation-filters="sRGB">` +
+    // fine former (kanter mellem farver) og stor rundhed (hele figuren som en kuppel)
+    `<feGaussianBlur in="SourceGraphic" stdDeviation="1.3" result="soft"/>` +
+    `<feColorMatrix in="soft" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  .2 .3 .1 .4 0" result="h"/>` +
+    `<feDiffuseLighting in="h" surfaceScale="4.5" diffuseConstant="1.05" lighting-color="#ffffff" result="d1"><feDistantLight azimuth="235" elevation="58"/></feDiffuseLighting>` +
+    `<feGaussianBlur in="SourceAlpha" stdDeviation="5.5" result="dome"/>` +
+    `<feDiffuseLighting in="dome" surfaceScale="17" diffuseConstant="1.05" lighting-color="#ffffff" result="d2"><feDistantLight azimuth="235" elevation="58"/></feDiffuseLighting>` +
+    `<feComposite in="SourceGraphic" in2="d1" operator="arithmetic" k1="1.18" k2="0" k3="0" k4="0" result="lit1"/>` +
+    `<feComposite in="lit1" in2="d2" operator="arithmetic" k1="1.18" k2="0" k3="0" k4="0" result="lit2a"/>` +
+    `<feComposite in="SourceGraphic" in2="lit2a" operator="arithmetic" k1="0" k2=".3" k3=".7" k4="0" result="lit2"/>` +
+    `<feSpecularLighting in="dome" surfaceScale="17" specularConstant=".5" specularExponent="22" lighting-color="#ffffff" result="sp"><feDistantLight azimuth="235" elevation="58"/></feSpecularLighting>` +
+    `<feComposite in="sp" in2="SourceAlpha" operator="in" result="sp2"/>` +
+    `<feComposite in="lit2" in2="sp2" operator="arithmetic" k1="0" k2="1" k3=".5" k4="0" result="shine"/>` +
+    `<feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="7" result="nz"/>` +
+    `<feColorMatrix in="nz" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 1" result="nz2"/>` +
+    `<feComposite in="shine" in2="nz2" operator="arithmetic" k1="0" k2="1" k3=".14" k4="-.07" result="grain"/>` +
+    `<feComposite in="grain" in2="SourceAlpha" operator="in" result="body"/>` +
+    `<feGaussianBlur in="SourceAlpha" stdDeviation="1.8" result="sb"/><feOffset in="sb" dx="1" dy="2.6" result="so"/>` +
+    `<feFlood flood-color="#06140c" flood-opacity=".34"/><feComposite in2="so" operator="in" result="shadow"/>` +
+    `<feMerge><feMergeNode in="shadow"/><feMergeNode in="body"/></feMerge></filter>`;
+
+  const svg = (body, attrs = "", flat = false) => {
+    if (flat) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" ${attrs} aria-hidden="true" focusable="false">${body}</svg>`;
+    const id = `rl${++fid}`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" ${attrs} aria-hidden="true" focusable="false"><defs>${REAL(id)}</defs>` +
+      `<g filter="url(#${id})" transform="translate(50 50) scale(.93) translate(-50 -50)">${body}</g></svg>`;
+  };
 
   function mix(hex, to, k) {
     const a = parseInt(hex.slice(1), 16);
@@ -45,7 +74,7 @@
   }
 
   // ---------- Tempeltårn (gopuram) ----------
-  function gopuram() {
+  function gopuram(flat) {
     const tiers = [
       [14, 84, 72, 14, "#e9b872"], [20, 68, 60, 16, "#d9632b"], [26, 53, 48, 15, "#e9b872"],
       [32, 40, 36, 13, "#d9632b"], [38, 29, 24, 11, "#e9b872"]
@@ -64,7 +93,7 @@
     s += `<path d="M38 29Q50 12 62 29Z" fill="#f59e0b"/><circle cx="50" cy="12" r="3.6" fill="#fcd34d"/>` +
       `<circle cx="40" cy="22" r="2.6" fill="#fcd34d"/><circle cx="60" cy="22" r="2.6" fill="#fcd34d"/>` +
       `<path d="M40 98V88Q50 76 60 88V98Z" fill="#2a0e06"/><path d="M38 98V88Q50 73 62 88V98" fill="none" stroke="#fcd34d" stroke-width="2.4"/>`;
-    return svg(s);
+    return svg(s, "", flat);
   }
 
   // ---------- Personer ----------
@@ -305,7 +334,7 @@
       const rot = (sx < 0 ? 180 - r : r) * (sy < 0 ? -1 : 1);
       return leaf(px, py, l, sx < 0 && sy < 0 ? -(180 - r) : rot, c);
     }).join("");
-    const inner = gopuram().replace(/<svg[^>]*>|<\/svg>/g, "");
+    const inner = gopuram(true).replace(/<svg[^>]*>|<\/svg>/g, "");
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">` +
       `<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>` +
       `<rect width="${W}" height="${H}" fill="url(#sg)"/>` +

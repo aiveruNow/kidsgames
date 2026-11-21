@@ -13,6 +13,19 @@
   const dk = (c, k = .3) => mix(c, "#000000", k);
   const lt = (c, k = .3) => mix(c, "#ffffff", k);
 
+  // Et mere naturligt øje: hvid øjeæble med mørk kant, farvet regnbuehinde, pupil og to glans (bruges af de fleste dyr)
+  function eyeReal(c, x, y, r, iris, pupil) {
+    c.fillStyle = "#f2efe4"; c.beginPath(); c.arc(x, y, r, 0, PI2); c.fill();
+    c.strokeStyle = "rgba(10,16,24,.5)"; c.lineWidth = r * .16; c.stroke();
+    const ir = r * .74;
+    const g = c.createRadialGradient(x + r * .1, y, ir * .2, x + r * .1, y, ir);
+    g.addColorStop(0, dk(iris || "#d9a93a", .35)); g.addColorStop(.7, iris || "#d9a93a"); g.addColorStop(1, dk(iris || "#d9a93a", .3));
+    c.fillStyle = g; c.beginPath(); c.arc(x + r * .1, y, ir, 0, PI2); c.fill();
+    c.fillStyle = pupil || "#080e16"; c.beginPath(); c.arc(x + r * .14, y, r * .42, 0, PI2); c.fill();
+    c.fillStyle = "rgba(255,255,255,.95)"; c.beginPath(); c.arc(x - r * .16, y - r * .32, r * .22, 0, PI2); c.fill();
+    c.fillStyle = "rgba(255,255,255,.6)"; c.beginPath(); c.arc(x + r * .34, y + r * .3, r * .09, 0, PI2); c.fill();
+  }
+
   // ---------- Mønstre på fisk ----------
   const B = (x, w, c, e) => ({ t: "band", x, w, c, e }); // lodret bånd
   const S = (y, h, c) => ({ t: "stripe", y, h, c }); // vandret stribe
@@ -66,15 +79,25 @@
     if (s.tail === "round") { c.moveTo(0, 0); c.quadraticCurveTo(-tl * .6, -H * 1.1, -tl, -H * .7); c.quadraticCurveTo(-tl * .7, 0, -tl, H * .7); c.quadraticCurveTo(-tl * .6, H * 1.1, 0, 0); }
     else if (s.tail === "lunate") { c.moveTo(0, 0); c.quadraticCurveTo(-tl * .3, -H * 1.3, -tl * 1.1, -H * 1.6); c.quadraticCurveTo(-tl * .5, 0, -tl * 1.1, H * 1.6); c.quadraticCurveTo(-tl * .3, H * 1.3, 0, 0); }
     else { c.moveTo(0, 0); c.lineTo(-tl, -H * .95); c.quadraticCurveTo(-tl * .55, 0, -tl, H * .95); }
-    c.closePath(); c.fill(); c.restore();
+    c.closePath(); c.globalAlpha = .93; c.fill(); c.globalAlpha = 1;
+    c.save(); c.clip(); c.strokeStyle = "rgba(0,0,0,.2)"; c.lineWidth = .02; c.beginPath();
+    for (let k = -3; k <= 3; k++) { c.moveTo(0, 0); c.lineTo(-tl * 1.1, k * H * .32); }
+    c.stroke(); c.restore();
+    c.restore();
     // rygfinne og bugfinne
     const ds = s.dorsal == null ? .35 : s.dorsal;
+    const rays = (bx, by, tx, ty0, ty1) => { // fine finnestråler i den finne, der lige er tegnet
+      c.save(); c.clip(); c.strokeStyle = "rgba(0,0,0,.22)"; c.lineWidth = .018; c.beginPath();
+      for (let k = 0; k < 6; k++) { c.moveTo(bx - k * L * .1, by); c.lineTo(tx - k * L * .12, ty0 + (ty1 - ty0) * (k % 3) / 2); }
+      c.stroke(); c.restore();
+    };
     c.fillStyle = s.dfin || fin;
     if (ds > 0) {
       c.beginPath();
       if (s.tri) { c.moveTo(L * .15, -H * .88); c.lineTo(-L * .12, -H * (1 + ds * 2.3)); c.lineTo(-L * .42, -H * .8); }
       else { c.moveTo(L * .45, -H * .82); c.quadraticCurveTo(L * .05, -H * (1 + ds * 2.2), -L * .55, -H * .74); }
       c.closePath(); c.fill();
+      if (!s.tri) rays(L * .4, -H * .8, L * .1, -H * (1 + ds * 1.6), -H * (1 + ds * 1.1));
     }
     if (s.anal) { c.beginPath(); c.moveTo(L * .2, H * .8); c.quadraticCurveTo(-L * .1, H * (1 + s.anal * 2.2), -L * .55, H * .74); c.closePath(); c.fill(); }
     if (s.wing) { // flyvefisk: store brystfinner
@@ -88,8 +111,24 @@
     c.fillStyle = g; c.fill(bp);
     c.save(); c.clip(bp);
     for (const p of s.pat || []) pattern(c, p, L, H);
+    // naturlig belysning: skygge på maven, glans på ryggen og fine skæl (skæl kun, når fisken er stor nok til at man kan se dem)
+    const sh = c.createLinearGradient(0, -H, 0, H);
+    sh.addColorStop(0, "rgba(0,0,0,.16)"); sh.addColorStop(.18, "rgba(0,0,0,0)"); sh.addColorStop(.55, "rgba(0,0,0,0)"); sh.addColorStop(1, "rgba(0,0,0,.3)");
+    c.fillStyle = sh; c.fillRect(-L, -H * 1.3, L * 2, H * 2.6);
+    if (o.r * H > 7 && !s.tri) {
+      const sr = Math.max(.07, H * .17);
+      c.strokeStyle = "rgba(0,0,0,.12)"; c.lineWidth = .016; c.beginPath();
+      for (let row = -5; row <= 5; row++) for (let x = -L * .8 + (row & 1) * sr; x < L * .78; x += sr * 2) { c.moveTo(x + sr, row * sr * .85); c.arc(x, row * sr * .85, sr, 0, Math.PI * .9); }
+      c.stroke();
+    }
+    const gl = c.createLinearGradient(0, -H, 0, -H * .1);
+    gl.addColorStop(0, "rgba(255,255,255,.4)"); gl.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = gl; c.beginPath(); c.ellipse(L * .12, -H * .52, L * .62, H * .38, -.03, 0, PI2); c.fill();
+    c.strokeStyle = "rgba(0,0,0,.11)"; c.lineWidth = .025; c.beginPath(); c.moveTo(L * .42, -H * .1); c.quadraticCurveTo(-L * .2, H * .12, -L * .8, 0); c.stroke();
     c.restore();
-    c.strokeStyle = dk(s.body, .45); c.lineWidth = .045; c.stroke(bp);
+    c.strokeStyle = "rgba(0,0,0,.38)"; c.lineWidth = .03; c.stroke(bp);
+    // gællelåg
+    if (!s.gills && !s.tri) { c.strokeStyle = "rgba(0,0,0,.3)"; c.lineWidth = .03; c.beginPath(); c.moveTo(L * .44, -H * .62); c.quadraticCurveTo(L * .3, 0, L * .44, H * .62); c.stroke(); }
     // brystfinne
     c.fillStyle = fin; c.globalAlpha = .85; c.beginPath(); c.ellipse(L * .15, H * .5, H * .5, H * .18, .7, 0, PI2); c.fill(); c.globalAlpha = 1;
     if (s.gills) { c.strokeStyle = dk(s.body, .5); c.lineWidth = .035; c.beginPath(); for (let i = 0; i < 4; i++) { c.moveTo(L * (.3 - i * .06), -H * .4); c.quadraticCurveTo(L * (.26 - i * .06), 0, L * (.3 - i * .06), H * .4); } c.stroke(); }
@@ -119,9 +158,7 @@
     const er = s.eye || Math.max(.1, H * .22);
     const ex = L * (s.ex || .56);
     const ey = -H * .2;
-    c.fillStyle = "#fff"; c.beginPath(); c.arc(ex, ey, er, 0, PI2); c.fill();
-    c.fillStyle = s.pupil || "#0f1c2c"; c.beginPath(); c.arc(ex + er * .22, ey, er * .58, 0, PI2); c.fill();
-    c.fillStyle = "#fff"; c.beginPath(); c.arc(ex + er * .02, ey - er * .25, er * .2, 0, PI2); c.fill();
+    eyeReal(c, ex, ey, er, s.iris || (s.tri ? "#4a5a62" : "#d9a93a"), s.pupil);
     if (o.angry) { c.strokeStyle = "#0f1c2c"; c.lineWidth = Math.max(.05, er * .7); c.beginPath(); c.moveTo(ex - er * 1.4, ey - er * 1.7); c.lineTo(ex + er * 1.5, ey - er * .6); c.stroke(); }
     // mund
     const ch = o.chomp || 0;
@@ -205,12 +242,16 @@
     const g = c.createRadialGradient(.3, -.3, .1, .3, 0, 1);
     g.addColorStop(0, lt(s.body, .3)); g.addColorStop(1, s.body);
     c.fillStyle = g; c.beginPath(); c.ellipse(.3, 0, .85, .72, 0, 0, PI2); c.fill();
-    c.strokeStyle = dk(s.body, .4); c.lineWidth = .045; c.stroke();
+    c.strokeStyle = dk(s.body, .4); c.lineWidth = .04; c.stroke();
+    // glans og skygge på hovedet
+    c.save(); c.beginPath(); c.ellipse(.3, 0, .85, .72, 0, 0, PI2); c.clip();
+    const sh = c.createLinearGradient(0, -.72, 0, .72); sh.addColorStop(0, "rgba(255,255,255,.28)"); sh.addColorStop(.5, "rgba(255,255,255,0)"); sh.addColorStop(1, "rgba(0,0,0,.28)");
+    c.fillStyle = sh; c.fillRect(-.7, -.8, 2, 1.6);
+    c.fillStyle = "rgba(255,255,255,.3)"; c.beginPath(); c.ellipse(.05, -.38, .38, .12, -.3, 0, PI2); c.fill();
+    c.restore();
     if (s.dots) { c.fillStyle = s.dots; for (let i = 0; i < 7; i++) { c.beginPath(); c.arc(-.1 + (i % 4) * .2, -.35 + Math.floor(i / 4) * .35, .06, 0, PI2); c.fill(); } }
     const ex = .55;
-    c.fillStyle = "#fff"; c.beginPath(); c.arc(ex, -.1, .24, 0, PI2); c.fill();
-    c.fillStyle = s.eye || "#101c2c"; c.beginPath(); c.arc(ex + .06, -.1, .13, 0, PI2); c.fill();
-    c.fillStyle = "#fff"; c.beginPath(); c.arc(ex + .02, -.18, .045, 0, PI2); c.fill();
+    eyeReal(c, ex, -.1, .24, s.eye || "#d99a2b", "#0a1018");
     if (o.angry) { c.strokeStyle = "#101c2c"; c.lineWidth = .09; c.beginPath(); c.moveTo(ex - .3, -.5); c.lineTo(ex + .3, -.28); c.stroke(); }
   }
 
@@ -225,10 +266,13 @@
     for (const y0 of [-.1, .1]) { c.lineWidth = .06; c.beginPath(); c.moveTo(.9, y0); c.quadraticCurveTo(1.8, y0 + Math.sin(t * 4) * .3, 2.6, y0 + Math.sin(t * 5) * .45); c.stroke(); }
     c.fillStyle = s.body; c.beginPath(); c.moveTo(.95, 0); c.bezierCurveTo(.6, -.62, -1.1, -.5, -1.7, 0); c.bezierCurveTo(-1.1, .5, .6, .62, .95, 0); c.fill();
     c.fillStyle = dk(s.body, .2); c.beginPath(); c.moveTo(-1.0, 0); c.lineTo(-1.75, -.65); c.lineTo(-1.95, 0); c.lineTo(-1.75, .65); c.closePath(); c.fill();
-    c.strokeStyle = dk(s.body, .45); c.lineWidth = .045; c.beginPath(); c.moveTo(.95, 0); c.bezierCurveTo(.6, -.62, -1.1, -.5, -1.7, 0); c.bezierCurveTo(-1.1, .5, .6, .62, .95, 0); c.stroke();
+    c.strokeStyle = dk(s.body, .45); c.lineWidth = .04; c.beginPath(); c.moveTo(.95, 0); c.bezierCurveTo(.6, -.62, -1.1, -.5, -1.7, 0); c.bezierCurveTo(-1.1, .5, .6, .62, .95, 0); c.stroke();
+    c.save(); c.beginPath(); c.moveTo(.95, 0); c.bezierCurveTo(.6, -.62, -1.1, -.5, -1.7, 0); c.bezierCurveTo(-1.1, .5, .6, .62, .95, 0); c.clip();
+    const sq = c.createLinearGradient(0, -.6, 0, .6); sq.addColorStop(0, "rgba(255,255,255,.3)"); sq.addColorStop(.45, "rgba(255,255,255,0)"); sq.addColorStop(1, "rgba(0,0,0,.32)");
+    c.fillStyle = sq; c.fillRect(-2, -.7, 3.2, 1.4);
+    c.restore();
     if (s.dots) { c.fillStyle = s.dots; for (let i = 0; i < 9; i++) { c.beginPath(); c.arc(.5 - i * .22, Math.sin(i * 2.1) * .2, .06, 0, PI2); c.fill(); } }
-    c.fillStyle = "#fff"; c.beginPath(); c.arc(.55, -.05, .28, 0, PI2); c.fill();
-    c.fillStyle = "#101c2c"; c.beginPath(); c.arc(.62, -.05, .16, 0, PI2); c.fill();
+    eyeReal(c, .55, -.05, .28, "#e8b030", "#0a1018");
     if (o.angry) { c.strokeStyle = "#101c2c"; c.lineWidth = .1; c.beginPath(); c.moveTo(.2, -.5); c.lineTo(.85, -.28); c.stroke(); }
   }
 
@@ -265,8 +309,7 @@
     c.fillStyle = s.belly || "#f0f4f8"; c.globalAlpha = .9; c.beginPath(); c.ellipse(.15, .1, .6, .26, 0, 0, PI2); c.fill(); c.globalAlpha = 1;
     c.fillStyle = "#fff"; c.beginPath(); c.ellipse(.3, -.25, .22, .12, -.4, 0, PI2); c.fill();
     c.fillStyle = s.body; for (const sg of [-1, 1]) { c.beginPath(); c.ellipse(.98, sg * .2, .2, .08, sg * .3, 0, PI2); c.fill(); }
-    c.fillStyle = "#fff"; c.beginPath(); c.arc(.62, -.18, .1, 0, PI2); c.fill();
-    c.fillStyle = "#101c2c"; c.beginPath(); c.arc(.65, -.18, .055, 0, PI2); c.fill();
+    eyeReal(c, .62, -.18, .1, "#c8a040", "#080e16");
   }
 
   // ---------- Krebsdyr, søstjerner og andre på bunden ----------
@@ -280,9 +323,12 @@
       c.fillStyle = "#e8cfa0"; c.beginPath(); c.arc(-.15, -.55, .85, 0, PI2); c.fill(); c.strokeStyle = "#9a7a4a"; c.lineWidth = .06; c.stroke();
       c.beginPath(); c.arc(-.15, -.55, .55, .4, 4.6); c.arc(-.15, -.55, .25, .8, 5); c.stroke();
     }
-    c.fillStyle = s.body; c.beginPath(); c.ellipse(0, .05, .95, .6, 0, 0, PI2); c.fill();
-    c.strokeStyle = dk(s.body, .4); c.lineWidth = .05; c.stroke();
-    c.fillStyle = lt(s.body, .3); c.beginPath(); c.ellipse(-.15, -.1, .5, .22, -.2, 0, PI2); c.fill();
+    const cg = c.createRadialGradient(-.2, -.25, .1, 0, .05, 1);
+    cg.addColorStop(0, lt(s.body, .35)); cg.addColorStop(.6, s.body); cg.addColorStop(1, dk(s.body, .35));
+    c.fillStyle = cg; c.beginPath(); c.ellipse(0, .05, .95, .6, 0, 0, PI2); c.fill();
+    c.strokeStyle = dk(s.body, .4); c.lineWidth = .04; c.stroke();
+    c.fillStyle = "rgba(255,255,255,.28)"; c.beginPath(); c.ellipse(-.2, -.18, .5, .17, -.2, 0, PI2); c.fill();
+    c.fillStyle = dk(s.body, .25); for (let i = 0; i < 9; i++) { c.beginPath(); c.arc(-.6 + (i % 5) * .3, -.05 + Math.floor(i / 5) * .28, .035, 0, PI2); c.fill(); }
     for (const sg of [0, 1]) { // klør
       const bx = .6; const by = sg ? -.5 : -.2;
       c.strokeStyle = s.body; c.lineWidth = .16; c.beginPath(); c.moveTo(.45, sg ? -.2 : .05); c.lineTo(bx + .3, by - .25 - sc * 2); c.stroke();
@@ -300,7 +346,10 @@
     c.lineJoin = "round";
     c.beginPath();
     for (let i = 0; i < n * 2; i++) { const a = -Math.PI / 2 + i * Math.PI / n; const r = i % 2 ? ri : 1; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
-    c.closePath(); c.fillStyle = s.body; c.fill(); c.strokeStyle = dk(s.body, .45); c.lineWidth = .06; c.stroke();
+    c.closePath(); const stg = c.createRadialGradient(-.2, -.25, .05, 0, 0, 1.1); stg.addColorStop(0, lt(s.body, .3)); stg.addColorStop(.55, s.body); stg.addColorStop(1, dk(s.body, .3));
+    c.fillStyle = stg; c.fill(); c.strokeStyle = dk(s.body, .45); c.lineWidth = .05; c.stroke();
+    c.strokeStyle = dk(s.body, .3); c.lineWidth = .025; // midterrille på hver arm
+    for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + i * Math.PI * 2 / n; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(a) * .85, Math.sin(a) * .85); c.stroke(); }
     c.fillStyle = lt(s.body, .35);
     for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + i * Math.PI * 2 / n; for (const d of [.3, .6]) { c.beginPath(); c.arc(Math.cos(a) * d, Math.sin(a) * d, .06, 0, PI2); c.fill(); } }
     if (s.spiky) { c.strokeStyle = s.spiky; c.lineWidth = .05; for (let i = 0; i < n * 2; i++) { const a = -Math.PI / 2 + i * Math.PI / n; c.beginPath(); c.moveTo(Math.cos(a) * (i % 2 ? ri : .9), Math.sin(a) * (i % 2 ? ri : .9)); c.lineTo(Math.cos(a) * (i % 2 ? ri + .2 : 1.25), Math.sin(a) * (i % 2 ? ri + .2 : 1.25)); c.stroke(); } }
