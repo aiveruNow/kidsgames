@@ -719,7 +719,9 @@
       if (first && G) { sh.R = sharkRadius(); sh.x = SW * SHARK_X; sh.y = sh.ty = (TOP + SH) / 2; fish = []; fillFish(); }
     }
 
-    const evilTarget = () => Math.min(5, 1 + Math.floor((G.n - 1) / 2));
+    // Højst to onde fisk ad gangen: kun én i de første størrelser, og først efter et lille stykke tid, så man kan øve sig
+    const evilTarget = () => (G.n <= 3 ? 1 : 2);
+    const evilDelay = () => Math.max(1.2, 4.5 - .5 * G.n); // sekunder, før en ny ond fisk kommer ind
     const homing = () => Math.min(.6, .12 * (G.n - 1));
     // Mere tid på en smal telefonskærm: fiskene er 15 % langsommere, og på første størrelse er den ene onde fisk langsom
     const speedFactor = () => FACT[speedKey] * Math.min(1.3, 1 + .03 * (G.n - 1)) * (SW < SH ? .85 : 1);
@@ -740,18 +742,20 @@
     }
     function fillFish() {
       for (let i = 0; i < 8; i++) spawnFish(false, true);
-      for (let i = 0; i < evilTarget(); i++) spawnFish(true, true);
+      evilCd = G.n <= 1 ? 4 : 2; // den første onde fisk kommer først lidt inde i spillet
     }
-    // Holder antallet af onde og spiselige fisk oppe, så der altid kommer nye ind fra højre
+    // Holder antallet af spiselige fisk oppe og lader en ond fisk komme ind, når der er plads til den
     let spawnCd = 0;
+    let evilCd = 0;
     function ensureFish(dt) {
       spawnCd -= dt;
-      if (spawnCd > 0) return;
+      evilCd -= dt;
       let evil = 0;
       let food = 0;
       for (const f of fish) { if (f.big) evil++; else food++; }
-      if (evil < evilTarget()) { spawnFish(true, false); spawnCd = .5; }
-      else if (food < 8) { spawnFish(false, false); spawnCd = .22; }
+      if (evil < evilTarget() && evilCd <= 0) { spawnFish(true, false); evilCd = evilDelay(); return; }
+      if (spawnCd > 0) return;
+      if (food < 8) { spawnFish(false, false); spawnCd = .22; }
     }
 
     function loadLevel(n, keepWords, keepReview) {
