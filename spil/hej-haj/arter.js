@@ -395,23 +395,19 @@
   add("lodde", "Lodde", 1, "fish", { body: "#a9c0ca", back: "#4a6577", belly: "#eef4f6", len: 1, h: .3, tail: "fork", dorsal: .12, fin: "#7d97a5" });
   add("polartorsk", "Polartorsk", 2, "fish", { body: "#7f8fa6", back: "#4c5c74", belly: "#dfe6ee", len: 1, h: .45, tail: "round", dorsal: .3, fin: "#5a6a82", pat: [D(8, "#33425a", .05)] });
   add("stenbider", "Stenbider", 2, "fish", { body: "#d9824a", belly: "#f0b070", len: .72, h: .72, tail: "round", tl: .4, dorsal: .35, fin: "#b8602c", pat: [D(9, "#f4c48a", .07)] });
-  add("neontetra", "Neontetra", 1, "fish", { body: "#5a74a0", back: "#1f3cc0", belly: "#ff3a2a", len: .9, h: .3, tail: "fork", dorsal: .15, fin: "#8aa0c0", pat: [S(-.25, .2, "#2cd0ff")] });
-  add("guppy", "Guppy", 1, "fish", { body: "#e06a3a", belly: "#f4a070", len: .75, h: .36, tail: "round", tl: 1.0, dorsal: .25, fin: "#2fb8c8", tailc: "#2fb8c8", pat: [D(5, "#fff3b0", .06)] });
-  add("skalar", "Skalar", 2, "fish", { body: "#d4dbe0", belly: "#f1f4f6", len: .55, h: 1.0, tail: "round", tl: .4, dorsal: .9, anal: .8, fin: "#aab4bb", pat: [B(.1, .09, "#222222", "#222222"), B(-.35, .09, "#222222", "#222222")] });
-  add("diskus", "Diskusfisk", 2, "fish", { body: "#f08a2a", belly: "#ffc27a", len: .7, h: .9, tail: "round", tl: .35, dorsal: .25, anal: .3, fin: "#2a7ad0", pat: [S(-.3, .1, "#2a7ad0"), S(.1, .1, "#2a7ad0"), S(.5, .1, "#2a7ad0")] });
-  add("flyvefisk", "Flyvefisk", 2, "fish", { body: "#3d6ea8", back: "#264a78", belly: "#cfe0ee", len: 1, h: .4, tail: "fork", dorsal: .12, wing: true, fin: "#7aa0c8" });
+  add("flyvefisk",  "Flyvefisk", 2, "fish", { body: "#3d6ea8", back: "#264a78", belly: "#cfe0ee", len: 1, h: .4, tail: "fork", dorsal: .12, wing: true, fin: "#7aa0c8" });
   add("tun", "Tun", 5, "fish", { body: "#2c5aa0", back: "#15305c", belly: "#e8eef5", len: 1.3, h: .6, tail: "lunate", tl: .6, dorsal: .25, fin: "#f2d230" });
   add("mahimahi", "Mahi-mahi", 5, "fish", { body: "#33b86a", back: "#1c7a5a", belly: "#f2e36b", len: 1.25, h: .62, tail: "fork", dorsal: .3, fin: "#2ba8b8", pat: [D(7, "#2e7de0", .05)] });
   add("mola", "Månefisk", 10, "fish", { body: "#9ea8b0", belly: "#d4dadf", len: .8, h: 1.0, tail: "round", tl: .3, dorsal: .9, anal: .9, fin: "#7b868f", pat: [D(8, "#7a858e", .05)] });
   add("lanternefisk", "Lanternefisk", 1, "fish", { body: "#2e4468", belly: "#2e4468", len: .9, h: .38, tail: "fork", dorsal: .12, fin: "#1f2f4c", glow: true });
+  add("isfisk", "Isfisk", 2, "fish", { body: "#dfe9ee", back: "#b8c8d2", belly: "#f8fbfd", len: 1.05, h: .4, tail: "round", dorsal: .3, fin: "#c4d4dd", bill: .25, billc: "#dfe9ee" });
+  add("antarktisk_torsk", "Antarktisk torsk", 2, "fish", { body: "#8a9a8a", belly: "#d6dccf", len: 1.05, h: .5, tail: "round", dorsal: .3, fin: "#667566", pat: [D(8, "#5a6a5a", .05)] });
 
   // Rovfisk og hajer
   add("barracuda", "Barracuda", 5, "fish", { body: "#8c9ba5", back: "#46606f", belly: "#e6edf0", len: 1.8, h: .34, tail: "fork", dorsal: .15, fin: "#5b7080", teeth: true, pat: [S(.1, .08, "#c9d6dd")] });
   add("loevefisk", "Løvefisk", 5, "fish", { body: "#c5402a", belly: "#e8a58a", len: .8, h: .6, tail: "round", dorsal: 0, fin: "#8a2314", mane: true, pat: [B(.35, .1, "#fff0e0", "#6a1408"), B(-.1, .1, "#fff0e0", "#6a1408"), B(-.55, .1, "#fff0e0", "#6a1408")] });
   add("torsk", "Torsk", 5, "fish", { body: "#8a8a52", belly: "#e3dfc2", len: 1.15, h: .58, tail: "round", dorsal: .3, fin: "#6a6a3a", barbel: true, pat: [D(11, "#5f5c2c", .05)] });
   add("havkat", "Havkat", 5, "fish", { body: "#566a70", belly: "#8ea0a6", len: 1.5, h: .5, tail: "round", dorsal: .2, fin: "#3b4a50", teeth: true, pat: [B(.25, .1, "#2f3d41", "#2f3d41"), B(-.2, .1, "#2f3d41", "#2f3d41"), B(-.6, .1, "#2f3d41", "#2f3d41")] });
-  add("piratfisk", "Piratfisk", 5, "fish", { body: "#7a8d99", belly: "#e3532f", len: .9, h: .75, tail: "fork", dorsal: .25, fin: "#5a6a75", teeth: true, pat: [D(10, "#c6d3dc", .04)] });
-  add("arapaima", "Arapaima", 10, "fish", { body: "#4f6a4a", belly: "#9ab07a", len: 1.9, h: .5, tail: "round", dorsal: .15, fin: "#3a5a3a", tailc: "#c0392b", pat: [D(12, "#c0392b", .045)] });
   add("svaerdfisk", "Sværdfisk", 5, "fish", { body: "#4a5f80", back: "#2a3a58", belly: "#cfd8e4", len: 1.55, h: .5, tail: "lunate", tl: .7, dorsal: .45, bill: .55, fin: "#34445f" });
   add("marlin", "Blå marlin", 10, "fish", { body: "#1f4fa0", back: "#0f2a60", belly: "#d7e2f0", len: 1.65, h: .5, tail: "lunate", tl: .7, dorsal: 1.0, bill: .5, fin: "#1a3d80", pat: [B(.1, .05, "#6fa0e8", "#6fa0e8"), B(-.3, .05, "#6fa0e8", "#6fa0e8")] });
   add("havtaske", "Havtaske", 10, "fish", { body: "#4a3b2e", belly: "#7a6650", len: 1, h: .95, tail: "round", dorsal: .1, fin: "#2c2118", lure: true, teeth: true, pat: [D(10, "#2c2118", .07)] });
@@ -422,6 +418,7 @@
   add("tigerhaj", "Tigerhaj", 10, "fish", { body: "#7f9aa8", back: "#5c7a8a", belly: "#eef4f6", len: 1.65, h: .55, tail: "fork", tl: 1, dorsal: 1, tri: true, gills: true, fin: "#64808f", pat: [Z("#34505e")] });
   add("groenlandshaj", "Grønlandshaj", 10, "fish", { body: "#515a60", back: "#3a4248", belly: "#8a949a", len: 1.6, h: .55, tail: "round", tl: .6, dorsal: .35, tri: true, fin: "#3a4248", pat: [D(5, "#7c868c", .05)] });
   add("hvalhaj", "Hvalhaj", 10, "fish", { body: "#3d6a8a", back: "#2a4a66", belly: "#e8f0f4", len: 1.9, h: .62, tail: "fork", tl: .9, dorsal: .3, tri: true, fin: "#2e5470", pat: [D(34, "#f2f7fa", .04)] });
+  add("tandfisk", "Tandfisk", 10, "fish", { body: "#5a6670", back: "#3a444c", belly: "#b8c2c8", len: 1.8, h: .55, tail: "round", dorsal: .3, fin: "#3a444c", teeth: true });
 
   // Andre havdyr
   add("soehest", "Søhest", 5, "seahorse", { body: "#f2a21c" });
@@ -449,26 +446,20 @@
   // ---------- Verdener ----------
   // grad = vandets farver (top, midte, bund), far = baggrund langt væk, near = tang i forgrunden, sand = bundens farve.
   const W = [
-    { id: "koral", da: "Koralrevet", fact: "Hjem for klovnefisk og tusindvis af arter", grad: ["#3fd8ec", "#1da6c8", "#0a5f88"], far: "coral", farc: "#0f7fa0", weed: ["#ff7aa8", "#ffb347"], sand: "#f0dba0",
-      food: ["klovnefisk", "blaa_doktorfisk", "sommerfuglefisk", "kejserfisk", "papegoejefisk", "maurisk_idol", "soehest"], evil: ["revhaj", "muraene", "loevefisk"], ground: ["soestjerne"], hazards: ["tornekrone"], float: [] },
-    { id: "tang", da: "Tangskoven", fact: "Tang kan vokse en halv meter på en dag", grad: ["#6fd4a8", "#2a9a7a", "#0d4a45"], far: "kelp", farc: "#17705a", weed: ["#3a8a3a", "#5a9a2a"], sand: "#b9a46a",
-      food: ["sardin", "garibaldi", "rodspaette", "sild", "havoerred"], evil: ["torsk", "hvid_haj"], ground: ["krabbe"], hazards: ["soepindsvin"], float: [] },
-    { id: "skib", da: "Piratskibet", fact: "Gamle skibsvrag bliver til rev for fisk", grad: ["#2f8fb0", "#1b5f7e", "#0a2f45"], far: "ship", farc: "#0d3b52", weed: ["#2e6a4a", "#3a7a5a"], sand: "#8a7a58",
-      food: ["makrel", "sardin", "kejserfisk", "papegoejefisk"], evil: ["barracuda", "muraene", "hammerhaj"], ground: ["krabbe", "kiste"], hazards: ["soepindsvin", "tornekrone"], float: [] },
-    { id: "tidevand", da: "Tidevandsbassinet", fact: "Når vandet går, bor krabber og blæksprutter her", grad: ["#9ee6e0", "#5cc6c6", "#2a8a96"], far: "rocks", farc: "#3a8a90", weed: ["#7ab04a", "#a0c060"], sand: "#f3e2b0",
-      food: ["tangsnarre", "hundestejle", "rodspaette", "blaeksprutte"], evil: ["aal", "havkat"], ground: ["eremitkrebs", "krabbe", "soestjerne"], hazards: ["soepindsvin"], float: ["brandmand"] },
-    { id: "amazon", da: "Amazonfloden", fact: "Her lever både piratfisk og elektriske ål", grad: ["#9cc27a", "#5a8f4a", "#264a30"], far: "jungle", farc: "#2f5a35", weed: ["#4a7a3a", "#6a8a3a"], sand: "#8a6f45",
-      food: ["neontetra", "guppy", "skalar", "diskus"], evil: ["piratfisk", "arapaima"], ground: [], hazards: [], float: ["elektrisk_aal"] },
-    { id: "polar", da: "Polarhavet", fact: "Grønlandshajen kan blive flere hundrede år gammel", grad: ["#aeeaff", "#5ab4e8", "#17406e"], far: "ice", farc: "#8ac8e8", weed: ["#bfe6f4", "#dff4fa"], sand: "#dbe9f2",
-      food: ["lodde", "polartorsk", "stenbider", "sild"], evil: ["havkat", "groenlandshaj"], ground: ["soestjerne"], hazards: [], float: ["brandmand"] },
-    { id: "hav", da: "Det åbne hav", fact: "Hvalhajen er verdens største fisk", grad: ["#2f7ae0", "#1853b5", "#082a6a"], far: "open", farc: "#10408a", weed: ["#2a6ac0", "#3a7ad0"], sand: "#6a7a9a",
-      food: ["makrel", "flyvefisk", "tun", "mahimahi", "mola", "hvalhaj", "manta"], evil: ["svaerdfisk", "marlin", "tigerhaj"], ground: [], hazards: [], float: ["orlogsmand"] },
-    { id: "dyb", da: "Dybhavet", fact: "Mange dybhavsfisk laver deres eget lys", grad: ["#1c2d6a", "#0d1a47", "#050b22"], far: "deep", farc: "#12235a", weed: ["#2a4a8a", "#3a5aa0"], sand: "#2a2f4a",
-      food: ["lanternefisk", "vampyr_blaeksprutte", "dumbo"], evil: ["havtaske", "viperfisk", "kaempeblaeksprutte"], ground: ["soestjerne"], hazards: [], float: [] },
-    { id: "vulkan", da: "Vulkanhavet", fact: "Ved sorte rygere lever dyr uden sollys", grad: ["#5a2a3a", "#2a1a35", "#0e0a1a"], far: "vents", farc: "#3a1f2a", weed: ["#7a3a3a", "#9a4a3a"], sand: "#3a2a2a",
-      food: ["lanternefisk", "dumbo", "vampyr_blaeksprutte"], evil: ["viperfisk", "havtaske"], ground: ["roerorm", "yetikrabbe"], hazards: ["ryger"], float: [] },
-    { id: "atlantis", da: "Atlantis", fact: "Gamle ruiner bliver hjem for havets dyr", grad: ["#3fc6c0", "#1c8a9a", "#0b4455"], far: "temple", farc: "#0f5a6a", weed: ["#2e9a6a", "#4aaa7a"], sand: "#d8c78a",
-      food: ["kejserfisk", "maurisk_idol", "tun", "skildpadde", "manta"], evil: ["hvid_haj", "kaempeblaeksprutte", "muraene"], ground: ["kiste"], hazards: ["tornekrone"], float: ["orlogsmand"] }
+    { id: "arktis", da: "Nordishavet", fact: "Grønlandshajen kan blive flere hundrede år gammel", grad: ["#aeeaff", "#5ab4e8", "#17406e"], far: "ice", farc: "#8ac8e8", weed: ["#bfe6f4", "#dff4fa"], sand: "#dbe9f2",
+      food: ["lodde", "polartorsk", "stenbider", "sild"], evil: ["groenlandshaj", "torsk"], ground: ["soestjerne"], hazards: ["soepindsvin"], float: ["brandmand"] },
+    { id: "nordatl", da: "Nordatlanten", fact: "Her lever sild, torsk og tun, og gamle skibsvrag bliver til rev", grad: ["#4fa6b8", "#2a6f8a", "#0e3550"], far: "ship", farc: "#0d3b52", weed: ["#3a8a3a", "#5a9a2a"], sand: "#b9a46a",
+      food: ["sild", "makrel", "sardin", "rodspaette", "tangsnarre", "hundestejle", "havoerred", "tun"], evil: ["torsk", "aal", "havkat", "hvid_haj"], ground: ["krabbe", "eremitkrebs", "kiste"], hazards: ["soepindsvin"], float: ["brandmand"] },
+    { id: "sydatl", da: "Sydatlanten", fact: "Havskildpadder svømmer flere tusind kilometer over Atlanterhavet", grad: ["#2f7ae0", "#1853b5", "#082a6a"], far: "open", farc: "#10408a", weed: ["#2a6ac0", "#3a7ad0"], sand: "#6a7a9a",
+      food: ["sardin", "flyvefisk", "mahimahi", "tun", "mola", "skildpadde", "hvalhaj"], evil: ["svaerdfisk", "marlin", "tigerhaj", "hammerhaj"], ground: [], hazards: [], float: ["orlogsmand"] },
+    { id: "nordpac", da: "Nordpacifik", fact: "Ildringen: havets vulkaner og dybeste grav ligger her", grad: ["#5a2a3a", "#2a1a35", "#0e0a1a"], far: "vents", farc: "#3a1f2a", weed: ["#7a3a3a", "#9a4a3a"], sand: "#3a2a2a",
+      food: ["lanternefisk", "blaeksprutte", "vampyr_blaeksprutte", "dumbo", "garibaldi"], evil: ["havtaske", "viperfisk", "kaempeblaeksprutte"], ground: ["roerorm", "soestjerne"], hazards: ["ryger"], float: [] },
+    { id: "sydpac", da: "Sydpacifik", fact: "Her ligger Det Store Barriere-rev, verdens største koralrev", grad: ["#3fd8ec", "#1da6c8", "#0a5f88"], far: "coral", farc: "#0f7fa0", weed: ["#ff7aa8", "#ffb347"], sand: "#f0dba0",
+      food: ["klovnefisk", "blaa_doktorfisk", "sommerfuglefisk", "kejserfisk", "papegoejefisk", "maurisk_idol", "soehest"], evil: ["revhaj", "muraene", "loevefisk"], ground: ["soestjerne", "eremitkrebs"], hazards: ["tornekrone"], float: [] },
+    { id: "indisk", da: "Det Indiske Ocean", fact: "Hvalhajer og mantaer samles ved Maldiverne", grad: ["#59e0d0", "#1fa8b0", "#0a5f78"], far: "rocks", farc: "#2a7a82", weed: ["#7ad0a0", "#ffb86a"], sand: "#f5e6b8",
+      food: ["klovnefisk", "kejserfisk", "papegoejefisk", "flyvefisk", "mahimahi", "tun", "manta", "skildpadde", "hvalhaj"], evil: ["barracuda", "tigerhaj", "hvid_haj"], ground: ["eremitkrebs", "soestjerne"], hazards: ["soepindsvin"], float: ["orlogsmand"] },
+    { id: "syd", da: "Sydhavet", fact: "Havet rundt om Antarktis: fiskene her har frostvæske i blodet", grad: ["#b8dcf0", "#5a8fb8", "#12304f"], far: "ice", farc: "#6fa0c0", weed: ["#c4e0ee", "#e6f4fa"], sand: "#cfd8e0",
+      food: ["lanternefisk", "antarktisk_torsk", "isfisk", "dumbo"], evil: ["tandfisk", "kaempeblaeksprutte"], ground: ["yetikrabbe", "soestjerne"], hazards: ["soepindsvin"], float: [] }
   ];
 
   // Alle arter til ét ikon (bruges i quizzen)

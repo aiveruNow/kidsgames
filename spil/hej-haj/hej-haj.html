@@ -402,7 +402,7 @@
     // Ord, billeder og lydklip er Urundais (samme tamilske ord, samme gentagelse). Ordstatistikken deles med Urundai.
     const R = window.UrundaiOrd;
     const Art = window.UrundaiArt;
-    const AR = window.HajArter; // havets 10 verdener og rigtige arter (arter.js)
+    const AR = window.HajArter; // havets 7 have og rigtige arter (arter.js)
     const SPECIES = AR.species;
     const WORLDS = AR.worlds;
     const WORDS = R.words;
@@ -417,7 +417,7 @@
 
     const wordState = readWords(); // id -> { box 0-3, seen, ok, bad, t }
     let stars = Number(read("stars", "0")) || 0;
-    let curWorld = Math.max(0, Number(read("world", "0")) || 0) % WORLDS.length; // hvilken verden man er nået til (0-9)
+    let curWorld = Math.max(0, Number(read("hav", "0")) || 0) % WORLDS.length; // hvilket af de 7 have man er nået til (0-6)
     let muted = !Topbar.soundOn();
     window.addEventListener("topbar:sound", (e) => { muted = !e.detail.on; if (muted) stopSpeech(); });
 
@@ -681,14 +681,14 @@
     const pointer = { active: false, y: 0, y0: 0, ty0: 0 };
     const keys = { y: 0, down: new Set() };
 
-    // Hajen starter som en baby og vokser med de point, den spiser (50 point klarer verdenen). Størrelsen er i enheder (1 enhed = 1 % af den korteste side).
+    // Hajen starter som en baby og vokser med de point, den spiser (100 point klarer et hav). Størrelsen er i enheder (1 enhed = 1 % af den korteste side).
     const R_BASE = 3.8;
     const R_GROW = 7.5; // hvor meget hajen vokser i alt i én verden
-    const GOAL = 50; // point der skal til for at klare en verden
+    const GOAL = 100; // point der skal til for at klare et hav
     const TOP = 50; // øverste pixels på banen er til HUD'en
     const SHARK_X = .2; // hajen står stille her (andel af bredden), og verden scroller mod venstre
     const sharkRadius = () => (R_BASE + R_GROW * Math.min(1, G.points / GOAL)) * u;
-    const stageOf = (points) => Math.min(5, 1 + Math.floor(points / 10)); // 1-5, en ny størrelse for hver 10 point
+    const stageOf = (points) => Math.min(5, 1 + Math.floor(points / 20)); // 1-5, en ny størrelse for hver 20 point
     const world = () => WORLDS[G.w];
     let scrollX = 0;
     let eatFx = []; // fisk der suges ind i munden
@@ -955,7 +955,7 @@
       if (G.total % 4 === 0) { const wd = pickWeighted(seenIds(), 1)[0]; if (wd) wordPop(wd); }
     }
 
-    // Hver 10 point: en større haj, en stjerne og et nyt ord (spillet stopper ikke)
+    // Hver 20 point: en større haj, en stjerne og et nyt ord (spillet stopper ikke)
     function sizeUp() {
       G.n = stageOf(G.points);
       stars += 1;
@@ -971,7 +971,7 @@
       if (nw) { const st = ws(nw); st.seen = true; st.t = Date.now(); saveWords(); wordPop(nw, true); }
     }
 
-    // 50 point: verdenen er klaret. Hajen er stor, og næste verden begynder med en baby-haj.
+    // 100 point: havet er klaret. Hajen er stor, og næste hav begynder med en baby-haj.
     function worldDone() {
       state = "world";
       hidePop();
@@ -982,13 +982,13 @@
       write("stars", stars);
       Topbar.refreshStars(true);
       curWorld = (G.w + 1) % WORLDS.length;
-      write("world", curWorld);
+      write("hav", curWorld);
       sh.pop = 1;
       for (let i = 0; i < 4; i++) ring(sh.x, sh.y, sh.R * (.8 + i * .6), "253,224,71");
       burst(sh.x, sh.y, 36, ["#fde047", "#fff", "#7dd3fc", "#34d399", "#f472b6"]);
       sfx.fanfare();
       buzz(60);
-      toast(`${WORLDS[G.w].da} klaret!`, `${perfect ? "Ingen ædt! " : ""}+${got} ⭐ · næste: ${WORLDS[curWorld].da}`);
+      toast(`${WORLDS[G.w].da} klaret!`, G.w === WORLDS.length - 1 ? `Alle 7 have klaret! +${got} ⭐ · du begynder forfra` : `${perfect ? "Ingen ædt! " : ""}+${got} ⭐ · næste: ${WORLDS[curWorld].da}`);
     }
     let toastTimer = 0;
     function toast(title, sub) {
@@ -1649,7 +1649,7 @@
     $("optRom").addEventListener("change", (e) => { write("rom", e.target.value); applyRom(); });
     $("optReset").addEventListener("click", () => {
       curWorld = 0;
-      write("world", 0);
+      write("hav", 0);
       Topbar.closeMenu();
       if (screen === "play") goHome(); else renderHome();
     });
@@ -1676,7 +1676,7 @@
     renderHome();
     requestAnimationFrame(frame);
 
-    // Testværktøj: ?l=<verden 1-10> åbner en verden direkte. window.__haj giver adgang til tilstanden, og tick(sek) kører spillet frem.
+    // Testværktøj: ?l=<hav 1-7> åbner et hav direkte. window.__haj giver adgang til tilstanden, og tick(sek) kører spillet frem.
     const qs = new URLSearchParams(location.search);
     window.__haj = {
       get G() { return G; }, get sh() { return sh; }, get fish() { return fish; }, get state() { return state; }, get quiz() { return quiz; },
