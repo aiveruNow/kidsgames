@@ -24,6 +24,7 @@
     body {
       height: 100vh;
       height: 100dvh;
+      height: var(--app-h, 100dvh);
       min-width: 320px;
       margin: 0;
       overflow-y: auto;
@@ -640,9 +641,13 @@
 
     function resize() {
       const w = stage.clientWidth;
-      const h = stage.clientHeight;
-      if (!w || !h) return;
+      // På iPhone kan banen række længere ned end det synlige (værktøjslinjer i Safari), så højden begrænses til det, der kan ses
+      const vv = window.visualViewport;
+      const visibleBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+      const h = Math.floor(Math.min(stage.clientHeight, visibleBottom - stage.getBoundingClientRect().top));
+      if (!w || h < 80) return;
       if (w === SW && h === SH) return;
+      cv.style.height = `${h}px`;
       const first = !SW;
       const ox = SW || w;
       const oy = SH || h;
@@ -1388,8 +1393,18 @@
     $("dictBtn").addEventListener("click", () => { renderDict(); show("dictScreen"); $("dictScreen").scrollTop = 0; });
     $("dictBack").addEventListener("click", () => { stopSpeech(); renderHome(); show("home"); });
 
+    // Siden følger den højde, der faktisk kan ses (iPhone-Safari tæller nogle gange værktøjslinjerne med)
+    const fitViewport = () => {
+      const vv = window.visualViewport;
+      document.documentElement.style.setProperty("--app-h", `${Math.round(vv ? vv.height : window.innerHeight)}px`);
+    };
+    fitViewport();
+    window.addEventListener("resize", fitViewport);
+    window.addEventListener("orientationchange", () => setTimeout(fitViewport, 300));
+    if (window.visualViewport) visualViewport.addEventListener("resize", fitViewport);
     new ResizeObserver(() => { if (screen === "play") resize(); }).observe(stage);
     window.addEventListener("resize", () => { if (screen === "play") resize(); });
+    if (window.visualViewport) { visualViewport.addEventListener("resize", () => { if (screen === "play") resize(); }); visualViewport.addEventListener("scroll", () => { if (screen === "play") resize(); }); }
 
     Topbar.init({ kid, controls: [$("settings")] });
     renderHome();
