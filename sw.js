@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v1.26.0";
+const CACHE = "regnespil-v1.27.0";
 
 // Prinsesse Riyanas lydklip hentes fra samme replikliste som spillet bruger
 let prinsesseClips = [];
@@ -59,6 +59,7 @@ const FILES = [
   "spil/urundai/ord.js",
   "spil/urundai/billeder.js",
   "spil/urundai/laengder.js",
+  "spil/hej-haj/hej-haj.html",
   ...clipFiles,
   ...prinsesseClips,
   ...urundaiClips,
