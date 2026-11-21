@@ -315,6 +315,12 @@
   </div>
 
   <div id="settings" hidden>
+    <label>Styring
+      <select id="optControl">
+        <option value="tryk">Tryk: hold for at stige, slip for at synke</option>
+        <option value="traek">Træk: fingeren op og ned</option>
+      </select>
+    </label>
     <label>Fart
       <select id="optSpeed">
         <option value="rolig">Rolig</option>
@@ -393,6 +399,8 @@
 
     const FACT = { rolig: .6, normal: .8, hurtig: 1 };
     let speedKey = FACT[read("fart", "")] ? read("fart", "") : "normal";
+    let controlMode = read("styring", "tryk") === "traek" ? "traek" : "tryk";
+    const hintText = () => (controlMode === "tryk" ? "Hold fingeren nede for at stige!" : "Træk op og ned for at svømme!");
 
     // ---------- Tegninger (haj og fisk) ----------
     // Samme former bruges i SVG (forside, popups) og på lærredet. Alt er tegnet med radius 1.
@@ -651,7 +659,7 @@
       if (first && G) { sh.R = sharkRadius(); sh.x = SW * SHARK_X; sh.y = sh.ty = (TOP + SH) / 2; fish = []; fillFish(); }
     }
 
-    const fishCounts = () => ({ small: 6, big: Math.min(5, 1 + Math.floor((G.n - 1) / 2)) });
+    const fishCounts = () => ({ small: 8, big: Math.min(5, 1 + Math.floor((G.n - 1) / 2)) });
     const homing = () => Math.min(.6, .12 * (G.n - 1));
     // Mere tid på en smal telefonskærm: fiskene er 15 % langsommere, og bane 1 har kun én langsom stor fisk
     const speedFactor = () => FACT[speedKey] * Math.min(1.25, 1 + .03 * (G.n - 1)) * (SW < SH ? .85 : 1);
@@ -662,9 +670,9 @@
       const r = (big ? (1.2 + Math.random() * .3) * R0 * 1.5 : (.45 + Math.random() * .4) * R0 * (1 + .5 * G.eaten / G.need)) * u;
       let f = null;
       for (let tries = 0; tries < 24; tries++) {
-        const x = spread ? SW * .5 + Math.random() * SW * 1.2 : SW + r * 2.4 + Math.random() * 14 * u;
+        const x = spread ? SW * .45 + Math.random() * SW * .9 : SW + r * 2.4 + Math.random() * 8 * u;
         const y = TOP + r + Math.random() * Math.max(1, SH - TOP - 2 * r);
-        f = { x, y, r, face: -1, big, phase: Math.random() * 6.28, freq: 1 + Math.random() * 1.5, amp: (big ? 1.5 : 3.5) * u * Math.random(), speed: (big ? 14 + Math.random() * 8 : 13 + Math.random() * 10) * u, color: big ? BIG_COLORS[rnd(BIG_COLORS.length)] : SMALL_COLORS[rnd(SMALL_COLORS.length)] };
+        f = { x, y, r, face: -1, big, phase: Math.random() * 6.28, freq: 1 + Math.random() * 1.5, amp: (big ? 1.5 : 3.5) * u * Math.random(), speed: (big ? 22 + Math.random() * 11 : 20 + Math.random() * 12) * u, color: big ? BIG_COLORS[rnd(BIG_COLORS.length)] : SMALL_COLORS[rnd(SMALL_COLORS.length)] };
         // to store fisk må ikke ligge oven i hinanden, så der altid er et hul at svømme igennem
         if (!fish.some((o) => o.big && big && Math.abs(o.x - x) < r * 3 && Math.abs(o.y - y) < (o.r + r) * 1.4)) break;
       }
@@ -711,6 +719,7 @@
     function beginReady() {
       state = "ready";
       resize();
+      $("startHint").textContent = hintText();
       $("startHint").hidden = false;
       sfx.ready();
       const w = pickWeighted(seenIds(), 1)[0];
@@ -831,16 +840,28 @@
       confetti();
     }
 
-    // Hajen står stille i siden og svømmer kun op og ned. Fingerens lodrette træk flytter hajen 1:1 (gange GAIN),
-    // uanset hvor på skærmen fingeren sættes, så fingeren aldrig behøver at dække hajen.
+    // To måder at styre på (⚙️): "tryk" = let tyngdekraft, hold fingeren for at stige og slip for at synke (som Big Shark), "traek" = træk op og ned.
+    // Hajen står stille i siden og svømmer kun op og ned.
     function moveShark(dt) {
-      if (pointer.active) sh.ty = sh.ty0 + GAIN * (pointer.y - pointer.y0);
-      else if (keys.y) sh.ty += keys.y * 60 * u * dt;
-      sh.ty = clamp(sh.ty, TOP + sh.R, SH - sh.R * .7);
+      const floor = SH - sh.R * .7 - 2.6 * u;
       const prev = sh.y;
-      const vmax = 110 * u;
-      sh.y = clamp(sh.y + clamp((sh.ty - sh.y) * 12, -vmax, vmax) * dt, TOP + sh.R, SH - sh.R * .7);
-      sh.vy = (sh.y - prev) / Math.max(dt, 1e-3);
+      if (controlMode === "tryk") {
+        const up = pointer.active || keys.y < 0;
+        sh.vy += (up ? -80 : 65) * u * dt; // stigning mens man holder, ellers sagte fald
+        sh.vy -= sh.vy * 2.2 * dt; // vandmodstand, så det føles blødt
+        sh.vy = clamp(sh.vy, -45 * u, 40 * u);
+        sh.y += sh.vy * dt;
+        if (sh.y < TOP + sh.R) { sh.y = TOP + sh.R; sh.vy = Math.max(0, sh.vy); }
+        if (sh.y > floor) { sh.y = floor; sh.vy = Math.min(0, sh.vy); }
+        sh.ty = sh.y;
+      } else {
+        if (pointer.active) sh.ty = sh.ty0 + GAIN * (pointer.y - pointer.y0);
+        else if (keys.y) sh.ty += keys.y * 60 * u * dt;
+        sh.ty = clamp(sh.ty, TOP + sh.R, SH - sh.R * .7);
+        const vmax = 110 * u;
+        sh.y = clamp(sh.y + clamp((sh.ty - sh.y) * 12, -vmax, vmax) * dt, TOP + sh.R, SH - sh.R * .7);
+        sh.vy = (sh.y - prev) / Math.max(dt, 1e-3);
+      }
       sh.tilt += (clamp(sh.vy / (60 * u), -.6, .6) - sh.tilt) * Math.min(1, dt * 8);
     }
 
@@ -884,7 +905,7 @@
         updateFish(dt);
         collide();
       } else if (state === "ready") {
-        moveShark(dt);
+        if (controlMode !== "tryk") moveShark(dt); // med tyngdekraft hænger hajen stille, til spillet starter
       } else if (state === "dying") {
         G.dyT += dt;
         sh.vy = sh.vy * .9 - 3 * u * dt;
@@ -1318,6 +1339,7 @@
       setPointer(e);
       pointer.y0 = pointer.y;
       sh.ty0 = sh.ty;
+      if (controlMode === "tryk" && state !== "quiz") sh.vy = Math.min(sh.vy, -30 * u); // et tryk giver straks et lille løft
       try { stage.setPointerCapture(e.pointerId); } catch { /* ikke vigtigt */ }
       startPlay();
     });
@@ -1347,6 +1369,8 @@
       fitSoon();
     }
     $("optSpeed").value = speedKey;
+    $("optControl").value = controlMode;
+    $("optControl").addEventListener("change", (e) => { controlMode = e.target.value === "traek" ? "traek" : "tryk"; write("styring", controlMode); if (sh) { sh.vy = 0; sh.ty = sh.y; } $("startHint").textContent = hintText(); });
     $("optChoices").value = read("valg", "auto");
     $("optRom").value = read("rom", "1");
     $("optSpeed").addEventListener("change", (e) => { write("fart", e.target.value); speedKey = e.target.value; });
