@@ -109,7 +109,7 @@
     /* Under spillet fylder banen hele skærmen under topbaren (ingen ramme). Den er fast placeret (samme koordinater som baggrunden),
        så den også rækker helt ned på iPhone, hvor sidens højde ellers kan afvige fra det synlige. */
     body.playing .app { padding: 0; }
-    body.playing #play { position: fixed; left: 0; right: 0; top: var(--tb-h, 54px); bottom: 0; height: auto; padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left); z-index: 1; }
+    body.playing #play { position: fixed; left: 0; right: 0; top: var(--tb-h, 54px); bottom: 0; height: auto; padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); background: #d8b865; z-index: 1; }
     @media (max-width: 520px) {
       .hud { gap: 6px; }
       #startHint { font-size: .9rem; padding: 8px 16px; }
@@ -202,6 +202,9 @@
     .card-w .t, .mcard .t, .wordbtn .tw, #wordPop .tw, .chip .ta { display: block; max-width: 100%; min-width: 0; white-space: nowrap; text-align: center; }
 
     #settings { display: grid; gap: 10px; }
+    /* Fejlsøgning: tal om skærmen og en rød ramme om banens kanter */
+    #dbg { position: fixed; left: 6px; top: calc(var(--tb-h, 54px) + 54px); z-index: 80; max-width: calc(100vw - 12px); padding: 6px 8px; border-radius: 8px; background: #000000b8; color: #fff; font: 11px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; pointer-events: none; }
+    #probe { position: fixed; left: 0; top: 0; bottom: 0; width: 1px; visibility: hidden; pointer-events: none; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
     #settings label { display: grid; gap: 4px; font-weight: 800; color: #27426f; }
     #settings select, #settings button { min-height: 44px; padding: 6px 10px; border: 2px solid #dfe7f3; border-radius: 12px; background: #f7faff; color: #27426f; font: inherit; font-weight: 700; }
 
@@ -345,8 +348,12 @@
         <option value="0">Skjul</option>
       </select>
     </label>
+    <button id="optDebug" type="button">🛠 Vis skærmmål (fejlsøgning)</button>
     <button id="optReset" type="button">↺ Start forfra fra bane 1</button>
   </div>
+
+  <div id="dbg" hidden></div>
+  <div id="probe" aria-hidden="true"></div>
 
   <script src="../../topbar.js"></script>
   <script src="../urundai/ord.js"></script>
@@ -1309,6 +1316,18 @@
         ctx.restore();
       }
       drawShark();
+      if (debugOn) {
+        // rød ramme om lærredets kanter, magenta linje ved hajens gulv og målestreger hver 50 px i bunden
+        ctx.save();
+        ctx.strokeStyle = "#ff0044"; ctx.lineWidth = 6;
+        ctx.strokeRect(3, 3, SW - 6, SH - 6);
+        ctx.strokeStyle = "#ff00ff"; ctx.lineWidth = 2;
+        const fy = SH - sh.R * .7 - 2.6 * u;
+        ctx.beginPath(); ctx.moveTo(0, fy); ctx.lineTo(SW, fy); ctx.stroke();
+        ctx.fillStyle = "#fff"; ctx.font = "bold 12px sans-serif";
+        for (let yy = SH - 50; yy > TOP; yy -= 50) { ctx.fillRect(0, yy, 14, 2); ctx.fillText(`${SH - yy} fra bund`, 18, yy + 4); }
+        ctx.restore();
+      }
       // Pulserende ring om hajen, så den er let at finde (stærkest før start)
       if (state === "ready" || state === "play") {
         const pulse = .5 + .5 * Math.sin(time * 5);
@@ -1368,6 +1387,39 @@
       startPlay();
     });
     document.addEventListener("keyup", (e) => { keys.down.delete(e.key); syncKeys(); });
+
+    // ---------- Fejlsøgning (⚙️ → Vis skærmmål, eller ?debug=1) ----------
+    let debugOn = read("debug", "0") === "1" || new URLSearchParams(location.search).has("debug");
+    let cacheName = "";
+    if (window.caches) caches.keys().then((k) => { cacheName = k.filter((n) => n.startsWith("regnespil-")).join(", "); }).catch(() => {});
+    function debugText() {
+      const vv = window.visualViewport;
+      const pr = getComputedStyle($("probe"));
+      const sr = stage.getBoundingClientRect();
+      const cr = cv.getBoundingClientRect();
+      const tb = document.querySelector(".tb");
+      const hud = document.querySelector(".hud");
+      return [
+        `cache: ${cacheName || "?"}`,
+        `inner ${innerWidth}x${innerHeight}  screen ${window.screen.width}x${window.screen.height}  dpr ${devicePixelRatio}`,
+        `vv ${vv ? `${Math.round(vv.width)}x${Math.round(vv.height)} top ${Math.round(vv.offsetTop)} scale ${vv.scale}` : "-"}`,
+        `fast kasse (fixed 0..bund): ${Math.round($("probe").getBoundingClientRect().height)}  dvh: ${CSS.supports("height", "100dvh")}`,
+        `safe t/r/b/l: ${pr.paddingTop} ${pr.paddingRight} ${pr.paddingBottom} ${pr.paddingLeft}`,
+        `topbar bund: ${tb ? Math.round(tb.getBoundingClientRect().bottom) : "-"}  hud top: ${hud ? Math.round(hud.getBoundingClientRect().top) : "-"}`,
+        `bane top/bund: ${Math.round(sr.top)} / ${Math.round(sr.bottom)}  (h ${Math.round(sr.height)})`,
+        `lærred bund: ${Math.round(cr.bottom)}  SW x SH: ${SW}x${SH}`,
+        `haj y: ${sh ? Math.round(sh.y) : "-"}  gulv: ${sh ? Math.round(SH - sh.R * .7 - 2.6 * u) : "-"}`,
+        `standalone: ${navigator.standalone === true || matchMedia("(display-mode: standalone)").matches}`,
+        `${navigator.userAgent.replace(/Mozilla\/5.0 /, "").slice(0, 80)}`
+      ].join("\n");
+    }
+    function applyDebug() {
+      $("dbg").hidden = !debugOn;
+      $("optDebug").textContent = debugOn ? "🛠 Skjul skærmmål" : "🛠 Vis skærmmål (fejlsøgning)";
+    }
+    $("optDebug").addEventListener("click", () => { debugOn = !debugOn; write("debug", debugOn ? "1" : "0"); applyDebug(); Topbar.closeMenu(); });
+    applyDebug();
+    setInterval(() => { if (debugOn) $("dbg").textContent = debugText(); }, 400);
 
     // ---------- Indstillinger og start ----------
     function applyRom() {
