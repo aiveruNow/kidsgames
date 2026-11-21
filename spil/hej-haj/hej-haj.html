@@ -350,7 +350,7 @@
         </button>
         <div class="banner" id="quizBanner"></div>
         <p class="mute-note" id="quizNote" hidden></p>
-        <button class="btn" id="quizRetry" type="button" hidden>↻ Prøv igen</button>
+        <button class="btn" id="quizRetry" type="button" hidden>↻ Start forfra som baby</button>
       </div>
       <div class="choices" id="quizChoices"></div>
     </div>
@@ -1172,10 +1172,13 @@
       beginReady();
     }
 
-    // Forkert svar: samme størrelse forfra, og hajen er lille igen
+    // Forkert svar: hajen starter forfra som en baby (størrelse 1). Stjernerne beholdes.
     function restartLevel() {
-      loadLevel(G.n, G.newWords, G.reviewWords);
+      nextLevel = 1;
+      write("level", 1);
+      loadLevel(1, G.newWords, G.reviewWords);
       beginReady();
+      toast("Baby-haj", "Du starter forfra");
     }
 
     function goHome() {
