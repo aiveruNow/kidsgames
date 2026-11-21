@@ -271,7 +271,7 @@
         <div class="prog" id="prog" aria-hidden="true"><i id="progFill"></i><span id="progText"></span></div>
         <div class="pips" id="pips" aria-hidden="true"></div>
       </div>
-      <div id="stage"><canvas id="cv"></canvas><div id="wordPop" hidden></div><div id="startHint" hidden>Hold fingeren på skærmen!</div></div>
+      <div id="stage"><canvas id="cv"></canvas><div id="wordPop" hidden></div><div id="startHint" hidden>Træk i en retning for at svømme!</div></div>
     </section>
   </main>
 
@@ -617,12 +617,14 @@
     let fish = [];
     let particles = [];
     let bubbles = [];
-    const pointer = { active: false, x: 0, y: 0 };
+    const pointer = { active: false, x: 0, y: 0, ax: 0, ay: 0 };
+    let JOY_MAX = 14; // joystickens radius og dødzone i pixel (sættes i resize)
+    let JOY_DEAD = 2;
     const keys = { x: 0, y: 0, down: new Set() };
 
     const SMALL_COLORS = ["#ffd54f", "#ff8a65", "#81d4fa", "#a5d6a7", "#f48fb1", "#ce93d8", "#ffcc80", "#80cbc4"];
     const BIG_COLORS = ["#c62828", "#7b1fa2", "#d84315", "#455a64"];
-    const R0 = 6; // hajens startradius i enheder
+    const R0 = 7.5; // hajens startradius i enheder (1 enhed = 1 % af den korteste side)
     const sharkRadius = () => R0 * (1 + .5 * G.eaten / G.need) * u;
 
     function resize() {
@@ -640,6 +642,8 @@
       cv.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       u = Math.min(SW, SH) / 100;
+      JOY_MAX = Math.max(46, 13 * u);
+      JOY_DEAD = JOY_MAX * .12;
       stage.style.backgroundImage = seaUri(SW > SH);
       if (!bubbles.length) for (let i = 0; i < 16; i++) bubbles.push({ x: Math.random() * SW, y: Math.random() * SH, r: .4 + Math.random() * 1.2, sp: 3 + Math.random() * 6 });
       if (sh) { sh.x *= SW / ox; sh.y *= SH / oy; }
@@ -652,7 +656,8 @@
     const speedFactor = () => FACT[speedKey] * Math.min(1.25, 1 + .03 * (G.n - 1));
 
     function spawnFish(big, spread) {
-      const r = (big ? (1.25 + Math.random() * .6) * R0 * 1.5 : (.45 + Math.random() * .4) * R0 * (1 + .5 * G.eaten / G.need)) * u;
+      // Store fisk er altid mindst 1,2 × hajens slutstørrelse
+      const r = (big ? (1.2 + Math.random() * .3) * R0 * 1.5 :  (.45 + Math.random() * .4) * R0 * (1 + .5 * G.eaten / G.need)) * u;
       let f = null;
       for (let tries = 0; tries < 24; tries++) {
         const face = Math.random() < .5 ? 1 : -1;
@@ -826,21 +831,29 @@
     }
 
     function moveShark(dt) {
-      let tx = null;
-      let ty = null;
-      if (pointer.active) { tx = pointer.x; ty = pointer.y; }
-      else if (keys.x || keys.y) { tx = sh.x + keys.x * SW; ty = sh.y + keys.y * SH; }
+      // Flydende joystick: retningen er fingerens retning væk fra stedet, hvor den blev sat ned. Fingeren dækker derfor aldrig hajen.
       let dvx = 0;
       let dvy = 0;
-      if (tx !== null) {
-        const dx = tx - sh.x;
-        const dy = ty - sh.y;
+      if (pointer.active) {
+        let dx = pointer.x - pointer.ax;
+        let dy = pointer.y - pointer.ay;
         const d = Math.hypot(dx, dy);
-        if (d > sh.R * .25) {
-          const sp = Math.min(46 * u, d * 6);
-          dvx = dx / d * sp;
-          dvy = dy / d * sp;
+        if (d > JOY_MAX) { // trækkes fingeren længere, følger udgangspunktet med, så en ny retning kan tages med det samme
+          pointer.ax += dx / d * (d - JOY_MAX);
+          pointer.ay += dy / d * (d - JOY_MAX);
+          dx = pointer.x - pointer.ax;
+          dy = pointer.y - pointer.ay;
         }
+        const dd = Math.hypot(dx, dy);
+        if (dd > JOY_DEAD) {
+          const sp = 46 * u * Math.min(1, (dd - JOY_DEAD) / (JOY_MAX * .7));
+          dvx = dx / dd * sp;
+          dvy = dy / dd * sp;
+        }
+      } else if (keys.x || keys.y) {
+        const d = Math.hypot(keys.x, keys.y);
+        dvx = keys.x / d * 46 * u;
+        dvy = keys.y / d * 46 * u;
       }
       const k = Math.min(1, dt * 5);
       sh.vx += (dvx - sh.vx) * k;
@@ -1232,6 +1245,31 @@
       if (!G || !sh) return;
       for (const f of fish) drawFish(f);
       drawShark();
+      // Pulserende ring om hajen, så den er let at finde (stærkest før start)
+      if (state === "ready" || state === "play") {
+        const pulse = .5 + .5 * Math.sin(time * 5);
+        ctx.save();
+        ctx.strokeStyle = `rgba(255,224,138,${state === "ready" ? .55 + .4 * pulse : .38 + .2 * pulse})`;
+        ctx.lineWidth = Math.max(2, u * .6);
+        ctx.beginPath();
+        ctx.arc(sh.x, sh.y, sh.R * (1.45 + .12 * pulse), 0, 6.3);
+        ctx.stroke();
+        ctx.restore();
+      }
+      if (pointer.active && (state === "play" || state === "ready")) {
+        let dx = pointer.x - pointer.ax;
+        let dy = pointer.y - pointer.ay;
+        const d = Math.hypot(dx, dy);
+        if (d > JOY_MAX) { dx *= JOY_MAX / d; dy *= JOY_MAX / d; }
+        ctx.save();
+        ctx.strokeStyle = "rgba(255,255,255,.5)";
+        ctx.fillStyle = "rgba(255,255,255,.12)";
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(pointer.ax, pointer.ay, JOY_MAX, 0, 6.3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "rgba(255,224,138,.8)";
+        ctx.beginPath(); ctx.arc(pointer.ax + dx, pointer.ay + dy, JOY_MAX * .38, 0, 6.3); ctx.fill();
+        ctx.restore();
+      }
       for (const p of particles) {
         ctx.globalAlpha = Math.max(0, p.life);
         ctx.fillStyle = p.c;
@@ -1249,7 +1287,7 @@
       requestAnimationFrame(frame);
     }
 
-    // ---------- Styring: hold en finger, så svømmer hajen derhen ----------
+    // ---------- Styring: hold en finger nede og træk i en retning, så svømmer hajen den vej ----------
     const setPointer = (e) => {
       const rect = cv.getBoundingClientRect();
       pointer.x = e.clientX - rect.left;
@@ -1260,6 +1298,8 @@
       if (!G) return;
       pointer.active = true;
       setPointer(e);
+      pointer.ax = pointer.x;
+      pointer.ay = pointer.y;
       try { stage.setPointerCapture(e.pointerId); } catch { /* ikke vigtigt */ }
       startPlay();
     });
