@@ -95,7 +95,7 @@
     #play { position: relative; gap: 0; overflow: hidden; }
     .hud { position: absolute; left: 8px; right: 8px; top: 8px; z-index: 6; display: flex; align-items: center; gap: 10px; padding: 0; color: #fff; pointer-events: none; }
     .hud .back { width: 40px; height: 40px; font-size: 1.3rem; pointer-events: auto; }
-    .hud .title { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 14px; background: #0000004d; font-size: 1.05rem; font-weight: 900; white-space: nowrap; text-shadow: 0 2px 0 #0006; }
+    .hud .title { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 14px; background: #0000004d; font-size: 1.05rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; text-shadow: 0 2px 0 #0006; }
     .prog { position: relative; flex: 1; min-width: 60px; height: 26px; border-radius: 999px; background: #0000004d; box-shadow: inset 0 0 0 2px #ffffff40; overflow: hidden; }
     .prog i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 999px; background: linear-gradient(#ffe08a, #f5b83d); transition: width .3s; }
     .prog span { position: absolute; inset: 0; display: grid; place-items: center; font-size: .85rem; font-weight: 900; color: #fff; text-shadow: 0 1px 2px #000a; font-variant-numeric: tabular-nums; }
@@ -251,7 +251,7 @@
     #wordPop .badge { margin-bottom: 1px; }
     #startHint { background: #081c32a6; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid #ffffff38; color: #fff; box-shadow: 0 12px 30px #00000059; font-weight: 800; }
     /* Ny størrelse: midt på banen, uden at stoppe spillet */
-    #toast { position: absolute; left: 50%; top: 30%; z-index: 7; display: grid; gap: 2px; padding: 14px 28px; border-radius: 24px; text-align: center; pointer-events: none; background: #081c3299; border: 1px solid #ffffff38; backdrop-filter: blur(18px) saturate(1.5); -webkit-backdrop-filter: blur(18px) saturate(1.5); box-shadow: 0 20px 50px #00000066; animation: toastIn 2.3s cubic-bezier(.16, 1, .3, 1) both; }
+    #toast { position: absolute; left: 50%; top: 30%; max-width: 88%; transform: translateX(-50%); z-index: 7; display: grid; gap: 2px; padding: 14px 28px; border-radius: 24px; text-align: center; pointer-events: none; background: #081c3299; border: 1px solid #ffffff38; backdrop-filter: blur(18px) saturate(1.5); -webkit-backdrop-filter: blur(18px) saturate(1.5); box-shadow: 0 20px 50px #00000066; animation: toastIn 2.3s cubic-bezier(.16, 1, .3, 1) both; }
     #toast b { font-size: 1.9rem; letter-spacing: -.02em; background: linear-gradient(180deg, #fff, #fde047); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
     #toast span { color: #fde68a; font-weight: 800; }
     @keyframes toastIn { 0% { opacity: 0; transform: translate(-50%, 14px) scale(.85); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 20% { transform: translate(-50%, 0) scale(1); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -12px); } }
@@ -395,12 +395,16 @@
   <script src="../urundai/ord.js"></script>
   <script src="../urundai/laengder.js"></script>
   <script src="../urundai/billeder.js"></script>
+  <script src="arter.js"></script>
   <script>
   (() => {
     "use strict";
     // Ord, billeder og lydklip er Urundais (samme tamilske ord, samme gentagelse). Ordstatistikken deles med Urundai.
     const R = window.UrundaiOrd;
     const Art = window.UrundaiArt;
+    const AR = window.HajArter; // havets 10 verdener og rigtige arter (arter.js)
+    const SPECIES = AR.species;
+    const WORLDS = AR.worlds;
     const WORDS = R.words;
     const ALL = Object.keys(WORDS);
     const $ = (id) => document.getElementById(id);
@@ -413,7 +417,7 @@
 
     const wordState = readWords(); // id -> { box 0-3, seen, ok, bad, t }
     let stars = Number(read("stars", "0")) || 0;
-    let nextLevel = Math.max(1, Number(read("level", "1")) || 1);
+    let curWorld = Math.max(0, Number(read("world", "0")) || 0) % WORLDS.length; // hvilken verden man er nået til (0-9)
     let muted = !Topbar.soundOn();
     window.addEventListener("topbar:sound", (e) => { muted = !e.detail.on; if (muted) stopSpeech(); });
 
@@ -460,8 +464,6 @@
       `<path d="${SHARK.dorsal}" fill="#2a6fb0"/><path d="${SHARK.pect}" fill="#2a6fb0"/><path d="${SHARK.body}" fill="url(#${id})" stroke="#1f5a92" stroke-width=".05" stroke-linejoin="round"/>` +
       `<path d="${SHARK.belly}" fill="#f4fbff"/><circle cx=".8" cy="-.12" r=".12" fill="#fff"/><circle cx=".83" cy="-.12" r=".065" fill="#12263a"/>` +
       `<path d="M1.27 .13Q.95 .32 .6 .22" fill="none" stroke="#12263a" stroke-width=".04" stroke-linecap="round"/><path d="M.5 -.25Q.46 -.1 .5 .05M.38 -.26Q.34 -.1 .38 .04" fill="none" stroke="#1f5a92" stroke-width=".03" stroke-linecap="round"/></svg>`;
-    const fishSvg = (color, angry) => `<svg viewBox="-1.7 -.95 3 1.9" aria-hidden="true"><path d="M-.75 0L-1.55 -.6Q-1.3 0 -1.55 .6Z" fill="${Art.dark(color, .2)}"/><ellipse rx="1" ry=".66" fill="${color}" stroke="${Art.dark(color, .35)}" stroke-width=".05"/><path d="M-.2 -.62Q.1 -1 .4 -.56Z" fill="${Art.dark(color, .2)}"/><circle cx=".5" cy="-.14" r=".2" fill="#fff"/><circle cx=".55" cy="-.14" r=".1" fill="#12263a"/>` +
-      (angry ? `<path d="M.22 -.45L.78 -.28" stroke="#12263a" stroke-width=".1" stroke-linecap="round"/><path d="M.98 .06Q.7 .4 .3 .22" fill="none" stroke="#12263a" stroke-width=".07" stroke-linecap="round"/><path d="M.86 .16L.78 .3L.7 .2ZM.6 .22L.52 .34L.44 .22Z" fill="#fff"/>` : `<path d="M.9 .1Q.7 .3 .5 .2" fill="none" stroke="#12263a" stroke-width=".05" stroke-linecap="round"/>`) + `</svg>`;
     $("mascot").innerHTML = sharkSvg("sm");
 
     // ---------- Billeder til ordene ----------
@@ -635,7 +637,7 @@
     $("temple").innerHTML = Art.gopuram();
 
     function renderHome() {
-      $("playBtn").textContent = nextLevel > 1 ? `▶ Spil · størrelse ${nextLevel}` : "▶ Spil";
+      $("playBtn").textContent = `▶ Spil · ${WORLDS[curWorld].da}`;
       $("dictCount").textContent = `(${seenCount()}/${ALL.length})`;
     }
 
@@ -679,15 +681,15 @@
     const pointer = { active: false, y: 0, y0: 0, ty0: 0 };
     const keys = { y: 0, down: new Set() };
 
-    const SMALL_COLORS = ["#ffd54f", "#ff8a65", "#81d4fa", "#a5d6a7", "#f48fb1", "#ce93d8", "#ffcc80", "#80cbc4"];
-    const BIG_COLORS = ["#c62828", "#7b1fa2", "#d84315", "#455a64"];
-    // Hajen starter som en baby og vokser, hver gang den spiser. Størrelsen er i enheder (1 enhed = 1 % af den korteste side).
+    // Hajen starter som en baby og vokser med de point, den spiser (50 point klarer verdenen). Størrelsen er i enheder (1 enhed = 1 % af den korteste side).
     const R_BASE = 3.8;
-    const R_STEP = .75; // vækst pr. størrelse (højst 10 størrelser, så hajen ender omkring 11 enheder)
+    const R_GROW = 7.5; // hvor meget hajen vokser i alt i én verden
+    const GOAL = 50; // point der skal til for at klare en verden
     const TOP = 50; // øverste pixels på banen er til HUD'en
     const SHARK_X = .2; // hajen står stille her (andel af bredden), og verden scroller mod venstre
-    const needFor = (n) => 5 + n; // fisk der skal spises for at vokse til næste størrelse
-    const sharkRadius = () => (R_BASE + R_STEP * Math.min(10, (G.n - 1) + G.eaten / G.need)) * u;
+    const sharkRadius = () => (R_BASE + R_GROW * Math.min(1, G.points / GOAL)) * u;
+    const stageOf = (points) => Math.min(5, 1 + Math.floor(points / 10)); // 1-5, en ny størrelse for hver 10 point
+    const world = () => WORLDS[G.w];
     let scrollX = 0;
     let eatFx = []; // fisk der suges ind i munden
     let floaters = []; // "+1" der svæver op
@@ -719,53 +721,102 @@
       if (first && G) { sh.R = sharkRadius(); sh.x = SW * SHARK_X; sh.y = sh.ty = (TOP + SH) / 2; fish = []; fillFish(); }
     }
 
+    // Sværhed: stiger med verdenen og med hajens størrelse (0-22)
+    const diff = () => G.w * 2 + (G.n - 1);
     // Højst to onde fisk ad gangen: kun én i de første størrelser, og først efter et lille stykke tid, så man kan øve sig
     const evilTarget = () => (G.n <= 3 ? 1 : 2);
-    const evilDelay = () => Math.max(1.2, 4.5 - .5 * G.n); // sekunder, før en ny ond fisk kommer ind
-    const homing = () => Math.min(.6, .12 * (G.n - 1));
-    // Mere tid på en smal telefonskærm: fiskene er 15 % langsommere, og på første størrelse er den ene onde fisk langsom
-    const speedFactor = () => FACT[speedKey] * Math.min(1.3, 1 + .03 * (G.n - 1)) * (SW < SH ? .85 : 1);
+    const evilDelay = () => Math.max(1.2, 4.5 - .35 * diff()); // sekunder, før en ny ond fisk kommer ind
+    const homing = () => Math.min(.6, .08 * diff());
+    // Mere tid på en smal telefonskærm: fiskene er 15 % langsommere, og i starten er den ene onde fisk langsom
+    const speedFactor = () => FACT[speedKey] * Math.min(1.3, 1 + .02 * diff()) * (SW < SH ? .85 : 1);
+    const groundSpeed = () => 9 * u * .8 * speedFactor(); // bunddyr følger tang og sand (forgrunden scroller med 80 %)
 
-    // Alle fisk kommer ind fra højre og svømmer mod venstre. spread = fordelt ud over banen ved start (kun til højre for hajen).
-    // Størrelsen er i forhold til hajens størrelse lige nu: onde fisk er kun en lille smule større end hajen, og når hajen vokser forbi dem, kan den spise dem.
-    function spawnFish(big, spread) {
-      const r = sh.R * (big ? 1.2 + Math.random() * .25 : .35 + Math.random() * .5);
+    // Størrelsen på spiselige fisk i forhold til hajen: små og almindelige (1 point) er mindst, sjældne (10 point) næsten lige så store som hajen
+    const R_REL = { 1: [.3, .45], 2: [.42, .58], 5: [.58, .74], 10: [.72, .88] };
+    const WEIGHT = { 1: 5, 2: 3, 5: 1.3, 10: .4 }; // hvor ofte hver slags kommer (sjældne sjældent)
+    function pickFood() {
+      const ids = world().food;
+      let tot = 0;
+      for (const id of ids) tot += WEIGHT[SPECIES[id].pts];
+      let r = Math.random() * tot;
+      for (const id of ids) { r -= WEIGHT[SPECIES[id].pts]; if (r <= 0) return SPECIES[id]; }
+      return SPECIES[ids[0]];
+    }
+    const hitFactor = (spec) => (spec.kind === "fish" ? .55 + .22 * (spec.len || 1) : spec.kind === "eel" ? .9 : .75);
+
+    // Alle dyr kommer ind fra højre og svømmer mod venstre. role: "food" (spiselig), "evil" (rovfisk, kun lidt større end hajen),
+    // "ground" (bunddyr: krabber og søstjerner, eller farlige pindsvin og rygere) og "float" (farlige vandmænd og ål).
+    // spread = fordelt ud over banen ved start (kun til højre for hajen).
+    function spawnFish(role, spread) {
+      const W = world();
+      let spec;
+      let r;
+      let speed;
+      if (role === "evil") { spec = SPECIES[W.evil[rnd(W.evil.length)]]; r = sh.R * (1.2 + Math.random() * .25); speed = (22 + Math.random() * 11) * u; }
+      else if (role === "ground") {
+        const hzChance = G.w === 0 && G.n === 1 ? 0 : Math.min(.55, .15 + .03 * diff());
+        const useHazard = W.hazards.length && (!W.ground.length || Math.random() < hzChance);
+        const list = useHazard ? W.hazards : W.ground;
+        if (!list.length) return;
+        spec = SPECIES[list[rnd(list.length)]];
+        if (spec.id === "kiste" && Math.random() < .5) spec = SPECIES[list[rnd(list.length)]]; // skattekisten er sjælden
+        if (spec.hazard) r = clamp(sh.R * .55, 2.4 * u, 4 * u);
+        else { const rr = R_REL[spec.pts]; r = Math.max(2.4 * u, sh.R * (rr[0] + Math.random() * (rr[1] - rr[0]))); }
+        speed = groundSpeed();
+      } else if (role === "float") { spec = SPECIES[W.float[rnd(W.float.length)]]; r = clamp(sh.R * .7, 3 * u, 5 * u); speed = (10 + Math.random() * 5) * u; }
+      else { spec = pickFood(); const rr = R_REL[spec.pts]; r = sh.R * (rr[0] + Math.random() * (rr[1] - rr[0])); speed = (20 + Math.random() * 12) * u; }
+      const ground = !!spec.ground;
       let f = null;
       for (let tries = 0; tries < 24; tries++) {
         const x = spread ? SW * .45 + Math.random() * SW * .9 : SW + r * 2.4 + Math.random() * 8 * u;
-        const y = TOP + r + Math.random() * Math.max(1, SH - TOP - 2 * r);
-        f = { x, y, r, face: -1, big, chomp: 0, phase: Math.random() * 6.28, freq: 1 + Math.random() * 1.5, amp: (big ? 1.5 : 3.5) * u * Math.random(), speed: (big ? 22 + Math.random() * 11 : 20 + Math.random() * 12) * u, color: big ? BIG_COLORS[rnd(BIG_COLORS.length)] : SMALL_COLORS[rnd(SMALL_COLORS.length)] };
+        const y = ground ? SH - 2.4 * u - (spec.gy || .8) * r : TOP + r + Math.random() * Math.max(1, SH - TOP - 2 * r);
+        f = { spec, role, x, y, r, hr: r * hitFactor(spec), face: -1, big: role === "evil", ground, hazard: !!spec.hazard, chomp: 0, phase: Math.random() * 6.28, freq: 1 + Math.random() * 1.5, amp: (role === "evil" ? 1.5 : role === "float" ? 4 : ground ? 0 : 3.5) * u * Math.random(), speed };
         // to onde fisk må ikke ligge oven i hinanden, så der altid er et hul at svømme igennem
-        if (!fish.some((o) => o.big && big && Math.abs(o.x - x) < r * 3 && Math.abs(o.y - y) < (o.r + r) * 1.4)) break;
+        if (!fish.some((o) => o.big && role === "evil" && Math.abs(o.x - x) < r * 3 && Math.abs(o.y - y) < (o.r + r) * 1.4)) break;
       }
       fish.push(f);
     }
     function fillFish() {
-      for (let i = 0; i < 8; i++) spawnFish(false, true);
-      evilCd = G.n <= 1 ? 4 : 2; // den første onde fisk kommer først lidt inde i spillet
+      for (let i = 0; i < 8; i++) spawnFish("food", true);
+      evilCd = G.w === 0 && G.n <= 1 ? 4 : 2; // den første onde fisk kommer først lidt inde i spillet
+      groundCd = 2.5;
+      floatCd = 6;
     }
-    // Holder antallet af spiselige fisk oppe og lader en ond fisk komme ind, når der er plads til den
+    // Holder antallet af spiselige fisk oppe og lader farlige dyr komme ind, når der er plads til dem
     let spawnCd = 0;
     let evilCd = 0;
+    let groundCd = 0;
+    let floatCd = 0;
     function ensureFish(dt) {
       spawnCd -= dt;
       evilCd -= dt;
+      groundCd -= dt;
+      floatCd -= dt;
+      const W = world();
       let evil = 0;
       let food = 0;
-      for (const f of fish) { if (f.big) evil++; else food++; }
-      if (evil < evilTarget() && evilCd <= 0) { spawnFish(true, false); evilCd = evilDelay(); return; }
+      let ground = 0;
+      let floating = 0;
+      for (const f of fish) { if (f.ground) ground++; else if (f.role === "float") floating++; else if (f.big) evil++; else food++; }
+      if (evil < evilTarget() && evilCd <= 0) { spawnFish("evil", false); evilCd = evilDelay(); return; }
+      const gTarget = W.ground.length || W.hazards.length ? (G.w === 0 && G.n <= 2 ? 1 : 2) : 0;
+      if (ground < gTarget && groundCd <= 0) { spawnFish("ground", false); groundCd = 2.4; return; }
+      if (W.float.length && floating < 1 && floatCd <= 0 && diff() >= 2) { spawnFish("float", false); floatCd = 5; return; }
       if (spawnCd > 0) return;
-      if (food < 8) { spawnFish(false, false); spawnCd = .22; }
+      if (food < 8) { spawnFish("food", false); spawnCd = .22; }
     }
 
-    function loadLevel(n, keepWords, keepReview) {
+    // Starter en verden: hajen er en baby, og verdenen har sine egne farver og dyr
+    function loadWorld(w, keepWords, keepReview) {
       const fresh = keepWords || shuffle(ALL.filter((id) => !ws(id).seen)).slice(0, 2);
       G = {
-        n, need: needFor(n), eaten: 0, total: 0, caught: 0, diedTier: 0, grace: 0, dyT: 0, killer: null,
+        w, n: 1, points: 0, total: 0, caught: 0, diedWorld: 0, grace: 0, dyT: 0, tT: 0, killer: null, announce: true,
         newWords: fresh,
-        reviewWords: keepReview || pickWeighted(seenIds(), 2, fresh),
-        bigColor: BIG_COLORS[0]
+        reviewWords: keepReview || pickWeighted(seenIds(), 2, fresh)
       };
+      const W = WORLDS[w];
+      stage.style.background = `linear-gradient(${W.grad[0]}, ${W.grad[1]} 45%, ${W.grad[2]})`;
+      $("play").style.backgroundColor = W.sand;
       sh = { x: SW * SHARK_X, y: (TOP + SH) / 2, ty: (TOP + SH) / 2, vy: 0, face: 1, tilt: 0, R: R_BASE * u, chew: 0, pop: 0, dscale: 1 };
       sh.R = sharkRadius();
       resetActors();
@@ -787,9 +838,9 @@
       G.grace = 0;
     }
 
-    function startLevel(n) {
+    function startWorld(w) {
       show("play");
-      loadLevel(n);
+      loadWorld(w);
       if (G.newWords.length || G.reviewWords.length) showMeet(G.newWords, G.reviewWords);
       else beginReady();
     }
@@ -800,6 +851,7 @@
       $("startHint").textContent = hintText();
       $("startHint").hidden = false;
       sfx.ready();
+      if (G.announce) { G.announce = false; toast(WORLDS[G.w].da, WORLDS[G.w].fact); }
       const w = pickWeighted(seenIds(), 1)[0];
       if (w) setTimeout(() => { if (state === "ready") wordPop(w); }, 500);
     }
@@ -825,9 +877,9 @@
 
     function renderFoot() { renderProg(); }
     function renderProg() {
-      $("playTitle").textContent = `Størrelse ${G.n}`;
-      $("progFill").style.width = `${Math.min(100, Math.round(100 * G.eaten / G.need))}%`;
-      $("progText").textContent = `${G.eaten} / ${G.need}`;
+      $("playTitle").textContent = WORLDS[G.w].da;
+      $("progFill").style.width = `${Math.min(100, Math.round(100 * G.points / GOAL))}%`;
+      $("progText").textContent = `${Math.min(G.points, GOAL)} / ${GOAL}`;
     }
 
     // ---------- Mød ordene ----------
@@ -883,35 +935,30 @@
     // ---------- Spillet ----------
     // Lille lyd-ring, der breder sig fra hajens mund
     const ring = (x, y, r, color = "255,255,255") => rings.push({ x, y, r, life: 1, color });
-    const floatText = (x, y, text, color = "#fff") => floaters.push({ x, y, text, life: 1, color });
+    const floatText = (x, y, text, color = "#fff", big = false) => floaters.push({ x, y, text, life: 1, color, big });
+    const POINT_COLOR = { 1: "#ffffff", 2: "#a7f3d0", 5: "#fde047", 10: "#fb923c" };
     function eat(f) {
       fish.splice(fish.indexOf(f), 1);
-      const w = f.r > sh.R * .65 ? 2 : 1; // en stor fisk giver dobbelt vækst
-      G.eaten += w;
+      const pts = f.spec.pts; // hver art giver 1, 2, 5 eller 10 point
+      G.points += pts;
       G.total++;
       sh.chew = .35;
-      eatFx.push({ x: f.x, y: f.y, r: f.r, color: f.color, phase: f.phase, t: 0 });
-      floatText(sh.x + sh.R * .6, sh.y - sh.R * 1.3, `+${w}`, w > 1 ? "#fde047" : "#fff");
-      ring(sh.x + sh.R * .9, sh.y, sh.R * .5);
-      burst(sh.x + sh.R * .9, sh.y, 6, ["#fff", "#bae6fd", f.color]);
+      eatFx.push({ spec: f.spec, x: f.x, y: f.y, r: f.r, phase: f.phase, t: 0 });
+      floatText(sh.x + sh.R * .6, sh.y - sh.R * 1.3, `${f.spec.da} +${pts}`, POINT_COLOR[pts] || "#fff", pts >= 5);
+      ring(sh.x + sh.R * .9, sh.y, sh.R * .5, pts >= 5 ? "253,224,71" : "255,255,255");
+      burst(sh.x + sh.R * .9, sh.y, pts >= 5 ? 12 : 6, ["#fff", "#bae6fd", "#fde047"]);
       sfx.eat();
-      buzz(15);
+      buzz(pts >= 5 ? 30 : 15);
       renderProg();
-      if (G.eaten >= G.need) { tierUp(); return; }
+      if (G.points >= GOAL) { worldDone(); return; }
+      if (stageOf(G.points) > G.n) { sizeUp(); return; }
       if (G.total % 4 === 0) { const wd = pickWeighted(seenIds(), 1)[0]; if (wd) wordPop(wd); }
     }
 
-    // Hajen er blevet en størrelse større: ingen pause, bare en stjerne og et nyt ord undervejs
-    function tierUp() {
-      const perfect = G.diedTier === 0;
-      const got = perfect ? 2 : 1;
-      G.eaten = Math.max(0, G.eaten - G.need);
-      G.n++;
-      G.need = needFor(G.n);
-      G.diedTier = 0;
-      nextLevel = G.n;
-      write("level", nextLevel);
-      stars += got;
+    // Hver 10 point: en større haj, en stjerne og et nyt ord (spillet stopper ikke)
+    function sizeUp() {
+      G.n = stageOf(G.points);
+      stars += 1;
       write("stars", stars);
       Topbar.refreshStars(true);
       sh.pop = 1;
@@ -919,10 +966,29 @@
       burst(sh.x, sh.y, 22, ["#fde047", "#fff", "#7dd3fc", "#34d399"]);
       sfx.levelup();
       buzz(40);
-      toast(`Størrelse ${G.n}`, perfect ? "Ingen ædt! +2 ⭐" : "+1 ⭐");
-      renderProg();
+      toast(`Størrelse ${G.n}`, "+1 ⭐");
       const nw = shuffle(ALL.filter((id) => !ws(id).seen))[0];
       if (nw) { const st = ws(nw); st.seen = true; st.t = Date.now(); saveWords(); wordPop(nw, true); }
+    }
+
+    // 50 point: verdenen er klaret. Hajen er stor, og næste verden begynder med en baby-haj.
+    function worldDone() {
+      state = "world";
+      hidePop();
+      G.tT = 0;
+      const perfect = G.diedWorld === 0;
+      const got = perfect ? 5 : 3;
+      stars += got;
+      write("stars", stars);
+      Topbar.refreshStars(true);
+      curWorld = (G.w + 1) % WORLDS.length;
+      write("world", curWorld);
+      sh.pop = 1;
+      for (let i = 0; i < 4; i++) ring(sh.x, sh.y, sh.R * (.8 + i * .6), "253,224,71");
+      burst(sh.x, sh.y, 36, ["#fde047", "#fff", "#7dd3fc", "#34d399", "#f472b6"]);
+      sfx.fanfare();
+      buzz(60);
+      toast(`${WORLDS[G.w].da} klaret!`, `${perfect ? "Ingen ædt! " : ""}+${got} ⭐ · næste: ${WORLDS[curWorld].da}`);
     }
     let toastTimer = 0;
     function toast(title, sub) {
@@ -942,10 +1008,9 @@
       hidePop();
       stopSpeech();
       G.caught++;
-      G.diedTier++;
+      G.diedWorld++;
       G.dyT = 0;
       G.killer = f;
-      G.bigColor = f.color;
       G.burped = false;
       sh.dx0 = sh.x;
       sh.dy0 = sh.y;
@@ -986,12 +1051,17 @@
       const h = homing();
       scrollX += 9 * u * f0 * dt;
       for (const f of [...fish]) {
-        f.big = f.r > sh.R; // vokser hajen forbi en fisk, bliver den spiselig
-        f.x -= f.speed * f0 * (f.big && G.n === 1 ? .65 : 1) * dt;
-        let vy = Math.cos(time * f.freq + f.phase) * f.amp * f.freq;
-        if (f.big && h && f.x > sh.x) vy += clamp(sh.y - f.y, -8 * u, 8 * u) * h;
-        f.y = clamp(f.y + vy * dt, TOP + f.r * .8, SH - f.r * .8);
-        if (f.x < -f.r * 2.6) fish.splice(fish.indexOf(f), 1);
+        if (f.role === "evil") f.big = f.r > sh.R; // vokser hajen forbi en rovfisk, bliver den spiselig
+        if (f.ground) {
+          f.x -= groundSpeed() * dt; // bunddyr følger sandet
+          f.y = SH - 2.4 * u - (f.spec.gy || .8) * f.r;
+        } else {
+          f.x -= f.speed * f0 * (f.big && G.w === 0 && G.n === 1 ? .65 : 1) * dt;
+          let vy = Math.cos(time * f.freq + f.phase) * f.amp * f.freq;
+          if (f.big && h && f.x > sh.x) vy += clamp(sh.y - f.y, -8 * u, 8 * u) * h;
+          f.y = clamp(f.y + vy * dt, TOP + f.r * .8, SH - 2.6 * u - f.r * .8);
+        }
+        if (f.x < -f.r * 3) fish.splice(fish.indexOf(f), 1);
       }
       ensureFish(dt);
     }
@@ -1000,8 +1070,9 @@
       const sr = sh.R * .8;
       for (const f of [...fish]) {
         const d = Math.hypot(f.x - sh.x, f.y - sh.y);
-        const fr = f.r * .75;
-        if (f.big) { if (G.grace <= 0 && d < sr + fr * .7) { caught(f); return; } }
+        const fr = f.hr;
+        if (f.hazard) { if (G.grace <= 0 && d < sr + fr * .8) { caught(f); return; } }
+        else if (f.big) { if (G.grace <= 0 && d < sr + fr * .7) { caught(f); return; } }
         else if (d < sr + fr + sh.R * .45) { eat(f); if (state !== "play") return; }
       }
     }
@@ -1033,8 +1104,8 @@
         const k = G.killer;
         const p = clamp(G.dyT / .55, 0, 1);
         const e = p * p * (3 - 2 * p);
-        const mx = k.x - k.r * .85;
-        const my = k.y + k.r * .08;
+        const mx = k.hazard ? sh.dx0 : k.x - k.r * .85;
+        const my = k.hazard ? sh.dy0 : k.y + k.r * .08;
         sh.x = sh.dx0 + (mx - sh.dx0) * e; // hajen suges ind i fiskens mund
         sh.y = sh.dy0 + (my - sh.dy0) * e;
         sh.dscale = 1 - .93 * e;
@@ -1044,9 +1115,13 @@
           G.burped = true;
           burst(mx, my, 16, ["#fff", "#bae6fd", "#7dd3fc"]);
           ring(k.x, k.y, k.r * .8, "255,255,255");
-          floatText(k.x, k.y - k.r * 1.1, "SLURP!", "#fff");
+          floatText(k.x, k.y - k.r * 1.1, k.hazard ? "AV!" : "SLURP!", "#fff", true);
         }
         if (G.dyT > 1.35) openQuiz();
+      } else if (state === "world") { // verdenen er klaret: kort fest, så starter den næste verden med en baby-haj
+        G.tT += dt;
+        updateFish(dt);
+        if (G.tT > 2.8) { startWorld(curWorld); }
       }
     }
 
@@ -1056,7 +1131,8 @@
     function choiceCount() {
       const v = read("valg", "auto");
       if (v !== "auto") return Number(v);
-      return nextLevel <= 1 ? 2 : nextLevel === 2 ? 3 : 4;
+      const d = G ? diff() : 0;
+      return d <= 1 ? 2 : d <= 4 ? 3 : 4;
     }
     function pickTarget() {
       const known = ALL.filter((id) => ws(id).seen || G.newWords.includes(id));
@@ -1092,8 +1168,9 @@
       $("quizBanner").textContent = "";
       $("quizBanner").className = "banner";
       $("quizRetry").hidden = true;
-      $("quizIcon").innerHTML = fishSvg(G.bigColor, true);
-      $("quizWhy").textContent = "Du blev ædt af en større fisk";
+      const k = G.killer;
+      $("quizIcon").innerHTML = `<img src="${AR.icon(k.spec, 54, k.big && !k.hazard)}" width="54" height="35" alt="">`;
+      $("quizWhy").textContent = k.hazard ? `Av! Du blev stukket af ${k.spec.da.toLowerCase()}` : `Du blev ædt af ${k.spec.da.toLowerCase()}`;
       const box = $("quizChoices");
       box.replaceChildren();
       box.className = `choices n${n}`;
@@ -1172,11 +1249,9 @@
       beginReady();
     }
 
-    // Forkert svar: hajen starter forfra som en baby (størrelse 1). Stjernerne beholdes.
+    // Forkert svar: hajen starter forfra som en baby i den samme verden. Stjernerne beholdes.
     function restartLevel() {
-      nextLevel = 1;
-      write("level", 1);
-      loadLevel(1, G.newWords, G.reviewWords);
+      loadWorld(G.w, G.newWords, G.reviewWords);
       beginReady();
       toast("Baby-haj", "Du starter forfra");
     }
@@ -1208,71 +1283,25 @@
       }
     }
 
+    // Tegner et dyr (rigtig art fra arter.js) med glød: grøn = kan spises, rød = farlig
     function drawFish(f) {
       ctx.save();
       ctx.translate(f.x, f.y);
       ctx.scale(f.face, 1);
       const r = f.r;
       const pulse = .5 + .5 * Math.sin(time * 5 + f.phase);
-      // Glød: grøn = kan spises, rød = farlig
-      const gr = ctx.createRadialGradient(0, 0, r * .5, 0, 0, r * (f.big ? 2.1 + pulse * .3 : 1.7));
-      gr.addColorStop(0, f.big ? `rgba(255,40,40,${.28 + .2 * pulse})` : "rgba(120,255,140,.32)");
+      const danger = f.big || f.hazard;
+      const reach = r * Math.max(1, (f.spec.len || 1) * .9);
+      const gr = ctx.createRadialGradient(0, 0, reach * .5, 0, 0, reach * (danger ? 2.1 + pulse * .3 : 1.7));
+      gr.addColorStop(0, danger ? `rgba(255,40,40,${.28 + .2 * pulse})` : "rgba(120,255,140,.32)");
       gr.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = gr;
       ctx.beginPath();
-      ctx.arc(0, 0, r * 2.4, 0, 6.3);
+      ctx.arc(0, 0, reach * 2.4, 0, 6.3);
       ctx.fill();
-      ctx.scale(r * (1 + .12 * (f.chomp || 0)), r * (1 - .08 * (f.chomp || 0)));
-      const dark = Art.dark(f.color, .25);
-      const wag = Math.sin(time * 9 + f.phase) * .22;
-      ctx.lineJoin = "round";
-      ctx.fillStyle = dark;
-      ctx.save();
-      ctx.translate(-.75, 0);
-      ctx.rotate(wag);
-      ctx.beginPath();
-      ctx.moveTo(0, 0); ctx.lineTo(-.8, -.6); ctx.quadraticCurveTo(-.55, 0, -.8, .6); ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-      ctx.beginPath();
-      ctx.moveTo(-.2, -.6); ctx.quadraticCurveTo(.1, -1, .4, -.54); ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = f.color;
-      ctx.strokeStyle = Art.dark(f.color, .35);
-      ctx.lineWidth = .05;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 1, .66, 0, 0, 6.3);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = "rgba(255,255,255,.28)";
-      ctx.beginPath();
-      ctx.ellipse(.05, .22, .8, .3, 0, 0, 6.3);
-      ctx.fill();
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.arc(.5, -.14, .2, 0, 6.3);
-      ctx.fill();
-      ctx.fillStyle = "#12263a";
-      ctx.beginPath();
-      ctx.arc(.55, -.14, .1, 0, 6.3);
-      ctx.fill();
-      ctx.strokeStyle = "#12263a";
-      ctx.lineCap = "round";
-      if (f.big) {
-        ctx.lineWidth = .1;
-        ctx.beginPath(); ctx.moveTo(.22, -.45); ctx.lineTo(.78, -.28); ctx.stroke();
-        if (f.chomp > .05) { // åben mund, når den spiser hajen
-          ctx.fillStyle = "#3b0a0a";
-          ctx.beginPath(); ctx.moveTo(1, .02); ctx.quadraticCurveTo(.95, .2 + .55 * f.chomp, .3, .22 + .1 * f.chomp); ctx.quadraticCurveTo(.7, .02, 1, .02); ctx.fill();
-        }
-        ctx.lineWidth = .07;
-        ctx.beginPath(); ctx.moveTo(.98, .06); ctx.quadraticCurveTo(.7, .4 + .3 * (f.chomp || 0), .3, .22); ctx.stroke();
-        ctx.fillStyle = "#fff";
-        ctx.beginPath(); ctx.moveTo(.86, .16); ctx.lineTo(.78, .3); ctx.lineTo(.7, .2); ctx.moveTo(.6, .22); ctx.lineTo(.52, .34); ctx.lineTo(.44, .22); ctx.fill();
-      } else {
-        ctx.lineWidth = .05;
-        ctx.beginPath(); ctx.moveTo(.9, .1); ctx.quadraticCurveTo(.7, .3, .5, .2); ctx.stroke();
-      }
+      const ck = f.chomp || 0;
+      ctx.scale(1 + .1 * ck, 1 - .06 * ck);
+      AR.draw(ctx, f.spec, { r, t: time + f.phase, angry: !!f.big && !f.hazard, chomp: ck });
       ctx.restore();
     }
 
@@ -1327,19 +1356,90 @@
     const wrap = (x, w) => ((x % w) + w) % w;
     // Baggrund der scroller mod venstre i flere lag (langsomt langt væk, hurtigere tæt på): ruiner, tang og sand
     function drawFarLayers() {
+      const W = world();
       const T = 70 * u;
       const cnt = Math.ceil(SW / T) + 2;
-      ctx.fillStyle = "rgba(8,64,100,.42)";
+      const base = SH - 2 * u;
+      ctx.fillStyle = W.farc;
+      ctx.strokeStyle = W.farc;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
       for (let i = 0; i < cnt; i++) {
         const x = wrap(i * T - scrollX * .3, cnt * T) - T;
-        const base = SH - 2 * u;
-        const tiers = [[26, 5], [21, 5], [16, 5], [11, 4], [6, 4]];
-        let y = base;
-        for (const [w, h] of tiers) { y -= h * u; ctx.fillRect(x - w * u / 2 + 18 * u, y, w * u, h * u + 1); }
-        ctx.beginPath(); ctx.arc(x + 18 * u, y, 3 * u, Math.PI, 0); ctx.fill();
+        const k = W.far;
+        if (k === "coral") { // koralgrene
+          ctx.lineWidth = 2.2 * u;
+          for (const [dx, h] of [[8, 16], [20, 11], [34, 19], [48, 12]]) {
+            const bx = x + dx * u;
+            ctx.beginPath(); ctx.moveTo(bx, base); ctx.lineTo(bx, base - h * u); ctx.moveTo(bx, base - h * .5 * u); ctx.lineTo(bx - 3.5 * u, base - h * .8 * u); ctx.moveTo(bx, base - h * .35 * u); ctx.lineTo(bx + 3.5 * u, base - h * .65 * u); ctx.stroke();
+          }
+        } else if (k === "kelp") { // høje tangstilke
+          ctx.lineWidth = 2.4 * u;
+          for (const [dx, h] of [[6, 38], [26, 30], [44, 42], [60, 28]]) {
+            const bx = x + dx * u, sw = Math.sin(time * .9 + i + dx) * 3 * u;
+            ctx.beginPath(); ctx.moveTo(bx, base); ctx.bezierCurveTo(bx + sw, base - h * .35 * u, bx - sw, base - h * .7 * u, bx + sw * 1.3, base - h * u); ctx.stroke();
+          }
+        } else if (k === "ship") { // skibsvrag med master
+          if (i % 2 === 0) {
+            ctx.beginPath(); ctx.moveTo(x, base); ctx.lineTo(x + 6 * u, base - 9 * u); ctx.lineTo(x + 46 * u, base - 9 * u); ctx.lineTo(x + 56 * u, base - 2 * u); ctx.lineTo(x + 52 * u, base); ctx.closePath(); ctx.fill();
+            ctx.lineWidth = 1.6 * u;
+            ctx.beginPath(); ctx.moveTo(x + 20 * u, base - 9 * u); ctx.lineTo(x + 18 * u, base - 30 * u); ctx.moveTo(x + 34 * u, base - 9 * u); ctx.lineTo(x + 36 * u, base - 24 * u); ctx.moveTo(x + 11 * u, base - 22 * u); ctx.lineTo(x + 26 * u, base - 20 * u); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x + 18 * u, base - 28 * u); ctx.lineTo(x + 30 * u, base - 24 * u); ctx.lineTo(x + 19 * u, base - 14 * u); ctx.closePath(); ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.arc(x + 30 * u, base, 7 * u, Math.PI, 0); ctx.fill();
+            ctx.fillRect(x + 22 * u, base - 4 * u, 16 * u, 4 * u);
+          }
+        } else if (k === "rocks") { // klipper
+          for (const [dx, w, h] of [[2, 22, 14], [20, 26, 22], [44, 18, 11]]) {
+            ctx.beginPath(); ctx.moveTo(x + dx * u, base); ctx.lineTo(x + (dx + w * .25) * u, base - h * u); ctx.lineTo(x + (dx + w * .7) * u, base - h * .85 * u); ctx.lineTo(x + (dx + w) * u, base); ctx.closePath(); ctx.fill();
+          }
+        } else if (k === "jungle") { // mangroverødder
+          ctx.lineWidth = 1.8 * u;
+          for (const dx of [6, 30, 52]) {
+            ctx.beginPath(); ctx.moveTo(x + dx * u, 0); ctx.lineTo(x + dx * u + Math.sin(time * .7 + i + dx) * u, 14 * u + (dx % 11) * u); ctx.stroke();
+          }
+          for (const [dx, h] of [[10, 18], [36, 24]]) {
+            for (let j = -1; j <= 1; j++) { ctx.beginPath(); ctx.moveTo(x + (dx + j * 4) * u, base); ctx.quadraticCurveTo(x + (dx + j * 1.5) * u, base - h * .6 * u, x + dx * u, base - h * u); ctx.stroke(); }
+            ctx.beginPath(); ctx.ellipse(x + dx * u, base - h * u, 7 * u, 3 * u, 0, 0, 6.3); ctx.fill();
+          }
+        } else if (k === "ice") { // isbjerge
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 10 * u, 18 * u); ctx.lineTo(x + 20 * u, 4 * u); ctx.lineTo(x + 34 * u, 24 * u); ctx.lineTo(x + 46 * u, 6 * u); ctx.lineTo(x + 70 * u, 0); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(x + 10 * u, base); ctx.lineTo(x + 22 * u, base - 18 * u); ctx.lineTo(x + 30 * u, base - 8 * u); ctx.lineTo(x + 38 * u, base - 22 * u); ctx.lineTo(x + 52 * u, base); ctx.closePath(); ctx.fill();
+        } else if (k === "open") { // lysstriber og en fjern hvalskygge
+          if (i % 3 === 0) {
+            ctx.beginPath(); ctx.ellipse(x + 30 * u, SH * .42 + Math.sin(time * .4 + i) * 2 * u, 20 * u, 4 * u, 0, 0, 6.3); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x + 8 * u, SH * .42); ctx.lineTo(x - 2 * u, SH * .42 - 5 * u); ctx.lineTo(x - 2 * u, SH * .42 + 5 * u); ctx.closePath(); ctx.fill();
+          }
+        } else if (k === "deep") { // lysende prikker og dybe søjler
+          ctx.fillRect(x + 4 * u, base - 14 * u, 5 * u, 14 * u);
+          ctx.fillRect(x + 40 * u, base - 9 * u, 4 * u, 9 * u);
+          ctx.fillStyle = "rgba(120,240,255,.55)";
+          for (const [dx, dy] of [[12, .3], [30, .55], [52, .38], [64, .7]]) {
+            const p = .5 + .5 * Math.sin(time * 1.5 + dx + i);
+            ctx.globalAlpha = .25 + .5 * p;
+            ctx.beginPath(); ctx.arc(x + dx * u, SH * dy, .9 * u, 0, 6.3); ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = W.farc;
+        } else if (k === "vents") { // sorte rygere med røg
+          for (const dx of [14, 48]) {
+            ctx.beginPath(); ctx.moveTo(x + (dx - 6) * u, base); ctx.lineTo(x + (dx - 2) * u, base - 20 * u); ctx.lineTo(x + (dx + 2) * u, base - 20 * u); ctx.lineTo(x + (dx + 7) * u, base); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "rgba(255,120,60,.22)";
+            for (let j = 0; j < 4; j++) { ctx.beginPath(); ctx.arc(x + dx * u + Math.sin(time + j + dx) * 2 * u, base - (24 + j * 7 + (time * 6 % 7)) * u, (2 + j * .8) * u, 0, 6.3); ctx.fill(); }
+            ctx.fillStyle = W.farc;
+          }
+        } else if (k === "temple") { // søjler og tempel
+          ctx.fillRect(x + 6 * u, base - 22 * u, 5 * u, 22 * u);
+          ctx.fillRect(x + 20 * u, base - 22 * u, 5 * u, 22 * u);
+          ctx.fillRect(x + 3 * u, base - 26 * u, 25 * u, 4 * u);
+          ctx.beginPath(); ctx.moveTo(x + 1 * u, base - 26 * u); ctx.lineTo(x + 15.5 * u, base - 36 * u); ctx.lineTo(x + 30 * u, base - 26 * u); ctx.closePath(); ctx.fill();
+          ctx.fillRect(x + 44 * u, base - 14 * u, 5 * u, 14 * u);
+          ctx.fillRect(x + 56 * u, base - 9 * u, 5 * u, 9 * u);
+        }
       }
     }
     function drawNearLayers() {
+      const W = world();
       const S = 17 * u;
       const cnt = Math.ceil(SW / S) + 3;
       ctx.lineCap = "round";
@@ -1347,12 +1447,12 @@
         const x = wrap(i * S - scrollX * .8, cnt * S) - S;
         const h = (6 + (i * 37) % 7) * u;
         const sway = Math.sin(time * 1.6 + i) * u * 1.2;
-        ctx.strokeStyle = i % 2 ? "#2e9a4f" : "#1f7a3d";
+        ctx.strokeStyle = W.weed[i % 2];
         ctx.lineWidth = u * 1.6;
         ctx.beginPath(); ctx.moveTo(x, SH - 2 * u); ctx.quadraticCurveTo(x + sway, SH - 2 * u - h * .55, x + sway * 1.6, SH - 2 * u - h); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(x + u * 2.2, SH - 2 * u); ctx.quadraticCurveTo(x + u * 2.2 - sway, SH - 2 * u - h * .4, x + u * 2.2 - sway * 1.3, SH - 2 * u - h * .75); ctx.stroke();
       }
-      ctx.fillStyle = "#d8b865";
+      ctx.fillStyle = W.sand;
       ctx.beginPath();
       ctx.moveTo(0, SH);
       for (let xx = 0; xx <= SW + 8; xx += 8) ctx.lineTo(xx, SH - 2.6 * u + Math.sin((xx + scrollX * .8) / (9 * u)) * u * .8);
@@ -1394,7 +1494,7 @@
         const my = sh.y + sh.R * .05;
         ctx.save();
         ctx.globalAlpha = 1 - e * .4;
-        drawFish({ x: s.x + (mx - s.x) * e, y: s.y + (my - s.y) * e, r: Math.max(.5, s.r * (1 - .9 * e)), face: -1, big: false, chomp: 0, color: s.color, phase: s.phase + s.t * 12 });
+        drawFish({ spec: s.spec, x: s.x + (mx - s.x) * e, y: s.y + (my - s.y) * e, r: Math.max(.5, s.r * (1 - .9 * e)), face: -1, big: false, hazard: false, chomp: 0, phase: s.phase + s.t * 12 });
         ctx.restore();
       }
       for (const rg of rings) {
@@ -1433,17 +1533,6 @@
         for (let yy = SH - 50; yy > TOP; yy -= 50) { ctx.fillRect(0, yy, 14, 2); ctx.fillText(`${SH - yy} fra bund`, 18, yy + 4); }
         ctx.restore();
       }
-      // Pulserende ring om hajen, så den er let at finde (stærkest før start)
-      if (state === "ready" || state === "play") {
-        const pulse = .5 + .5 * Math.sin(time * 5);
-        ctx.save();
-        ctx.strokeStyle = `rgba(255,224,138,${state === "ready" ? .55 + .4 * pulse : .38 + .2 * pulse})`;
-        ctx.lineWidth = Math.max(2, u * .6);
-        ctx.beginPath();
-        ctx.arc(sh.x, sh.y, sh.R * (1.45 + .12 * pulse), 0, 6.3);
-        ctx.stroke();
-        ctx.restore();
-      }
       for (const p of particles) {
         ctx.globalAlpha = Math.max(0, p.life);
         ctx.fillStyle = p.c;
@@ -1453,7 +1542,7 @@
       for (const t of floaters) { // "+1" og "SLURP!" der svæver op
         ctx.save();
         ctx.globalAlpha = Math.min(1, t.life * 1.6);
-        ctx.font = `800 ${Math.round(u * 3.6)}px "Trebuchet MS", sans-serif`;
+        ctx.font = `800 ${Math.round(u * (t.big ? 3.9 : 3.1))}px "Trebuchet MS", sans-serif`;
         ctx.textAlign = "center";
         ctx.lineWidth = Math.max(3, u * .7);
         ctx.strokeStyle = "rgba(8,28,50,.75)";
@@ -1559,14 +1648,14 @@
     $("optChoices").addEventListener("change", (e) => write("valg", e.target.value));
     $("optRom").addEventListener("change", (e) => { write("rom", e.target.value); applyRom(); });
     $("optReset").addEventListener("click", () => {
-      nextLevel = 1;
-      write("level", 1);
+      curWorld = 0;
+      write("world", 0);
       Topbar.closeMenu();
       if (screen === "play") goHome(); else renderHome();
     });
 
     $("mascot").addEventListener("click", (e) => { audio(); sfx.pop(); e.currentTarget.animate([{ transform: "scale(1)" }, { transform: "scale(1.15) rotate(8deg)" }, { transform: "scale(1)" }], { duration: 380 }); });
-    $("playBtn").addEventListener("click", () => { audio(); startLevel(nextLevel); });
+    $("playBtn").addEventListener("click", () => { audio(); startWorld(curWorld); });
     $("dictBtn").addEventListener("click", () => { renderDict(); show("dictScreen"); $("dictScreen").scrollTop = 0; });
     $("dictBack").addEventListener("click", () => { stopSpeech(); renderHome(); show("home"); });
 
@@ -1587,18 +1676,18 @@
     renderHome();
     requestAnimationFrame(frame);
 
-    // Testværktøj: ?l=<bane> åbner en bane direkte. window.__haj giver adgang til tilstanden, og tick(sek) kører spillet frem.
+    // Testværktøj: ?l=<verden 1-10> åbner en verden direkte. window.__haj giver adgang til tilstanden, og tick(sek) kører spillet frem.
     const qs = new URLSearchParams(location.search);
     window.__haj = {
       get G() { return G; }, get sh() { return sh; }, get fish() { return fish; }, get state() { return state; }, get quiz() { return quiz; },
-      pointer, answer, closeQuiz, startLevel, speak, wordState, ALL,
-      get SW() { return SW; }, get SH() { return SH; },
+      pointer, answer, closeQuiz, startWorld, speak, wordState, ALL, WORLDS, SPECIES,
+      get SW() { return SW; }, get SH() { return SH; }, get curWorld() { return curWorld; },
       tick(sec) { for (let i = 0; i < sec * 60; i++) update(1 / 60); draw(); },
-      tierUp, caught, eat, get stars() { return stars; }
+      worldDone, sizeUp, caught, eat, spawnFish, get stars() { return stars; }
     };
-    if (qs.has("l")) startLevel(Math.max(1, Number(qs.get("l")) || 1));
+    if (qs.has("l")) startWorld(Math.max(0, (Number(qs.get("l")) || 1) - 1) % WORLDS.length);
     // ?quiz=1 (sammen med ?l=) åbner quizzen direkte, til skærmbilleder
-    if (qs.has("quiz") && qs.has("l")) setTimeout(() => { $("meetGo").click(); state = "play"; pointer.active = false; G.grace = 0; const e = fish.find((f) => f.big); e.x = sh.x; e.y = sh.y; for (let i = 0; i < 100; i++) update(1 / 60); }, 800);
+    if (qs.has("quiz") && qs.has("l")) setTimeout(() => { $("meetGo").click(); state = "play"; pointer.active = false; G.grace = 0; spawnFish("evil", false); const e = fish.find((f) => f.big); e.x = sh.x; e.y = sh.y; for (let i = 0; i < 100; i++) update(1 / 60); }, 800);
   })();
   </script>
 </body>
