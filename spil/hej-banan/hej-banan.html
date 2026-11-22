@@ -744,6 +744,9 @@
       eat: () => { tone(520, .08, "square", .05, 0, 500); tone(880, .08, "square", .045, .06); },
       friend: () => [660, 880, 1100, 1320].forEach((f, i) => tone(f, .14, "triangle", .1, i * .06)),
       grab: () => { tone(300, .07, "triangle", .08, 0, -120); },
+      jump: () => { tone(260, .12, "triangle", .07, 0, 320); },
+      land: () => { tone(110, .07, "sine", .09, 0, -40); },
+      step: () => { tone(95, .04, "sine", .035, 0, -20); },
       swoosh: () => { tone(500, .22, "sine", .06, 0, 500); },
       caught: () => { [440, 370, 311, 262, 196, 147].forEach((f, i) => tone(f, .16, "sawtooth", .08, i * .12)); },
       ready: () => { [392, 523, 659, 784].forEach((f, i) => tone(f, .16, "triangle", .08, i * .15)); },
@@ -891,6 +894,9 @@
     const GRAV = 95;
     const FLYG = .86; // tyngden i luften er lidt blødere end på lianen
     const MR = 5; // abens størrelse
+    const GJ = 160; // tyngde, når aben hopper på jorden
+    const JV = 110; // hopstyrke (enheder i sekundet): et kort hop er ca. 38 enheder højt og varer 1,3 sek.
+    const runSpeed = () => 24 * speedFactor();
     const GOAL = 250; // bananpoint, der skal til for at klare en jungle
     const MAXTH = 1.25; // størst udsving (radianer, ca. 70 grader)
     const stageOf = (points) => Math.min(5, 1 + Math.floor(points / (GOAL / 5))); // 1-5, nyt trin for hver 50 point
@@ -949,10 +955,11 @@
       const first = { x: WV * .3, ay: 5, len: 30, ph: rr(0, 6.28), id: ++vineSeq, leaves: makeLeaves() };
       vines.push(first);
       ensureVines();
-      mk = { x: 0, y: 0, vx: 0, vy: 0, vine: null, L: 24, th: .5, w: 1.6, last: null, lastT: 0, flightT: 0, grabReq: 0, face: 1, pop: 0, tilt: 0, spin: 0, shrink: 1 };
+      mk = { x: 0, y: 0, vx: 0, vy: 0, vine: null, mode: "vine", onGround: false, L: 24, th: .5, w: 1.6, last: null, lastT: 0, flightT: 0, grabReq: 0, face: 1, pop: 0, tilt: 0, spin: 0, shrink: 1, ph: 0, sq: 0, gT: 0, hold: false, holdT: 0, coy: 0, jb: 0, stepA: 0 };
       attach(mk, first, 24, .5, 1.6);
       G.checkpoint = first;
       G.grace = 0;
+      G.gx = 0;
     }
 
     function makeLeaves() {
@@ -962,6 +969,8 @@
     // Aben hænger i en liane: pendul med længden L om forankringen
     function attach(m, v, L, th, w) {
       m.vine = v;
+      m.mode = "vine";
+      m.onGround = false;
       m.L = L;
       m.th = th;
       m.w = w;
@@ -981,7 +990,26 @@
         addBananas(last, nv);
       }
       while (vines.length > 3 && vines[1].x < camX - 40 && vines[0] !== mk?.vine && vines[0] !== G.checkpoint) vines.shift();
-      while (bananas.length && bananas[0].x < camX - 20) bananas.shift();
+      if (bananas.length > 70) bananas = bananas.filter((b) => !b.taken && b.x > camX - 20);
+    }
+
+    // Bananer på jorden, mens aben løber: rækker, man samler op, og buer, man skal hoppe for at nå
+    function ensureGround() {
+      while (G.gx < camX + WV + 40) {
+        G.gpat = (G.gpat || 0) + 1;
+        const x0 = G.gx;
+        if (G.gpat % 2 === 1) { // række på jorden
+          for (let i = 0; i < 4; i++) bananas.push({ x: x0 + i * 4.6, y: FL - MR - 1, type: "b", taken: false, ph: rr(0, 6.28) });
+          G.gx = x0 + 4 * 4.6 + rr(14, 22);
+        } else { // bue
+          const n = 5;
+          for (let i = 0; i < n; i++) {
+            const f = i / (n - 1);
+            bananas.push({ x: x0 + f * 24, y: FL - MR - 1 - 20 * Math.sin(Math.PI * f), type: i === 2 && G.gpat % 6 === 0 ? "bunch" : "b", taken: false, ph: rr(0, 6.28) });
+          }
+          G.gx = x0 + 24 + rr(14, 24);
+        }
+      }
     }
 
     // Bananer mellem to lianer: buer, rækker og zigzag. Af og til en klase (5 point) og sjældent en gylden banan (10 point).
@@ -1102,12 +1130,15 @@
       beginReady();
     });
 
-    // ---------- Aben svinger og flyver ----------
+    // ---------- Aben svinger, flyver og løber ----------
     function movePhys(dt) {
       const m = mk;
       if (m.lastT > 0) m.lastT -= dt;
       if (m.grabReq > 0) m.grabReq -= dt;
+      if (m.jb > 0) m.jb -= dt;
+      if (m.coy > 0) m.coy -= dt;
       if (m.pop > 0) m.pop = Math.max(0, m.pop - dt * 2.5);
+      if (m.sq > 0) m.sq = Math.max(0, m.sq - dt * 4);
       if (m.vine) {
         const steps = Math.max(1, Math.ceil(dt / (1 / 120)));
         const h = dt / steps;
@@ -1125,6 +1156,8 @@
         m.y = m.vine.ay + Math.cos(m.th) * m.L;
         m.vx = m.L * m.w * Math.cos(m.th);
         m.vy = -m.L * m.w * Math.sin(m.th);
+      } else if (m.mode === "run") {
+        runPhys(dt);
       } else {
         m.flightT += dt;
         m.vy += GRAV * FLYG * dt;
@@ -1133,11 +1166,83 @@
         m.y += m.vy * dt;
         if (m.x < camX + 3) { m.x = camX + 3; if (m.vx < 0) m.vx = 2; }
         if (m.y < MR) { m.y = MR; if (m.vy < 0) m.vy *= -.2; }
-        tryGrab();
+        if (m.y >= FL - MR && m.vy > 0) landRun(); else tryGrab();
       }
       if (Math.abs(m.vx) > 2) m.face = m.vx > 0 ? 1 : -1;
       const target = m.x - WV * .32;
       if (target > camX) camX += (target - camX) * Math.min(1, dt * 3.5);
+    }
+
+    // Støv ved fødderne
+    function dust(x, n, big) {
+      for (let i = 0; i < n; i++) particles.push({ x: x + rr(-1.5, 1.5), y: FL - .6, vx: -rr(1, big ? 14 : 7), vy: -rr(3, big ? 14 : 8), life: big ? .9 : .6, c: i % 2 ? "#d9c79a" : "#bfa97a", s: rr(.5, big ? 1.5 : 1) });
+    }
+
+    // Aben lander på jorden. Kommer den fra en liane eller luften (first), begynder den at løbe med et kort frihedsøjeblik (ingen straf:
+    // katten på jorden er til at hoppe over). Et hop på jorden lander bare igen.
+    function landRun(first = true) {
+      const m = mk;
+      m.mode = "run";
+      m.onGround = true;
+      m.y = FL - MR;
+      m.vy = 0;
+      m.sq = 1;
+      m.flightT = 0;
+      dust(m.x, first ? 8 : 5, first);
+      sfx.land();
+      if (!first) { if (m.jb > 0) jumpUp(); return; }
+      m.gT = 0;
+      m.last = null;
+      m.lastT = 0;
+      m.vine = null;
+      m.vx = Math.max(m.vx * .6, runSpeed() * .8);
+      G.gx = Math.max(G.gx || 0, m.x + 26);
+      if (G.grace < 1.3) G.grace = 1.3;
+      buzz(15);
+      const seen = Number(read("lob", "0")) || 0;
+      if (seen < 3 && state === "play") { write("lob", seen + 1); toast("Du løber!", "Tryk for at hoppe. Grib en liane for at komme op i træerne"); }
+    }
+
+    function jumpUp(boost) {
+      const m = mk;
+      m.onGround = false;
+      m.vy = -JV * (boost || 1);
+      m.holdT = 0;
+      m.jb = 0;
+      m.coy = 0;
+      m.flightT = 0;
+      m.sq = 0;
+      dust(m.x, 4, false);
+      sfx.jump();
+    }
+
+    function runPhys(dt) {
+      const m = mk;
+      m.vx += (runSpeed() - m.vx) * Math.min(1, dt * 3);
+      m.x += m.vx * dt;
+      if (m.onGround) {
+        m.coy = .1; // et hop lige efter en kant tæller stadig
+        m.gT += dt;
+        m.ph += m.vx * .6 * dt;
+        const st = Math.floor(m.ph / Math.PI);
+        if (st !== m.stepA) { m.stepA = st; if (st % 2 === 0) { dust(m.x - MR * .3, 1, false); sfx.step(); } }
+        // Har aben løbet længe uden at hoppe op i en liane, hjælper den selv, når den er lige under en
+        if (m.gT > 8) {
+          const v = vines.find((vv) => vv.x > m.x - 1 && vv.x < m.x + 4);
+          if (v) { m.grabReq = .7; jumpUp(1.12); return; }
+        }
+        if (m.jb > 0) jumpUp();
+      } else {
+        m.flightT += dt;
+        let g = GJ;
+        m.holdT += dt;
+        if (m.hold && m.vy < 0 && m.holdT < .2) g *= .6; // hold fingeren nede for at hoppe højere
+        m.vy += g * dt;
+        m.y += m.vy * dt;
+        if (m.y < MR) { m.y = MR; if (m.vy < 0) m.vy = 0; }
+        if (m.y >= FL - MR && m.vy > 0) { landRun(false); return; }
+        tryGrab();
+      }
     }
 
     // Finder en liane inden for rækkevidde af aben hånd
@@ -1146,11 +1251,12 @@
       const hx = m.x + MR * .5;
       const hy = m.y - MR * 1.2;
       const gx = easy ? 7 : 6;
+      const low = m.mode === "run" ? 12 : 4; // fra jorden kan man også nå lianernes nedre ende
       let best = null;
       let bd = 1e9;
       for (const v of vines) {
         if (v === m.last && m.lastT > 0) continue;
-        if (hy < v.ay + 4 || hy > v.ay + v.len + 4) continue;
+        if (hy < v.ay + 4 || hy > v.ay + v.len + low) continue;
         const dx = Math.abs(hx - v.x);
         if (dx < gx && dx < bd) { bd = dx; best = v; }
       }
@@ -1177,11 +1283,12 @@
       m.last = m.vine;
       m.lastT = .45;
       m.vine = null;
+      m.mode = "fly";
       m.flightT = 0;
       sfx.swoosh();
     }
 
-    // Et tryk: slip lianen, og (flyvende) grib den næste
+    // Et tryk: slip lianen. I luften griber man den næste liane, og på jorden hopper man.
     function onTap() {
       if (state === "ready") {
         state = "play";
@@ -1191,7 +1298,12 @@
         return;
       }
       if (state !== "play") return;
-      if (mk.vine) release(); else mk.grabReq = .4;
+      const m = mk;
+      if (m.vine) release();
+      else if (m.mode === "run") {
+        if (m.onGround || m.coy > 0) jumpUp();
+        else { m.grabReq = .4; m.jb = .12; } // et tryk lidt før landing tæller som hop
+      } else m.grabReq = .4;
     }
 
     // ---------- Dyr i junglen ----------
@@ -1211,20 +1323,40 @@
       return x;
     }
     function spawnPredator() {
-      const ids = world().predators;
+      const run = mk && mk.mode === "run";
+      const all = world().predators;
+      const pool = run ? all.filter((i) => SP[i].beh !== "hang") : all; // slanger i grenene rammer ikke en abe på jorden
+      const ids = pool.length ? pool : all;
       const id = pickFrom(ids.filter((i) => i !== G.lastPred)) || pickFrom(ids);
       G.lastPred = id;
       const sp = SP[id];
-      if (sp.beh === "floor") ents.push(makeEnt(id, { x: spawnX(6), y: FL - sp.size, state: "run", vx: -8 }));
+      if (sp.beh === "floor") ents.push(makeEnt(id, { x: spawnX(run ? 14 : 6), y: FL - sp.size, state: "run", vx: -8 }));
       else if (sp.beh === "air") ents.push(makeEnt(id, { x: spawnX(4), y: rr(10, 44), vx: -(17 + 2 * G.n) * speedFactor() }));
       else ents.push(makeEnt(id, { x: freeStaticX(), y: 0, hang: sp.len * rr(.6, .8) }));
     }
+    // Bananbue over et dyr på jorden: den viser, hvor man skal hoppe
+    function arcOver(x, half, h) {
+      const n = 5;
+      for (let i = 0; i < n; i++) {
+        const f = i / (n - 1);
+        bananas.push({ x: x - half + 2 * half * f, y: FL - MR - 1 - h * Math.sin(Math.PI * f), type: "b", taken: false, ph: rr(0, 6.28) });
+      }
+    }
     function spawnHazard() {
-      const ids = world().hazards;
+      const run = mk && mk.mode === "run";
+      const all = world().hazards;
+      const onGround = all.filter((i) => SP[i].beh === "branch");
+      const pool = run ? (onGround.length ? onGround : all.filter((i) => SP[i].beh === "air")) : all;
+      const ids = pool.length ? pool : all;
       const id = pickFrom(ids.filter((i) => i !== G.lastHaz)) || pickFrom(ids);
       G.lastHaz = id;
       const sp = SP[id];
-      if (sp.beh === "air") ents.push(makeEnt(id, { x: spawnX(4), y: rr(12, 44), vx: -rr(5, 9) }));
+      if (run && sp.beh === "branch") { // sidder på jorden, så man skal hoppe over den
+        const x = spawnX(rr(10, 22));
+        ents.push(makeEnt(id, { x, y: FL, gr: true }));
+        arcOver(x, 12, 18);
+        G.gx = Math.max(G.gx, x + 16);
+      } else if (sp.beh === "air") ents.push(makeEnt(id, { x: spawnX(4), y: rr(12, 44), vx: -rr(5, 9) }));
       else if (sp.beh === "thread") ents.push(makeEnt(id, { x: freeStaticX(), y: rr(14, 28) }));
       else ents.push(makeEnt(id, { x: freeStaticX(), y: rr(20, 40) }));
     }
@@ -1241,7 +1373,8 @@
       G.predCool -= dt;
       G.hazCool -= dt;
       G.frCool -= dt;
-      const count = (role) => ents.filter((e) => e.role === role && !e.leave && !e.done).length;
+      const run = mk.mode === "run";
+      const count = (role) => ents.filter((e) => e.role === role && !e.leave && !e.done && !(run && (e.beh === "hang" || e.beh === "thread"))).length;
       if (G.predCool <= 0 && count("predator") < (G.n <= 3 ? 1 : 2)) { spawnPredator(); G.predCool = Math.max(2.2, rr(4.2, 6.5) - .35 * diff()); }
       if (G.n >= 2 && G.hazCool <= 0 && count("hazard") < (G.n <= 3 ? 1 : 2)) { spawnHazard(); G.hazCool = Math.max(3, rr(6, 9) - .3 * diff()); }
       if (G.frCool <= 0 && count("friend") < (G.n >= 4 ? 2 : 1)) { spawnFriend(); G.frCool = rr(5, 9); }
@@ -1276,20 +1409,22 @@
       ents = ents.filter((e) => e.x > camX - 28 && e.x < camX + WV + 80);
     }
 
-    // Katte: løber efter aben på jorden, dukker sig og springer, hvis aben hænger lavt
+    // Katte: løber hen mod aben på jorden (som en forhindring, man hopper over). Hænger aben lavt i en liane, dukker katten sig og springer.
     function updateFloor(e, dt, sf) {
       const dx = mk.x - e.x;
       const S = (17 + 2 * G.n) * sf;
+      const run = mk.mode === "run";
       e.life = (e.life || 0) + dt;
       if (e.life > 16 && e.state === "run") e.leave = true;
+      if (run && dx > 4) e.pass = true; // forbi aben: løb videre ud af billedet
       if (e.state === "run") {
-        const want = e.leave ? 34 : clamp(dx * 1.6, -S, S);
+        const want = e.leave ? 34 : e.pass ? -S : clamp(dx * 1.6, -S, S) * (run ? .75 : 1); // mod en løbende abe er de lidt langsommere
         e.vx += (want - e.vx) * Math.min(1, dt * 4);
         e.x += e.vx * dt;
         e.y = FL - e.size;
         e.mode = "move";
         e.cd -= dt;
-        if (e.cd <= 0 && !e.leave && Math.abs(dx) < 20 && mk.y > FL - reach() - e.size * .6) { e.state = "crouch"; e.st = .5; }
+        if (!run && e.cd <= 0 && !e.leave && Math.abs(dx) < 20 && mk.y > FL - reach() - e.size * .6) { e.state = "crouch"; e.st = .5; }
       } else if (e.state === "crouch") {
         e.st -= dt;
         e.vx *= 1 - 3 * dt;
@@ -1318,7 +1453,10 @@
       const s = e.size;
       const d = e.dir;
       if (e.role === "friend") return e.beh === "sit" ? [[e.x, e.y - s, s * 1.05]] : [[e.x, e.y, s * 1.0]];
-      if (e.beh === "floor") return [[e.x + d * s * .15, e.y, s * .8], [e.x + d * s * .8, e.y - s * .1, s * .55]];
+      if (e.beh === "floor") { // på jorden er kattens fod og krop lidt snævrere, så et hop er til at time
+        const k = mk && mk.mode === "run" ? .78 : 1;
+        return [[e.x + d * s * .15, e.y, s * .8 * k], [e.x + d * s * .8, e.y - s * .1, s * .55 * k]];
+      }
       if (e.beh === "air" && e.role === "predator") return [[e.x, e.y, s * .65], [e.x + d * s * .5, e.y + s * .1, s * .5]];
       if (e.beh === "air") return [0, 1, 2].map((i) => [e.x + Math.sin(e.t * 2.3 + i * 2.1) * s * 1.3, e.y + Math.cos(e.t * 1.9 + i * 1.7) * s * 1.1, s * .75]);
       if (e.beh === "hang") { const sw = Math.sin(e.t * 1.3 + e.ph) * 1.5; return [[e.x + sw, e.hang - e.size * .4, s * .85], [e.x + sw * .6, e.hang * .72, s * .6], [e.x + sw * .3, e.hang * .45, s * .55]]; }
@@ -1342,13 +1480,6 @@
             break;
           }
         }
-      }
-      if (mk.y > FL - MR * .6 && !mk.vine) {
-        if (G.grace > 0) { mk.y = FL - MR * .6; mk.vy = -62; return; }
-        const f = pickFrom(world().predators.filter((id) => SP[id].beh === "floor"));
-        const e = makeEnt(f, { x: mk.x + 12, y: FL - SP[f].size, state: "leap", mode: "attack", dir: -1 });
-        ents.push(e);
-        caught(e);
       }
     }
 
@@ -1483,6 +1614,7 @@
         if (G.grace > 0) G.grace -= dt;
         movePhys(dt);
         ensureVines();
+        if (mk.mode === "run") ensureGround();
         ensureEnts(dt);
         updateEnts(dt);
         collide();
@@ -1794,7 +1926,7 @@
       const rgb = ROLE_RGB[e.role];
       ctx.save();
       if (e.beh === "thread") { ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = .18; ctx.beginPath(); ctx.moveTo(e.x, -offY - 4); ctx.lineTo(e.x, e.y - s * .5); ctx.stroke(); }
-      if (e.beh === "sit" || e.beh === "branch") { // gren, der hænger i et rep fra kronetaget
+      if ((e.beh === "sit" || e.beh === "branch") && !e.gr) { // gren, der hænger i et rep fra kronetaget
         ctx.strokeStyle = "#4a3a1c"; ctx.lineWidth = .35; ctx.beginPath(); ctx.moveTo(e.x, -offY - 4); ctx.lineTo(e.x, e.y + .6); ctx.stroke();
         ctx.lineCap = "round"; ctx.strokeStyle = "#6b4a24"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(e.x - 8, e.y + 1.1); ctx.lineTo(e.x + 8, e.y + .5); ctx.stroke();
         ctx.strokeStyle = "#8a6a38"; ctx.lineWidth = .4; ctx.beginPath(); ctx.moveTo(e.x - 7, e.y + .5); ctx.lineTo(e.x + 7, e.y - .1); ctx.stroke();
@@ -1827,7 +1959,7 @@
         ctx.fillStyle = `rgba(255,120,150,${Math.min(1, e.thanks)})`;
         ctx.font = `bold ${s * .9}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("♥", e.x, cy - s * 1.3 - (1.6 - e.thanks) * 3);
       }
-      if (e.beh === "floor" && e.state === "crouch") { ctx.fillStyle = "#fecaca"; ctx.font = `bold ${s * 1.1}px sans-serif`; ctx.textAlign = "center"; ctx.strokeStyle = "#7f1d1d"; ctx.lineWidth = .4; ctx.strokeText("!", e.x, cy - s * 1.2); ctx.fillText("!", e.x, cy - s * 1.2); }
+      if (e.beh === "floor" && (e.state === "crouch" || (mk && mk.mode === "run" && !e.pass && e.x > mk.x && e.x - mk.x < 60))) { ctx.fillStyle = "#fecaca"; ctx.font = `bold ${s * 1.1}px sans-serif`; ctx.textAlign = "center"; ctx.strokeStyle = "#7f1d1d"; ctx.lineWidth = .4; ctx.strokeText("!", e.x, cy - s * 1.2); ctx.fillText("!", e.x, cy - s * 1.2); }
     }
 
     function drawMonkey() {
@@ -1847,6 +1979,11 @@
         ctx.translate(hx, hy); ctx.rotate(-m.th);
         if (m.face < 0) ctx.scale(-1, 1);
         AR.draw(ctx, apeId, { r: MR * sc, t: time, mode: "swing" });
+      } else if (m.mode === "run") {
+        ctx.translate(m.x, m.y); // fødderne er ved y + MR = jorden
+        const bob = m.onGround ? 1 : 0;
+        if (m.face < 0) ctx.scale(-1, 1);
+        AR.draw(ctx, apeId, { r: MR * (1 + .06 * m.pop), t: time, mode: m.onGround ? "run" : "jump", ph: m.ph, jv: clamp(m.vy / (JV * .95), -1, 1), sq: m.sq * bob });
       } else {
         ctx.translate(m.x, m.y);
         ctx.rotate(clamp(m.vy / 60, -.7, .7) * .5 * m.face);
@@ -1921,18 +2058,23 @@
       requestAnimationFrame(frame);
     }
 
-    // ---------- Styring: et tryk slipper lianen (og griber den næste) ----------
+    // ---------- Styring: et tryk slipper lianen, griber den næste eller hopper (hold nede for at hoppe højere) ----------
+    const setHold = (on) => { if (mk) mk.hold = on; };
     stage.addEventListener("pointerdown", (e) => {
       if (!G) return;
       e.preventDefault();
+      setHold(true);
       onTap();
     });
+    for (const ev of ["pointerup", "pointercancel", "pointerleave"]) stage.addEventListener(ev, () => setHold(false));
     document.addEventListener("keydown", (e) => {
       if (screen !== "play" || (e.key !== " " && e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
       if (e.repeat) return;
       e.preventDefault();
+      setHold(true);
       onTap();
     });
+    document.addEventListener("keyup", () => setHold(false));
 
     // ---------- Dyrebogen ----------
     // Viser junglens dyr som kort. Et tryk viser dyret stort, og en dansk stemme fortæller fakta (lyd/<id>.mp3, se fakta.js).
@@ -2481,6 +2623,7 @@
       G.hazCool = 9;
       G.frCool = 3;
       G.lastStatic = -99;
+      G.gx = 0;
       beginReady();
     }
 
@@ -2589,7 +2732,7 @@
     window.__banan = {
       get G() { return G; }, get mk() { return mk; }, get ents() { return ents; }, get vines() { return vines; }, get bananas() { return bananas; }, get state() { return state; },
       get quiz() { return quiz; }, get camX() { return camX; }, get done() { return done; }, get SW() { return SW; }, get SH() { return SH; }, get u() { return u; },
-      onTap, release, startWorld, answer, closeQuiz, worldDone, sizeUp, caught, addPoints, spawnPredator, spawnHazard, spawnFriend, showFauna, showApeBook, openDetail, showUnlock, afterWorld,
+      onTap, release, startWorld, answer, closeQuiz, worldDone, sizeUp, caught, addPoints, spawnPredator, spawnHazard, spawnFriend, showFauna, showApeBook, openDetail, showUnlock, afterWorld, landRun, jumpUp,
       setApe(id) { apeId = id; }, heard, WORLDS, SP, MONKEYS, FL, MR,
       tick(sec) { for (let i = 0; i < sec * 60; i++) update(1 / 60); draw(); }
     };

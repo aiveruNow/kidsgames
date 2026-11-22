@@ -13,7 +13,9 @@
 //   o.angry  sand for rovdyr og farer: vrede øjne, tænder, ingen smil
 //   o.len    kun for "hang" (slanger)
 //   Aberne (de otte spilbare) har desuden o.mode: "swing" ((0,0) = hånden på lianen, kroppen hænger nedenunder i +y, op til ca. y = +2.6),
-//   "fly" ((0,0) = kroppens midte, armene strakt frem/op), "eat" (sidder og spiser en banan), "dizzy" (fanget: sløret blik).
+//   "fly" ((0,0) = kroppens midte, armene strakt frem/op), "eat" (sidder og spiser en banan), "dizzy" (fanget: sløret blik),
+//   "run" (løber på alle fire på jorden, fødderne ved y = +1; o.ph = trinfase i radianer, 2π = én gangcyklus; o.sq = 0..1 klem ved landing) og
+//   "jump" (hop på jorden; o.jv = -1 stiger hurtigt .. 0 toppen .. +1 styrter ned). De otte andre primater tegnes som "sit" i run/jump.
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory(root.BananTegn || require("./tegn.js"));
   else root.BananArter = factory(root.BananTegn);

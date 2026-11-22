@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v1.39.3";
+const CACHE = "regnespil-v1.40.0";
 
 // Prinsesse Riyanas lydklip hentes fra samme replikliste som spillet bruger
 let prinsesseClips = [];

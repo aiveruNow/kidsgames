@@ -1,6 +1,8 @@
 // Aber og andre primater til Hej Banan: de otte spilbare aber og deres venner (lemurer, langurer, bonobo m.fl.).
 // Alle bruger samme lille "skelet" (krop, hoved, fire lemmer, hale), men hver art har sine egne farver og kendetegn.
 // Poser: sit, swing, fly, eat, dizzy (andre navne tegnes som sit).
+// De otte spilbare aber kan desuden "run" (galop på alle fire, o.ph = trinfase, o.sq = klem efter landing 0..1)
+// og "jump" (hop i luften, o.jv = lodret fart -1..1). For de andre primater tegnes run/jump som sit.
 (function () {
   "use strict";
   const T = window.BananTegn;
@@ -258,12 +260,12 @@
   function drawTorso(c, s, P) {
     const hip = P.hip, sh = P.sh, g = s.tw;
     const dx = sh[0] - hip[0], dy = sh[1] - hip[1], l = hyp(dx, dy), ux = dx / l, uy = dy / l, nx = -uy, ny = ux;
-    const cx = (hip[0] + sh[0]) / 2, cy = (hip[1] + sh[1]) / 2, rot = Math.atan2(dy, dx), rx = l / 2 + g * .62;
+    const cx = (hip[0] + sh[0]) / 2, cy = (hip[1] + sh[1]) / 2 - (P.arch || 0) * g * .16, rot = Math.atan2(dy, dx), rx = l / 2 + g * .62; // arch: ryggen buer opad (run)
     if (s.shag) tufts(c, cx, cy, rx, g, rot, PI * 1.02, PI * 1.98, 9, .2, s.shag);
     if (s.hump) ell(c, sh[0] - nx * g * .3 - ux * .08, sh[1] - ny * g * .3 - uy * .08, s.hump, s.hump * .9, 0, s.fur, .04); // brede skuldre
     if (s.rump) { // bagdelen titter frem bag kroppen
-      const r = s.rump;
-      ell(c, hip[0] - nx * g * .72 - ux * g * .3, hip[1] - ny * g * .72 - uy * g * .3, r.r, r.r * .9, 0, shade(c, hip[0], hip[1], r.r, r.c, .4));
+      const r = s.rump, q = P.rump || [-nx * g * .72 - ux * g * .3, -ny * g * .72 - uy * g * .3];
+      ell(c, hip[0] + q[0], hip[1] + q[1], r.r, r.r * .9, 0, shade(c, hip[0], hip[1], r.r, r.c, .4));
     }
     ell(c, cx, cy, rx, g, rot, shade(c, cx, cy, g + l * .3, s.fur), .04);
     if (s.saddle) ell(c, cx - nx * g * .38 + ux * l * .12, cy - ny * g * .38 + uy * l * .12, l * .42 + g * .2, g * .46, rot, shade(c, cx, cy, g + l * .3, s.saddle, .7));
@@ -349,6 +351,7 @@
   }
 
   function ape(c, s, o) {
+    if ((o.mode === "run" || o.mode === "jump") && GANG[s.id]) return apeMove(c, s, o, o.mode);
     const t = o.t || 0, P = pose(s, o), m = P.mode;
     c.save();
     c.lineCap = c.lineJoin = "round";
@@ -383,6 +386,161 @@
       c.strokeStyle = "#5a463c"; c.lineWidth = .04; c.stroke();
       ell(c, p2[0], p2[1], .055, .055, 0, "#d8a89c", .02);
     }
+    c.restore();
+  }
+
+  // ---------- Løb og hop (kun de otte spilbare aber) ----------
+  const add = (p, x, y) => [p[0] + x, p[1] + y];
+  // Gangart pr. art. hh/sh = hoftens/skuldrens højde over jorden, bl = kropslængde, F/H = [fremme, bagved] for for-/bagben (ift. skulder/hofte),
+  // fl/hl = løftehøjde i svinget, D = andel af cyklussen, hvor foden står på jorden, kn = knoegang, hd = hoved ift. skulder (i hovedstørrelser)
+  const GANG = {
+    chimpanse: { hh: .96, sh: 1.1, bl: .95, F: [.85, -.4], H: [.5, -.62], fl: .5, hl: .6, D: .3, kn: 1, hd: [.62, -.42] },
+    gorilla: { hh: .8, sh: 1.3, bl: .92, F: [.7, -.4], H: [.42, -.45], fl: .35, hl: .4, D: .34, off: .06, kn: 1, hd: [.5, -.2], bob: .06, nod: .06 },
+    orangutang: { hh: .8, sh: 1.35, bl: .95, F: [.8, -.5], H: [.45, -.45], fl: .5, hl: .45, D: .3, kn: 1, hd: [.6, -.3], bob: .07, nod: .07, locks: 1, ov: .6 },
+    rhesusabe: { hh: .92, sh: 1.0, bl: .98, F: [.85, -.4], H: [.5, -.6], fl: .5, hl: .6, D: .3, hd: [.68, -.4], tail: "arch" },
+    toque_makak: { hh: .92, sh: 1.0, bl: 1.02, F: [.85, -.4], H: [.5, -.6], fl: .5, hl: .6, D: .3, hd: [.68, -.4], tail: "back" },
+    doedningehovedabe: { hh: .88, sh: .92, bl: .88, F: [.8, -.4], H: [.5, -.55], fl: .55, hl: .6, D: .28, hd: [.7, -.38], bob: .1, tail: "down" },
+    ringhalet_maki: { hh: 1.04, sh: .9, bl: 1.2, F: [.8, -.4], H: [.6, -.75], fl: .45, hl: .7, D: .3, hd: [.75, -.35], tail: "up" },
+    kapucinerabe: { hh: .9, sh: .94, bl: .92, F: [.85, -.4], H: [.5, -.55], fl: .5, hl: .6, D: .28, hd: [.68, -.4], bob: .09, tail: "spiral" }
+  };
+  const gang = (s) => s.gg || (s.gg = Object.assign({ off: .08, bob: .08, nod: .1, ov: 1 }, GANG[s.id]));
+  const cl = (v, a, b) => Math.max(a, Math.min(b, v));
+  const ss = (k) => k * k * (3 - 2 * k);
+  const frac = (x) => x - Math.floor(x);
+  const polar = (p, a, d) => [p[0] + cos(a) * d, p[1] + sin(a) * d];
+  // Punkt i afstanden d fra p i vinklen a, men med y holdt mellem lo og hi (så aben bliver inden for rammen)
+  const reach = (p, a, d, lo, hi) => {
+    const y = cl(p[1] + sin(a) * d, lo, hi), dy = y - p[1];
+    return [p[0] + Math.sqrt(Math.max(.04, d * d - dy * dy)) * (cos(a) < 0 ? -1 : 1), y];
+  };
+  // Fodens vej gennem et trin: [x, højde over jorden]. Står stille på jorden (og glider bagud ift. kroppen), svinger derefter frem.
+  // ovF: forbenet rækker ekstra frem lige før landing, ovB: bagbenet strækkes ekstra bagud lige efter afsæt
+  function step(u, D, a, b, lift, ovF, ovB) {
+    if (u < D) return [a + (b - a) * u / D, 0];
+    const k = (u - D) / (1 - D);
+    const f = k < .88 ? ss(k / .88) : 1 - ss((k - .88) / .12);
+    return [b + (a - b) * ss(k) + ovF * f - ovB * sin(PI * Math.min(1, k * 2)), lift * Math.pow(sin(PI * k), .6)];
+  }
+
+  // Hale i løb og hop: w = svingfase, a = evt. fast startvinkel (hop)
+  function tailMove(s, G, hip, w, a) {
+    if (!G.tail || !s.tail.len) return null;
+    const S = {
+      arch: [PI + .8, .95, 8, (u) => -2.4 + .5 * sin(w + 3 * u)],
+      back: [PI + .12, .42, 10, (u) => .9 * sin(w - 5 * u)],
+      down: [PI - .5, .58, 12, (u) => 2.4 * sin(PI2 * u + w)],
+      up: [-PI / 2 - .45, .56, 14, (u) => 2.2 * sin(PI2 * u) + .9 * sin(w + 3 * u) + (u > .78 ? 22 * (u - .78) : 0)],
+      spiral: [-PI / 2 - .7, .85, 18, (u) => (u < .3 ? 1 + .8 * sin(w + 4 * u) : 5 + 4 * (u - .3))]
+    }[G.tail];
+    return tailPts(hip[0] - .25, hip[1] - .1, a === undefined ? S[0] : a, s.tail.len * S[1], S[2], S[3]);
+  }
+  // Billig hale: hele halen i to streger, ringe/spids som få ekstra streger
+  function drawTailS(c, s, pts) {
+    const k = s.tail, n = pts.length - 1;
+    const path = (a, b, st) => { c.beginPath(); c.moveTo(pts[a][0], pts[a][1]); for (let i = a + 1; i <= b; i += st || 1) c.lineTo(pts[i][0], pts[i][1]); };
+    c.strokeStyle = dk(k.c, .55); c.lineWidth = k.w + .07; path(0, n); c.stroke();
+    c.strokeStyle = k.c; c.lineWidth = k.w; path(0, n); c.stroke();
+    if (k.rings) {
+      c.strokeStyle = k.rings; c.lineCap = "butt"; c.beginPath();
+      for (let i = 1; i < n - 2; i += 2) { c.moveTo(pts[i][0], pts[i][1]); c.lineTo(pts[i + 1][0], pts[i + 1][1]); }
+      c.stroke(); c.lineCap = "round";
+    }
+    if (k.tip || k.rings) { c.strokeStyle = k.tip || k.rings; path(n - 2, n); c.stroke(); }
+  }
+
+  // Knyttet hånd, der går på knoerne
+  function knuckle(c, x, y, r, col) {
+    ell(c, x, y, r * 1.1, r * .95, 0, shade(c, x, y, r, col), .03);
+    c.strokeStyle = dk(col, .5); c.lineWidth = .028; c.beginPath();
+    for (let i = 0; i < 3; i++) { c.moveTo(x + r * (.1 + i * .22), y - r * .85); c.quadraticCurveTo(x + r * (.75 + i * .1), y - r * .5, x + r * (.7 + i * .12), y + r * .1); }
+    c.stroke();
+  }
+  // Løse pelshaler efter kroppen (orangutang)
+  function locks(c, P, s, w) {
+    const hip = P.hip, sh = P.sh, g = s.tw;
+    for (let j = 0; j < 2; j++) {
+      c.fillStyle = j ? "#cf6a28" : "#b54f1d"; c.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const u = (i + .5) / 5, x = hip[0] + (sh[0] - hip[0]) * u, y = (hip[1] + (sh[1] - hip[1]) * u) + (j ? -.7 : .72) * g;
+        const L = .45 + .12 * ((i * 7 + j * 3) % 3), e = sin(w + i * 1.3 + j * 2) * .08, dy = j ? .05 : .16;
+        c.moveTo(x + .12, y - .03); c.quadraticCurveTo(x - L * .5, y + dy * .4 + e, x - L, y + dy + e * 1.6); c.quadraticCurveTo(x - L * .4, y + dy * .4 + .07, x - .08, y + .1);
+      }
+      c.fill();
+    }
+  }
+
+  // Galop: ét helt trin = 2π i o.ph. Forben først (fase 0 og .08), bagben en halv cyklus senere; mellem dem er alle fire fra jorden to gange
+  function poseRun(s, o) {
+    const G = gang(s), hr = s.hr, g = s.tw, th = frac((o.ph || 0) / PI2);
+    const A = s.arm, Lg = s.leg, ext = cos(PI2 * (th - .94)), arch = .5 - .5 * ext; // ext: 1 = strakt, -1 = samlet
+    const bob = G.bob * (.5 + .5 * cos(PI2 * 2 * (th - .44)));
+    const L = G.bl * 1.25 * (1 + .1 * ext), lift = bob + .03 * arch;
+    const hip = [-L / 2 - .1, 1 - G.hh - lift], sh = [L / 2 - .1, 1 - G.sh - lift];
+    const rh = s.aw * .5, rf = s.lw * .4;
+    const sp = (att, off, D, ab, lf, r, ovF, ovB) => { const st = step(frac(th - off), D, ab[0], ab[1], lf, ovF, ovB); return { p: [att[0] + st[0], 1 - r - st[1]], h: st[1] }; };
+    const aF = add(sh, -.04, .02), aN = add(sh, .02, .03), lF = add(hip, -.03, .04), lN = add(hip, 0, .06);
+    const fF = sp(aF, 0, G.D, G.F, G.fl, rh, G.ov * .38, 0), fN = sp(aN, G.off, G.D, G.F, G.fl, rh, G.ov * .38, 0);
+    const bF = sp(lF, .5, G.D, G.H, G.hl, rf, 0, G.ov * .38), bN = sp(lN, .5 + G.off, G.D, G.H, G.hl, rf, 0, G.ov * .38);
+    const nod = sin(PI2 * (th - .94) + .5), dx = sh[0] - hip[0], dy = sh[1] - hip[1], l = hyp(dx, dy);
+    const hd = [sh[0] + hr * G.hd[0] + .04 * ext, sh[1] + hr * G.hd[1] - .05 * nod * G.nod / .1];
+    return {
+      mode: "run", k: s.sc, G, hip, sh, arch, w: PI2 * th, hF: [fF.h, fN.h, bF.h, bN.h],
+      head: { x: hd[0], y: hd[1], rot: G.nod * nod * 1.2 - .03, mo: .2, eye: "open", tongue: false },
+      arF: ik(aF, fF.p, A[0], A[1], [-1, .2]), arN: ik(aN, fN.p, A[0], A[1], [-1, .2]),
+      lgF: ik(lF, bF.p, Lg[0], Lg[1], [1, -.1]), lgN: ik(lN, bN.p, Lg[0], Lg[1], [1, -.1]),
+      rump: [-dx / l * g * .95, -dy / l * g * .95 - .02], tail: tailMove(s, G, hip, PI2 * th)
+    };
+  }
+
+  // Hop: tre stadier (opstigning, top, nedstigning), blødt blandet ud fra o.jv
+  function poseJump(s, o) {
+    const G = gang(s), hr = s.hr, jv = cl(o.jv || 0, -1, 1), t = o.t || 0;
+    const wA = ss(cl((-jv - .05) / .5, 0, 1)), wC = ss(cl((jv - .05) / .5, 0, 1)), wB = 1 - wA - wC;
+    const mx = (a, b, c2) => a * wA + b * wB + c2 * wC;
+    const A = s.arm, Lg = s.leg, AA = A[0] + A[1], LL = Lg[0] + Lg[1];
+    const hip = [mx(-.5, -.3, -.55), mx(.5, .25, -.2)], sh = polar(hip, mx(-.95, -.4, .08), G.bl * mx(1.1, .75, 1));
+    const hr0 = s.aw * .62; // håndens størrelse: holder hænderne inden for rammen
+    const arm = (a1, f1, a2, f2, a3, f3) => reach(sh, mx(a1, a2, a3), AA * mx(f1, f2, f3), -1.6 + hr0 * 2.2, .98 - hr0 * 1.4);
+    const leg = (p, a1, f1, a2, f2, a3, f3) => reach(p, mx(a1, a2, a3), LL * mx(f1, f2, f3), -2, .68);
+    const aF = add(sh, -.04, .02), aN = add(sh, .02, .03), lF = add(hip, -.03, .04), lN = add(hip, 0, .06);
+    const pa = [mx(-.3, -.3, -1), mx(1, 1, .3)], pl = [1, mx(0, -.5, 0)];
+    const hd = [sh[0] + hr * mx(1.0, .6, .55), sh[1] + hr * mx(-.3, -.45, -.3)];
+    const dx = sh[0] - hip[0], dy = sh[1] - hip[1], l = hyp(dx, dy);
+    return {
+      mode: "jump", k: s.sc, G, hip, sh, arch: wB, wA, wB, wC,
+      head: { x: hd[0], y: hd[1], rot: mx(-.4, -.08, .2), mo: mx(.75, .45, .3), eye: "open", tongue: false },
+      arF: ik(aF, arm(-1.35, .97, -.75, .8, 1.3, .95), A[0], A[1], pa), arN: ik(aN, arm(-1.0, .97, -.35, .8, 1.05, .95), A[0], A[1], pa),
+      lgF: ik(lF, leg(lF, 2.88, .97, 1.65, .5, 1.85, .8), Lg[0], Lg[1], pl), lgN: ik(lN, leg(lN, 2.7, .97, 1.2, .55, 1.55, .82), Lg[0], Lg[1], pl),
+      rump: [-dx / l * s.tw * .95, -dy / l * s.tw * .95 - .02], tail: tailMove(s, G, hip, t * 3, PI + mx(.15, 0, .45)), w: t * 3
+    };
+  }
+
+  function apeMove(c, s, o, m) {
+    const t = o.t || 0, run = m === "run", P = run ? poseRun(s, o) : poseJump(s, o), G = P.G;
+    const sq = run ? cl(o.sq || 0, 0, 1) : 0;
+    c.save();
+    c.lineCap = c.lineJoin = "round";
+    c.translate(0, 1); c.scale(P.k * (1 + .14 * sq), P.k * (1 - .2 * sq)); c.translate(0, -1); // klem: lav og bred, fødderne bliver i jorden
+    if (P.tail) drawTailS(c, s, P.tail);
+    const arm = (J, h, far) => {
+      limb(c, J, s.aw * (far ? .95 : 1.1), s.aw * (far ? .8 : .85), far ? dk(s.limb, .18) : s.limb);
+      if (s.shagLimb && !far) limbFur(c, J, s.aw, dk(s.limb, .3));
+      const e = J[2], col = far ? dk(s.hand, .18) : s.hand;
+      if (run && G.kn) knuckle(c, e[0], e[1], s.aw * .55, col);
+      else hand(c, e[0], e[1], run ? cl(h * 2, 0, 1.1) : Math.atan2(e[1] - J[1][1], e[0] - J[1][0]), s.aw * .62, col);
+    };
+    const leg = (J, h, far) => {
+      limb(c, J, s.lw * (far ? 1.2 : 1.35), s.lw * (far ? .8 : .88), far ? dk(s.legc, .18) : s.legc);
+      if (s.shagLimb && !far) limbFur(c, J, s.lw, dk(s.legc, .3));
+      const e = J[2], dir = Math.atan2(e[1] - J[1][1], e[0] - J[1][0]);
+      foot(c, e[0], e[1], run ? cl(h * 2.2, 0, 1) : P.wA * dir * .8 + (1 - P.wA) * .55, s.lw * .75, s.lw * .42, far ? dk(s.foot, .18) : s.foot);
+    };
+    const hh = P.hF || [0, 0, 0, 0];
+    arm(P.arF, hh[0], 1); leg(P.lgF, hh[2], 1);
+    drawTorso(c, s, P);
+    if (G.locks) locks(c, P, s, P.w);
+    leg(P.lgN, hh[3]); arm(P.arN, hh[1]);
+    drawHead(c, s, P.head, t);
     c.restore();
   }
 
