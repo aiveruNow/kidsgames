@@ -239,6 +239,108 @@
       `<ellipse cx="38" cy="38" rx="26" ry="30" fill="#ef4444"/>` +
       `<ellipse cx="28" cy="26" rx="5.5" ry="9" fill="#fff" opacity=".55" stroke="none" transform="rotate(20 28 26)"/>` +
       `<path d="M82 6L98 28H88V68H76V28H66Z" fill="#22c55e"/>`
+    ),
+
+    // Ål: slangeformet fisk i vand
+    AAL: () => svg(
+      `<g transform="translate(2 0) scale(.95)">` +
+      `<path d="M4 90Q16 84 28 90T52 90T76 90T104 88" fill="none" stroke="#38bdf8" stroke-width="4"/>` +
+      `<path d="M8 62C20 36 32 38 44 54S68 72 80 52S90 42 92 44" transform="translate(0 -9)" fill="none" stroke="#4d7c0f" stroke-width="4" stroke-dasharray="4 4"/>` +
+      thick("M8 62C20 36 32 38 44 54S68 72 80 52S90 42 92 44", 10, "#6b8e5a") +
+      `<path d="M8 63C20 38 32 40 44 56S68 74 80 54" fill="none" stroke="#d9e8c4" stroke-width="2.6" transform="translate(0 2)"/>` +
+      `<ellipse cx="92" cy="45" rx="9" ry="7.5" fill="#6b8e5a" transform="rotate(-20 92 45)"/>` +
+      eye(93, 41, 3.2) + `<path d="M91 49Q95 51 99 47" fill="none" stroke-width="2.2"/>` +
+      `</g>`
+    ),
+
+    // Ur: vækkeur med ringeklokker
+    UR: () => svg(
+      `<path d="M26 22Q16 10 28 8Q40 10 38 22Z" fill="#fbbf24"/><path d="M74 22Q84 10 72 8Q60 10 62 22Z" fill="#fbbf24"/>` +
+      `<path d="M30 84L22 96M70 84L78 96" fill="none" stroke-width="6"/>` +
+      `<circle cx="50" cy="54" r="38" fill="#ef4444"/>` +
+      `<circle cx="50" cy="54" r="29" fill="#fff"/>` +
+      `<path d="M50 30V35M50 73V78M26 54H31M69 54H74" fill="none" stroke-width="3.4"/>` +
+      `<path d="M50 54V38M50 54L64 62" fill="none" stroke-width="4.6"/>` +
+      `<circle cx="50" cy="54" r="3.6" fill="${INK}"/>` +
+      `<path d="M6 40Q2 32 6 24M94 40Q98 32 94 24" fill="none" stroke="#f59e0b" stroke-width="3"/>`
+    ),
+
+    // El: lyspære med stråler
+    EL: () => svg(
+      `<path d="M50 4V12M18 18L24 24M82 18L76 24M6 46H14M94 46H86" stroke="#f59e0b" stroke-width="4" fill="none"/>` +
+      `<path d="M50 14C28 14 20 32 26 48C30 58 38 62 38 72H62C62 62 70 58 74 48C80 32 72 14 50 14Z" fill="#fde047"/>` +
+      `<polygon points="53,24 42,46 50,46 46,64 60,40 52,40" fill="#f59e0b" stroke-width="2.4"/>` +
+      `<ellipse cx="38" cy="30" rx="4" ry="8" fill="#fff" opacity=".6" stroke="none" transform="rotate(20 38 30)"/>` +
+      `<rect x="38" y="72" width="24" height="8" rx="2" fill="#9ca3af"/><rect x="40" y="80" width="20" height="7" rx="2" fill="#6b7280"/>` +
+      `<path d="M44 94H56" stroke-width="5" fill="none"/>`
+    ),
+
+    // Ro: barn der sover i seng
+    RO: () => svg(
+      `<rect x="6" y="46" width="6" height="46" rx="2" fill="#92400e"/><rect x="88" y="62" width="6" height="30" rx="2" fill="#92400e"/>` +
+      `<rect x="6" y="78" width="88" height="10" rx="3" fill="#b45309"/>` +
+      `<rect x="12" y="52" width="32" height="24" rx="10" fill="#fff"/>` +
+      `<circle cx="28" cy="58" r="15" fill="${SKIN}"/>` +
+      `<path d="M13 56Q12 40 28 42Q44 42 42 54Q34 48 26 50Q18 52 13 56Z" fill="#7c4a1e"/>` +
+      `<path d="M21 60Q24 63 27 60M31 60Q34 63 37 60" fill="none" stroke-width="2.4"/>` +
+      `<path d="M26 67Q29 69 32 67" fill="none" stroke-width="2.2"/>` +
+      `<path d="M34 62Q40 54 56 56L90 58Q94 60 92 78H30Q28 70 34 62Z" fill="#60a5fa"/>` +
+      `<path d="M50 58V78M66 58V78M80 58V78" stroke="#bfdbfe" stroke-width="3" fill="none"/>` +
+      digit("Z", 60, 36, 20, "#fde047") + digit("Z", 74, 24, 26, "#fde047") + digit("Z", 90, 12, 14, "#fde047")
+    ),
+
+    // Kø: tre børn i kø foran en kiosk
+    KOE: () => {
+      const kid = (x, shirt, hair) =>
+        `<path d="M${x - 9} 92Q${x - 9} 62 ${x} 60Q${x + 9} 62 ${x + 9} 92Z" fill="${shirt}"/>` +
+        `<circle cx="${x}" cy="46" r="11" fill="${SKIN}"/>` +
+        `<path d="M${x - 11} 44Q${x - 12} 32 ${x} 33Q${x + 12} 32 ${x + 11} 44Q${x + 6} 38 ${x} 38Q${x - 6} 38 ${x - 11} 44Z" fill="${hair}"/>` +
+        eye(x + 3, 47, 2.4);
+      return svg(
+        `<path d="M2 92H98" fill="none"/>` +
+        kid(14, "#f59e0b", "#7c4a1e") + kid(38, "#ef4444", "#fbbf24") + kid(62, "#22c55e", "#1f1410") +
+        `<rect x="76" y="46" width="22" height="46" fill="#fde68a"/>` +
+        `<path d="M74 46H100L96 30H78Z" fill="#ef4444"/><path d="M82 30L80 46M90 30L92 46" stroke="#fff" stroke-width="3" fill="none"/>` +
+        `<rect x="80" y="56" width="14" height="10" fill="#fff" stroke-width="2.2"/>`
+      );
+    },
+
+    // Tø: snemand der smelter i solen
+    TOE: () => svg(
+      `<ellipse cx="46" cy="90" rx="38" ry="7" fill="#7dd3fc"/>` +
+      `<path d="M20 90Q18 74 28 70H64Q76 74 72 90Z" fill="#fff"/>` +
+      `<circle cx="46" cy="58" r="22" fill="#fff"/>` +
+      `<circle cx="46" cy="38" r="15" fill="#fff"/>` +
+      `<path d="M32 28L58 22L56 14L36 18Z" fill="${INK}" stroke-width="2.4"/>` +
+      `<path d="M46 40L62 44L46 46Z" fill="#f97316" stroke-width="2.4"/>` +
+      eye(41, 34, 2.4) + eye(52, 33, 2.4) +
+      `<circle cx="46" cy="56" r="2.6" fill="${INK}" stroke="none"/><circle cx="46" cy="66" r="2.6" fill="${INK}" stroke="none"/>` +
+      `<path d="M26 54Q18 50 12 52" fill="none"/>` +
+      `<circle cx="84" cy="20" r="9" fill="#fde047"/>` +
+      `<path d="M72 74Q68 80 72 84Q76 80 72 74Z" fill="#38bdf8" stroke-width="2"/><path d="M60 80Q57 85 60 88Q63 85 60 80Z" fill="#38bdf8" stroke-width="2"/>`
+    ),
+
+    // Av: plaster med smertestjerner
+    AV: () => svg(
+      `<g transform="rotate(-28 50 54)">` +
+      `<rect x="8" y="38" width="84" height="32" rx="16" fill="#f4c28f"/>` +
+      `<rect x="34" y="38" width="32" height="32" fill="#fde7c8"/>` +
+      `<g fill="#d99a63" stroke="none"><circle cx="18" cy="48" r="2"/><circle cx="18" cy="60" r="2"/><circle cx="26" cy="54" r="2"/><circle cx="82" cy="48" r="2"/><circle cx="82" cy="60" r="2"/><circle cx="74" cy="54" r="2"/></g>` +
+      `<path d="M34 38V70M66 38V70" fill="none" stroke-width="2.4"/>` +
+      `</g>` +
+      `<polygon points="${starPts(18, 18, 12, 5, 6)}" fill="#fde047" stroke-width="2.4"/>` +
+      `<polygon points="${starPts(84, 82, 11, 4.6, 6)}" fill="#fde047" stroke-width="2.4"/>` +
+      `<path d="M78 16L88 8M86 26L96 24M14 84L6 92" stroke="#ef4444" stroke-width="3.4" fill="none"/>`
+    ),
+
+    // Fy: ansigt der synes, noget er klamt
+    FY: () => svg(
+      `<circle cx="50" cy="54" r="38" fill="#bef264"/>` +
+      `<path d="M26 40L40 46L26 52M74 40L60 46L74 52" fill="none" stroke-width="4.4"/>` +
+      `<path d="M26 72Q34 64 42 72T58 72T74 72" fill="none" stroke-width="3.8"/>` +
+      `<path d="M52 72Q52 92 62 90Q70 88 66 72Z" fill="#fb7185" stroke-width="2.6"/>` +
+      `<path d="M30 14Q24 22 30 28Q36 34 30 40M50 8Q44 16 50 22Q56 28 50 34M70 14Q64 22 70 28Q76 34 70 40" fill="none" stroke="#65a30d" stroke-width="3" transform="translate(0 -4) scale(1 .6) translate(0 12)"/>` +
+      `<path d="M84 34Q78 44 84 48Q90 44 84 34Z" fill="#7dd3fc" stroke-width="2"/>`
     )
   };
 

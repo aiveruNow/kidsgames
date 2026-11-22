@@ -7,11 +7,12 @@
 
   const sets = {
     2: [
-      // Første trin: 20 små lydrette ord, én lyd pr. bogstav.
+      // Første trin: 28 små lydrette ord, én lyd pr. bogstav.
       ["BI", "🐝"], ["KO", "🐄"], ["SO", "🐖"], ["IS", "🍦"], ["TO", "2️⃣"],
       ["NI", "9️⃣"], ["TÅ", "🦶"], ["HØ", "🌾"], ["SØ", "🏞️"], ["BY", "🏙️"],
       ["DU", "👉"], ["TE", "🍵"], ["FE", "🧚"], ["SY", "🧵"], ["LE", "😄"],
-      ["SE", "👀"], ["GÅ", "🚶"], ["JA", "✅"], ["NY", "🆕"], ["OP", "⬆️"]
+      ["SE", "👀"], ["GÅ", "🚶"], ["JA", "✅"], ["NY", "🆕"], ["OP", "⬆️"],
+      ["ÅL", "🐍"], ["UR", "⏰"], ["EL", "💡"], ["RO", "😴"], ["KØ", "🧍"], ["TØ", "☃️"], ["AV", "🩹"], ["FY", "🤢"]
     ],
     3: [
       // Begynderord: ét bogstav pr. lyd, uden stumme bogstaver eller konsonantgrupper.
