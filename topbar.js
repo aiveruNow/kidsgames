@@ -7,7 +7,7 @@
 
   // Nye spil skal tilføje deres stjernenøgle her (bruges også af forsiden)
   const STAR_KEYS = {
-    ari: ["talbasket-stars", "tabbi-stars", "leo-stars",     "maal-stars", "dino-stars", "urundai-ari-stars", "haj-ari-stars", "tamil-ari-stars"],
+    ari: ["talbasket-stars", "tabbi-stars", "leo-stars",     "maal-stars", "dino-stars", "urundai-ari-stars", "haj-ari-stars", "banan-ari-stars", "tamil-ari-stars"],
         riyana: ["prinsesse-stars", "prinsesse-make-stars", "prinsesse-find-stars", "prinsesse-count-stars", "farvehave-stars", "urundai-riyana-stars"]
   };
 

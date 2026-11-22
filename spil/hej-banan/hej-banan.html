@@ -1,0 +1,2566 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b3d2a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hej Banan">
+  <title>Hej Banan – Junglen</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      font-synthesis: none;
+      --ink: #2b2250;
+      --soft: #7a6fa3;
+      --gold: #f5b83d;
+      --tamil: "Noto Sans Tamil", "Nirmala UI", "Latha", "Tamil Sangam MN", "Trebuchet MS", sans-serif;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    html { height: 100%; overflow: hidden; overscroll-behavior: none; }
+    body {
+      height: 100vh;
+      height: 100dvh;
+      height: var(--app-h, 100dvh);
+      min-width: 320px;
+      margin: 0;
+      overflow-y: auto;
+      overscroll-behavior: none;
+      color: var(--ink);
+      background: #0b3d2a;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+    button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; box-shadow: 0 0 0 6px #f5b83d99; }
+    .ta { font-family: var(--tamil); }
+    #bg { position: fixed; inset: 0; z-index: 0; background: center / cover no-repeat #0b3d2a; }
+
+    .app { position: relative; z-index: 1; height: 100%; padding: calc(var(--tb-h, 54px) + 6px) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); overflow: hidden; }
+    .screen { display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+
+    .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 56px; padding: 10px 26px; border: 0; border-radius: 18px; background: linear-gradient(135deg, #fde68a, #fbbf24); color: #3b2a00; font-size: 1.2rem; font-weight: 800; box-shadow: 0 10px 24px #fbbf2459, inset 0 1px 0 #ffffff99; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), box-shadow .2s, filter .2s; }
+    .btn:active { transform: scale(.96); box-shadow: 0 4px 12px #fbbf244d; }
+    .btn.green { background: linear-gradient(135deg, #bef264, #84cc16 55%, #4ade80); color: #0b2a05; box-shadow: 0 12px 28px #84cc1666, inset 0 1px 0 #ffffff8c; }
+    .btn.ghost { background: #ffffff1a; border: 1px solid #ffffff38; color: #fff; box-shadow: none; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .btn.big { min-height: 70px; font-size: 1.6rem; padding: 10px 36px; border-radius: 24px; }
+    .back { flex: none; width: 46px; height: 46px; border: 1px solid #ffffff24; border-radius: 15px; background: #04200f73; color: #fff; font-size: 1.5rem; font-weight: 900; backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
+    .back:active { background: #04200fa6; transform: scale(.94); }
+
+    /* Billeder til ordene. --ps er billedets størrelse */
+    .pbox { container-type: inline-size; display: grid; place-items: center; aspect-ratio: 1; width: 100%; }
+    .pbox > .pic { --ps: 90cqw; }
+    .pic { width: var(--ps); height: var(--ps); display: grid; place-items: center; line-height: 1; }
+    .pic svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 2px #0002); }
+
+    /* Forside */
+    #home { align-items: center; padding-top: 6px; padding-bottom: 6px; }
+    .hero { display: flex; align-items: center; gap: 14px; flex: none; margin-top: 2px; }
+    #mascot { display: block; width: clamp(120px, 26vh, 190px); height: auto; aspect-ratio: 1 / .9; flex: none; border: 0; padding: 0; background: none; filter: drop-shadow(0 10px 14px #0006); }
+    .hero h1 { margin: 0; color: #fff; font-size: clamp(2.4rem, 10vw, 3.5rem); letter-spacing: -.02em; line-height: 1; text-shadow: 0 3px 0 #0006, 0 0 24px #bef26488; }
+    .hero h1 span { color: #fde047; }
+    .hero .sub { margin: 4px 0 0; color: #fef08a; font-size: 1.15rem; font-weight: 800; text-shadow: 0 2px 0 #0005; }
+    .homebtns { display: grid; gap: 12px; width: min(100%, 420px); flex: none; }
+    .tagline { margin: 0; color: #fff; font-weight: 800; text-align: center; text-shadow: 0 2px 0 #0006; }
+
+    .head { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 12px; flex: none; padding: 4px 0 6px; color: #fff; background: linear-gradient(#04200ff0, #04200f00); }
+    .head h2 { margin: 0; font-size: clamp(1.4rem, 5vw, 2rem); text-shadow: 0 2px 0 #0005; }
+    .head .tn { font-size: 1.05rem; font-weight: 700; color: #fef08a; }
+    .dict { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; padding: 2px 2px 14px; }
+    .card-w { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 8px 4px; border: 0; border-radius: 20px; background: #fffdf5; box-shadow: 0 0 0 2px #ffffff80, 0 4px 0 #0005; text-align: center; }
+    .card-w:active { transform: translateY(2px); }
+    .card-w .pbox { width: 72%; }
+    .card-w .t { font-family: var(--tamil); font-size: 1.2rem; font-weight: 800; line-height: 1.25; }
+    .card-w .r { font-size: .85rem; color: var(--soft); font-weight: 700; }
+    .card-w .d { font-size: .8rem; color: #9b92bb; }
+    .card-w .medal { position: absolute; top: 5px; right: 6px; display: flex; gap: 2px; }
+    .medal i { width: 10px; height: 10px; border-radius: 50%; background: #d8d2e8; }
+    .medal i.on { background: #f5b83d; box-shadow: 0 0 0 1px #b57b05; }
+    .card-w.unseen { background: #00000040; box-shadow: none; min-height: 118px; }
+    .card-w.unseen .q { display: grid; place-items: center; flex: 1; color: #fff9; font-size: 2.4rem; font-weight: 900; }
+
+    /* Junglerne */
+    .jg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; padding: 4px 2px 16px; }
+    .jg-card { --a: #58c08f; --b: #176b4b; position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px 14px 12px; overflow: hidden; border: 1px solid #ffffff3d; border-radius: 26px; background: linear-gradient(160deg, var(--a), var(--b)); color: #fff; text-align: left; box-shadow: 0 16px 34px #0006, inset 0 1px 0 #ffffff55; }
+    .jg-card:active { transform: scale(.97); }
+    .jg-card h3 { margin: 0; font-size: 1.5rem; text-shadow: 0 2px 0 #0005; }
+    .jg-card p { margin: 0; color: #ffffffd9; font-size: .88rem; font-weight: 700; text-shadow: 0 1px 0 #0004; }
+    .jg-card .nr { align-self: flex-start; padding: 1px 10px; border-radius: 999px; background: #0004; font-size: .7rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .jg-ico { display: flex; gap: 6px; margin: 4px 0; }
+    .jg-ico img { width: 56px; height: 42px; object-fit: contain; filter: drop-shadow(0 3px 3px #0006); }
+    .jg-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; }
+    .jg-foot .go { padding: 6px 16px; border-radius: 999px; background: linear-gradient(135deg, #fde68a, #fbbf24); color: #3b2a00; font-weight: 900; }
+    .jg-foot .book { min-height: 40px; padding: 6px 14px; border: 1px solid #ffffff55; border-radius: 999px; background: #0003; color: #fff; font-weight: 800; font-size: .85rem; }
+    .jg-card.locked { filter: grayscale(.85) brightness(.6); }
+    .jg-card.locked .go { background: #0006; color: #fff; }
+    .jg-card .lock { position: absolute; right: 12px; top: 10px; font-size: 1.6rem; }
+
+    /* Banen */
+    #play { position: relative; gap: 0; overflow: hidden; }
+    .hud { position: absolute; left: 8px; right: 8px; top: 8px; z-index: 6; display: flex; align-items: center; gap: 10px; color: #fff; pointer-events: none; }
+    .hud .back { width: 40px; height: 40px; font-size: 1.3rem; pointer-events: auto; }
+    .hud .title { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid #ffffff24; border-radius: 14px; background: #04200f73; backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); font-size: .95rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; text-shadow: 0 2px 0 #0006; }
+    .prog { position: relative; flex: 1; min-width: 60px; height: 30px; border: 1px solid #ffffff24; border-radius: 999px; background: #04200f73; overflow: hidden; backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
+    .prog i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, #fde047, #f59e0b); box-shadow: 0 0 18px #fde04799; transition: width .3s; }
+    .prog span { position: absolute; inset: 0; display: grid; place-items: center; font-size: .8rem; font-weight: 900; color: #fff; text-shadow: 0 1px 2px #000a; font-variant-numeric: tabular-nums; }
+    #stage { position: relative; flex: 1; min-height: 0; touch-action: none; background: linear-gradient(#9be7c4, #1f8d46 60%, #0a4a2a); overflow: hidden; }
+    #cv { position: absolute; inset: 0; display: block; }
+    #startHint { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); padding: 10px 22px; border: 1px solid #ffffff38; border-radius: 999px; background: #04200fa6; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: #fff; font-weight: 800; white-space: nowrap; box-shadow: 0 12px 30px #00000059; pointer-events: none; animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: .85; } 50% { opacity: 1; transform: translateX(-50%) scale(1.06); } }
+    body.playing .app { padding: 0; }
+    body.playing #play { position: fixed; left: 0; right: 0; top: var(--tb-h, 54px); bottom: 0; height: auto; padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); background: #0a4a2a; z-index: 1; }
+    @media (max-width: 520px) { .hud { gap: 6px; } #startHint { font-size: .9rem; padding: 8px 16px; } }
+
+    #wordPop { position: absolute; left: 50%; top: 58px; z-index: 5; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 16px); min-width: 0; padding: 6px 16px 6px 8px; border: 1px solid #ffffff38; border-radius: 22px; background: #04200f94; backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); box-shadow: 0 14px 34px #00000059; color: #fff; pointer-events: none; transform: translateX(-50%); animation: popin .3s cubic-bezier(.2, 1.5, .4, 1); }
+    #wordPop .pbox { width: 52px; flex: none; background: #fff; border-radius: 16px; padding: 3px; }
+    #wordPop > div { min-width: 0; }
+    #wordPop .tw { font-family: var(--tamil); font-size: 1.7rem; font-weight: 800; line-height: 1.2; }
+    #wordPop .rm { display: block; font-size: .85rem; font-weight: 800; color: #bbf7d0; line-height: 1; }
+    @keyframes popin { from { transform: translateX(-50%) translateY(-20px) scale(.85); opacity: 0; } }
+    .mute-note { margin: 0; padding: 4px 12px; border: 1px solid #fbbf2455; border-radius: 999px; background: #fbbf2424; color: #fde68a; font-size: .9rem; font-weight: 800; text-align: center; }
+    .badge { display: inline-block; margin-bottom: 2px; padding: 1px 10px; border-radius: 999px; background: #7dd3fc33; color: #0369a1; font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .badge.new { background: #34d3992e; color: #047857; }
+
+    /* Popups: glas */
+    .overlay { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: calc(var(--tb-h, 54px) + 10px) 10px 10px; background: radial-gradient(80% 55% at 50% 0%, #bef2642e, transparent 65%), #02140bc7; backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); animation: fadein .25s ease; }
+    @keyframes fadein { from { opacity: 0; } }
+    .card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; width: min(100%, 560px); max-height: 100%; padding: 18px 16px 16px; overflow-y: auto; border: 1px solid #ffffff2b; border-radius: 32px; background: linear-gradient(165deg, #ffffff29, #ffffff0a 45%), #06241bb8; color: #fff; box-shadow: 0 40px 90px #0000008c, 0 0 0 1px #ffffff0a, inset 0 1px 0 #ffffff47; backdrop-filter: blur(30px) saturate(1.5); -webkit-backdrop-filter: blur(30px) saturate(1.5); animation: sheetIn .55s cubic-bezier(.16, 1, .3, 1); }
+    @keyframes sheetIn { from { transform: translateY(26px) scale(.96); opacity: 0; filter: blur(6px); } }
+    .card h3 { margin: 0; color: #fff; font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; text-align: center; }
+    .card > * { max-width: 100%; min-width: 0; }
+    .card.quiz .left { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+    .eyebrow { margin: 0; text-align: center; color: #d9f99dcc; font-size: .7rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .why { display: flex; align-items: center; gap: 10px; padding: 6px 16px 6px 8px; border: 1px solid #fb71855c; border-radius: 999px; background: #fb718524; color: #ffe4e6; font-size: .86rem; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+    .why .whyicon { display: grid; place-items: center; width: 54px; flex: none; }
+    .why img { width: 52px; height: 36px; object-fit: contain; }
+    .wordbtn { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 240px; max-width: 100%; padding: 14px 28px; border: 1px solid #ffffff33; border-radius: 28px; background: linear-gradient(180deg, #ffffff22, #ffffff0a); box-shadow: 0 16px 40px #0000004d, inset 0 1px 0 #ffffff33; color: #fff; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); }
+    .wordbtn:active { transform: scale(.97); }
+    .wordbtn .tw { flex: 0 1 auto; padding-bottom: 2px; font-family: var(--tamil); font-size: clamp(2.4rem, 11vw, 3.8rem); font-weight: 800; line-height: 1.5; background: linear-gradient(180deg, #fff 25%, #d9f99d); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 20px #bef26459); }
+    .wordbtn .tw.long { font-size: clamp(1.9rem, 9vw, 3rem); }
+    .wordbtn .tw.xlong { font-size: clamp(1.5rem, 7vw, 2.4rem); }
+    .wordbtn .rm { padding: 3px 14px; border-radius: 999px; background: #ffffff1f; color: #d9f99d; font-size: .95rem; font-weight: 800; }
+    .card-w .t.long { font-size: .95rem; } .card-w .t.xlong { font-size: .78rem; }
+    .mcard .t.long { font-size: clamp(1rem, 4vw, 1.4rem); } .mcard .t.xlong { font-size: clamp(.85rem, 3.4vw, 1.15rem); }
+    #wordPop .tw.long { font-size: 1.35rem; } #wordPop .tw.xlong { font-size: 1.1rem; }
+    .wave { display: flex; align-items: center; gap: 3px; height: 20px; }
+    .wave i { width: 3px; height: 7px; border-radius: 2px; background: #bef264; opacity: .7; }
+    .wordbtn.speaking .wave i { opacity: 1; animation: wv .9s ease-in-out infinite; }
+    .wave i:nth-child(2) { animation-delay: .12s !important; } .wave i:nth-child(3) { animation-delay: .24s !important; } .wave i:nth-child(4) { animation-delay: .36s !important; } .wave i:nth-child(5) { animation-delay: .48s !important; }
+    @keyframes wv { 0%, 100% { height: 6px; } 50% { height: 20px; } }
+    .banner { min-height: 2em; padding: 2px 14px; color: #86efac; font-size: 1.1rem; font-weight: 800; text-align: center; overflow-wrap: anywhere; }
+    .banner.bad { color: #fecdd3; }
+    .banner .tw { font-family: var(--tamil); }
+    .banner:not(:empty) { border: 1px solid #22c55e66; border-radius: 999px; background: #22c55e29; animation: sheetIn .3s cubic-bezier(.2, 1.4, .4, 1); }
+    .banner.bad:not(:empty) { border-color: #fb718566; background: #fb718529; }
+    .choices { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 12px; width: min(100%, 56dvh, max(190px, calc(100dvh - 370px))); }
+    .choices.n3 { width: min(100%, 90dvh); }
+    .tile { position: relative; container-type: inline-size; display: grid; place-items: center; aspect-ratio: 1; padding: 0; border: 0; border-radius: 26px; background: linear-gradient(180deg, #fff, #eefbe0); box-shadow: 0 14px 30px #00000059, inset 0 -4px 0 #0e749020; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), box-shadow .25s, opacity .3s, filter .3s; }
+    .tile .pic { --ps: 78cqw; }
+    .tile:active { transform: scale(.95); }
+    .tile.right { background: linear-gradient(180deg, #f2fff9, #c6f6df); box-shadow: 0 0 0 4px #34d399, 0 0 44px #34d39999, 0 14px 30px #00000059; animation: yes .6s ease; }
+    .tile.right::after { content: "✓"; position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #22c55e; color: #fff; font-size: 16px; font-weight: 900; }
+    .tile.wrong { background: linear-gradient(180deg, #fff6f7, #ffe0e4); box-shadow: 0 0 0 4px #fb7185, 0 0 40px #fb718580; animation: no .45s ease; }
+    .tile.dim { opacity: .35; filter: saturate(.55); }
+    .tile:disabled { cursor: default; }
+    @keyframes yes { 0% { transform: scale(1); } 40% { transform: scale(1.12) rotate(-3deg); } 70% { transform: scale(1.06) rotate(3deg); } 100% { transform: scale(1.05); } }
+    @keyframes no { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-9px); } 50% { transform: translateX(8px); } 80% { transform: translateX(-4px); } }
+
+    .mcards { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; justify-content: center; }
+    .mcard { flex: 1 1 0; max-width: 190px; min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 10px 6px 12px; border: 0; border-radius: 24px; background: linear-gradient(180deg, #fff, #e9f8d8); box-shadow: 0 14px 30px #0000004d; color: #0b1b2e; text-align: center; animation: sheetIn .4s cubic-bezier(.2, 1.4, .4, 1) both; }
+    .mcard:nth-child(2) { animation-delay: .06s; } .mcard:nth-child(3) { animation-delay: .12s; } .mcard:nth-child(4) { animation-delay: .18s; }
+    .mcard.on { background: linear-gradient(180deg, #fff, #f0ffd0); box-shadow: 0 0 0 3px #bef264, 0 0 36px #bef26480, 0 14px 30px #0000004d; }
+    .mcards.many .mcard { flex: 1 1 calc(50% - 10px); max-width: 170px; }
+    .mcards.many .mcard .pbox { width: 62%; }
+    .mcards.many .mcard .t { font-size: clamp(1.1rem, 4.4vw, 1.5rem); }
+    .mcard .pbox { width: 86%; }
+    .mcard .t { font-family: var(--tamil); font-size: clamp(1.3rem, 5vw, 1.9rem); font-weight: 800; line-height: 1.25; color: #0b1b2e; }
+    .mcard .r { font-size: 1rem; font-weight: 800; color: #3f6212; }
+    .mcard .d { font-size: .95rem; color: #64748b; font-weight: 700; }
+    .hintline { margin: 0; color: #ffffff99; font-size: .85rem; font-weight: 700; text-align: center; }
+    .card-w .t, .mcard .t, .wordbtn .tw, #wordPop .tw { display: block; max-width: 100%; min-width: 0; white-space: nowrap; text-align: center; }
+
+    #settings { display: grid; gap: 10px; }
+    #settings label { display: grid; gap: 4px; font-weight: 800; color: #27426f; }
+    #settings select, #settings button { min-height: 44px; padding: 6px 10px; border: 2px solid #dfe7f3; border-radius: 12px; background: #f7faff; color: #27426f; font: inherit; font-weight: 700; }
+
+    #toast { position: absolute; left: 50%; top: 24%; max-width: 88%; transform: translateX(-50%); z-index: 7; display: grid; gap: 2px; padding: 14px 28px; border: 1px solid #ffffff38; border-radius: 24px; text-align: center; pointer-events: none; background: #04200f99; backdrop-filter: blur(18px) saturate(1.5); -webkit-backdrop-filter: blur(18px) saturate(1.5); box-shadow: 0 20px 50px #00000066; animation: toastIn 2.3s cubic-bezier(.16, 1, .3, 1) both; }
+    #toast b { font-size: 1.9rem; letter-spacing: -.02em; background: linear-gradient(180deg, #fff, #fde047); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+    #toast span { color: #fde68a; font-weight: 800; }
+    @keyframes toastIn { 0% { opacity: 0; transform: translate(-50%, 14px) scale(.85); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 20% { transform: translate(-50%, 0) scale(1); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -12px); } }
+
+    /* Dyrebogen */
+    #fauna { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+    .card.fauna { width: min(100%, 1040px); height: min(100%, 900px); max-height: none; align-self: center; justify-self: center; padding: 0; gap: 0; align-items: stretch; overflow: hidden; border-radius: 34px; }
+    .fn-head { flex: none; display: grid; gap: 8px; padding: 18px 22px 12px; background: linear-gradient(#ffffff17, #ffffff00); }
+    .fn-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .fn-dots { display: flex; align-items: center; gap: 5px; }
+    .fn-dots i { width: 16px; height: 5px; border-radius: 3px; background: #ffffff33; transition: width .3s; }
+    .fn-dots i.on { width: 30px; background: linear-gradient(90deg, #fde047, #a3e635); box-shadow: 0 0 12px #bef26499; }
+    .fn-head h2 { margin: 0; font-size: clamp(1.7rem, 6.5vw, 2.5rem); font-weight: 800; line-height: 1.05; letter-spacing: -.03em; background: linear-gradient(180deg, #fff 30%, #d9f99d); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+    .fn-sub { margin: 0; color: #dcfce7e0; font-size: .95rem; font-weight: 600; line-height: 1.35; }
+    .fn-row { display: flex; align-items: center; gap: 10px; }
+    .fn-pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: 40px; padding: 6px 16px 6px 12px; border: 1px solid #ffffff38; border-radius: 999px; background: #ffffff1a; color: #fff; font-size: .88rem; font-weight: 800; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), background .2s; }
+    .fn-pill:active { transform: scale(.95); }
+    .fn-pill.speaking { background: #bef2642e; border-color: #bef26499; }
+    .fn-pill .wave { height: 16px; } .fn-pill .wave i { opacity: 1; }
+    .fn-pill.speaking .wave i { animation: wv .9s ease-in-out infinite; }
+    .fn-prog { position: relative; flex: 1; min-width: 0; height: 32px; overflow: hidden; border: 1px solid #ffffff24; border-radius: 999px; background: #ffffff14; }
+    .fn-prog i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, #fde047aa, #a3e635aa); transition: width .5s cubic-bezier(.16, 1, .3, 1); }
+    .fn-prog span { position: absolute; inset: 0; display: grid; place-items: center; font-size: .8rem; font-weight: 800; color: #fff; }
+    .card.fauna.detail .fn-sub, .card.fauna.detail .fn-row { display: none; }
+    .card.fauna.detail .fn-head { padding-bottom: 4px; }
+    .card.fauna.detail .fn-head h2 { font-size: clamp(1.3rem, 5vw, 1.7rem); }
+    .fn-body { position: relative; flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 2px 18px 18px; scrollbar-width: thin; }
+    .fn-group { --acc: #4ade80; margin-top: 12px; }
+    .fn-group.predator { --acc: #fb7185; } .fn-group.hazard { --acc: #fbbf24; } .fn-group.ape { --acc: #fde047; }
+    .fn-group h4 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 9px; margin: 0 2px 10px; color: #fff; font-size: 1.02rem; font-weight: 800; }
+    .fn-group h4 i { width: 10px; height: 10px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 12px var(--acc); }
+    .fn-group h4 span { color: #ffffffa6; font-size: .78rem; font-weight: 700; }
+    .fn-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+    .fn-tile { --acc: inherit; position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 8px 6px 10px; overflow: hidden; border: 1px solid #ffffff2e; border-radius: 22px; background: linear-gradient(180deg, #ffffff26, #ffffff0a); color: #fff; box-shadow: 0 10px 24px #0000004d, inset 0 1px 0 #ffffff40; animation: tileIn .55s cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--i, 0) * 32ms); transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), border-color .2s, box-shadow .2s; }
+    .fn-tile::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 4%; width: 120%; aspect-ratio: 1; transform: translateX(-50%); background: radial-gradient(closest-side, var(--acc), #0000); opacity: .26; }
+    .fn-tile:hover { transform: translateY(-3px); border-color: #ffffff66; }
+    .fn-tile:active { transform: scale(.95); }
+    .fn-tile img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: contain; filter: drop-shadow(0 6px 8px #0007); pointer-events: none; }
+    .fn-tile .nm { display: grid; place-items: center; min-height: 2.3em; font-size: .78rem; font-weight: 800; line-height: 1.15; text-align: center; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
+    .fn-tile .pt { position: absolute; left: 7px; top: 7px; padding: 1px 8px; border-radius: 999px; background: #0000004d; color: #fde68a; font-size: .7rem; font-weight: 900; }
+    .fn-tile .tick { position: absolute; right: 7px; top: 7px; display: none; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #22c55e; color: #fff; font-size: 12px; font-weight: 900; box-shadow: 0 3px 8px #0006; }
+    .fn-tile.heard .tick { display: grid; }
+    .fn-tile.locked img { filter: brightness(0) opacity(.45); }
+    .fn-tile.locked .nm { color: #ffffffb0; font-size: .72rem; }
+    .fn-tile.picked { border-color: #fde047; box-shadow: 0 0 0 3px #fde04799, 0 10px 24px #0000004d; }
+    .fn-hint { margin: 14px 4px 0; color: #ffffff8c; font-size: .82rem; font-weight: 700; text-align: center; }
+    @keyframes tileIn { from { opacity: 0; transform: translateY(14px) scale(.94); } }
+    .fn-detail { --acc: #4ade80; display: grid; gap: 14px; padding-top: 6px; animation: fnIn .5s cubic-bezier(.16, 1, .3, 1); }
+    .fn-detail.predator { --acc: #fb7185; } .fn-detail.hazard { --acc: #fbbf24; } .fn-detail.ape { --acc: #fde047; }
+    @keyframes fnIn { from { opacity: 0; transform: translateY(18px) scale(.98); filter: blur(5px); } }
+    .fn-hero { position: relative; aspect-ratio: 4 / 3; max-height: 52dvh; width: 100%; overflow: hidden; border: 1px solid #ffffff3d; border-radius: 28px; box-shadow: 0 24px 50px #00000066, 0 0 0 1px #ffffff0f, inset 0 1px 0 #ffffff40; touch-action: pan-y; }
+    .fn-hero canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+    .fn-hbtn { position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 4px 14px; border: 1px solid #ffffff38; border-radius: 999px; background: #04200f78; color: #fff; font-size: .82rem; font-weight: 800; backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
+    .fn-hbtn:active { transform: scale(.95); }
+    #fnBack { left: 10px; top: 10px; }
+    #fnRole { right: 10px; bottom: 10px; cursor: default; gap: 7px; }
+    #fnRole i { width: 9px; height: 9px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); }
+    #fnCount { left: 10px; bottom: 10px; min-height: 30px; padding: 2px 12px; font-size: .75rem; letter-spacing: .06em; pointer-events: none; }
+    .fn-nav { position: absolute; z-index: 2; top: 50%; display: grid; place-items: center; width: 46px; height: 46px; padding: 0 0 3px; transform: translateY(-50%); border: 1px solid #ffffff38; border-radius: 50%; background: #04200f78; color: #fff; font-size: 1.7rem; font-weight: 700; line-height: 1; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); }
+    .fn-nav:active { transform: translateY(-50%) scale(.9); }
+    #fnPrev { left: 8px; } #fnNext { right: 8px; }
+    .fn-info { display: grid; gap: 12px; align-content: start; min-width: 0; }
+    .fn-name h3 { margin: 0; color: #fff; font-size: clamp(1.8rem, 7vw, 2.7rem); font-weight: 800; line-height: 1.05; letter-spacing: -.03em; text-align: left; }
+    .fn-latin { margin: 3px 0 0; color: #d9f99d; font-size: 1rem; font-style: italic; font-weight: 600; }
+    .fn-play { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; width: 100%; padding: 10px 16px 10px 10px; overflow: hidden; border: 1px solid #ffffff38; border-radius: 22px; background: linear-gradient(180deg, #ffffff29, #ffffff0d); color: #fff; text-align: left; box-shadow: 0 12px 28px #0000004d, inset 0 1px 0 #ffffff40; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); }
+    .fn-play:active { transform: scale(.98); }
+    .fn-play .ico { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #fde68a, #fbbf24); color: #3b2a00; box-shadow: 0 8px 20px #fbbf2466; }
+    .fn-play .ico svg { width: 20px; height: 20px; fill: currentColor; }
+    .fn-play .ico .pa { display: none; }
+    .fn-play.speaking .ico .pl { display: none; }
+    .fn-play.speaking .ico .pa { display: block; }
+    .fn-play .lbl { display: grid; gap: 1px; min-width: 0; font-weight: 800; }
+    .fn-play .lbl small { color: #dcfce7b3; font-size: .75rem; font-weight: 700; }
+    .fn-play .bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: linear-gradient(90deg, #fde047, #a3e635); box-shadow: 0 0 12px #fde047; }
+    .fn-play .wave i { opacity: .55; }
+    .fn-play.speaking .wave i { opacity: 1; animation: wv .9s ease-in-out infinite; }
+    .fn-text { margin: 0; color: #f0fdf4; font-size: 1.06rem; font-weight: 600; line-height: 1.55; }
+    .fn-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .fn-stat { min-width: 0; padding: 10px 12px; border: 1px solid #ffffff24; border-radius: 18px; background: #ffffff14; }
+    .fn-stat small { display: block; margin-bottom: 2px; color: #dcfce7b3; font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .fn-stat b { display: block; font-size: .92rem; line-height: 1.25; overflow-wrap: anywhere; }
+    .fn-sec { margin: 2px 2px -4px; color: #d9f99dcc; font-size: .7rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .fn-tegn { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .fn-tegn li { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px 7px 9px; border: 1px solid #ffffff2b; border-radius: 999px; background: #ffffff17; font-size: .86rem; font-weight: 700; line-height: 1.2; }
+    .fn-tegn li::before { content: "✓"; display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50%; background: #bef26433; color: #bef264; font-size: 11px; font-weight: 900; }
+    .fn-tip { margin: 0; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--acc) 45%, transparent); border-left: 5px solid var(--acc); border-radius: 16px; background: color-mix(in srgb, var(--acc) 14%, transparent); color: #fff; font-size: .92rem; font-weight: 700; line-height: 1.4; }
+    .fn-foot { flex: none; display: flex; gap: 10px; padding: 12px 18px 14px; border-top: 1px solid #ffffff14; background: linear-gradient(#06241b00, #02140b99 40%); }
+    .fn-foot .btn { flex: 1; }
+    @media (min-width: 820px) and (orientation: landscape) {
+      .fn-detail { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; gap: 22px; }
+      .fn-hero { position: sticky; top: 0; max-height: none; }
+      .fn-tiles { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+    }
+    @media (orientation: landscape) and (max-height: 560px) {
+      .card.fauna { padding: 0; border-radius: 26px; }
+      .fn-head { grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 14px; padding: 10px 16px 6px; }
+      .fn-top { display: none; }
+      .fn-head h2 { font-size: 1.5rem; }
+      .fn-sub { display: none; }
+      .fn-row { gap: 8px; }
+      .fn-detail { grid-template-columns: minmax(0, 44%) minmax(0, 1fr); align-items: start; gap: 14px; }
+      .fn-hero { aspect-ratio: auto; height: max(150px, calc(100dvh - 190px)); max-height: none; position: sticky; top: 0; }
+      .fn-foot { padding: 8px 16px 10px; }
+      #fnBack span, #fnCount { display: none; }
+      #fnRole { font-size: .72rem; padding: 2px 10px; min-height: 30px; }
+      .fn-foot .btn { min-height: 46px; font-size: 1.05rem; }
+      .fn-tiles { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+    }
+    /* Ny abe */
+    .card.unlock canvas { display: block; width: min(100%, 320px); aspect-ratio: 1; border-radius: 28px; border: 1px solid #ffffff3d; background: linear-gradient(#fde68a55, #bef2642e); }
+    .card.unlock p { margin: 0; text-align: center; font-weight: 700; line-height: 1.4; color: #f0fdf4; }
+    .card.unlock .row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+    @media (max-width: 380px) { .card { padding: 16px 10px 12px; } .choices { gap: 8px; } .btn { padding: 8px 16px; } .hud .title { padding: 4px 8px; } }
+    @media (min-width: 700px) { .card { width: min(100%, 640px); padding: 22px 22px 20px; } .tile { border-radius: 30px; } .mcard .pbox { width: 78%; } .btn { font-size: 1.3rem; } }
+    @media (min-width: 1000px) and (min-height: 700px) { .card { width: min(100%, 720px); } }
+    @media (orientation: landscape) and (max-height: 560px) {
+      #home { flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: center; gap: 8px 22px; }
+      #mascot { width: 110px; }
+      .hero h1 { font-size: 1.9rem; }
+      .tagline { display: none; }
+      .homebtns { grid-template-columns: 1fr 1fr; }
+      .card { padding: 10px 12px; gap: 6px; border-radius: 26px; }
+      .card h3 { font-size: 1.2rem; }
+      .card.quiz { flex-direction: row; flex-wrap: nowrap; justify-content: center; align-items: center; width: min(100%, 900px); padding: 10px 14px; gap: 6px 16px; }
+      .card.quiz .left { display: flex; flex-direction: column; align-items: center; flex: 1 1 250px; max-width: 360px; min-width: 0; gap: 6px; }
+      .card.quiz .why { font-size: .82rem; }
+      .card.quiz .banner { font-size: 1.05rem; min-height: 1.6em; }
+      .why { padding: 4px 12px 4px 6px; }
+      .choices, .choices.n3 { grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); width: auto; flex: 0 1 430px; min-width: 0; gap: 8px; }
+      .choices.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .choices.n2 { flex-basis: 280px; }
+      .tile { border-radius: 18px; }
+      .wordbtn { min-width: 0; padding: 4px 18px 6px; }
+      .wordbtn .tw { font-size: 2.4rem; }
+      .mcards { gap: 8px; }
+      .mcard { padding: 4px 4px 6px; }
+      .mcard .pbox { width: min(78%, 22dvh); }
+      .mcard .t { font-size: 1.4rem; }
+      .hintline { display: none; }
+      .btn.big { min-height: 56px; font-size: 1.3rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { .wave i, #toast, #startHint, .overlay, .card, .mcard, .banner, .tile, .fn-tile, .fn-detail, .fn-prog i { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <main class="app">
+    <section class="screen" id="home">
+      <div class="hero">
+        <canvas id="mascot" width="360" height="324" aria-label="Din abe"></canvas>
+        <div>
+          <h1>Hej <span>Banan</span></h1>
+          <p class="sub">Sving fra træ til træ!</p>
+        </div>
+      </div>
+      <p class="tagline">Spis bananer, mød junglens dyr, og lær tamilsk!</p>
+      <div class="homebtns">
+        <button class="btn green big" id="playBtn" type="button">▶ Spil</button>
+        <button class="btn ghost" id="jungleBtn" type="button">🌴 Vælg jungle</button>
+        <button class="btn ghost" id="apeBtn" type="button">🐒 Vælg abe <span id="apeCount"></span></button>
+        <button class="btn ghost" id="faunaBtn" type="button">📖 Junglens dyr <span id="faunaCount"></span></button>
+        <button class="btn ghost" id="dictBtn" type="button">Min ordbog <span id="dictCount"></span></button>
+      </div>
+    </section>
+
+    <section class="screen" id="jungleScreen" hidden>
+      <div class="head">
+        <button class="back" id="jungleBack" type="button" aria-label="Tilbage">←</button>
+        <div><h2>Junglerne</h2><div class="tn" id="jungleSub"></div></div>
+      </div>
+      <div class="jg-grid" id="jungleBody"></div>
+    </section>
+
+    <section class="screen" id="dictScreen" hidden>
+      <div class="head">
+        <button class="back" id="dictBack" type="button" aria-label="Tilbage">←</button>
+        <div><h2>Min ordbog</h2><div class="tn" id="dictSub"></div></div>
+      </div>
+      <div class="dict" id="dictBody"></div>
+    </section>
+
+    <section class="screen" id="play" hidden>
+      <div class="hud">
+        <button class="back" id="playBack" type="button" aria-label="Tilbage">←</button>
+        <div class="title"><span id="playTitle"></span></div>
+        <div class="prog" id="prog" aria-hidden="true"><i id="progFill"></i><span id="progText"></span></div>
+      </div>
+      <div id="stage"><canvas id="cv"></canvas><div id="toast" hidden></div><div id="wordPop" hidden></div><div id="startHint" hidden>Tryk for at slippe lianen!</div></div>
+    </section>
+  </main>
+
+  <div class="overlay" id="meet" hidden>
+    <div class="card">
+      <p class="eyebrow">Dagens ord</p>
+      <h3 id="meetTitle">Nye ord!</h3>
+      <div class="mcards" id="meetCards"></div>
+      <p class="mute-note" id="meetNote" hidden></p>
+      <p class="hintline">Tryk på et ord for at høre det igen</p>
+      <button class="btn green" id="meetGo" type="button">Lad os svinge</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="fauna" hidden>
+    <div class="card fauna" role="dialog" aria-modal="true" aria-labelledby="fnTitle">
+      <header class="fn-head">
+        <div class="fn-top"><p class="eyebrow" id="fnEyebrow">Junglens dyr</p><div class="fn-dots" id="fnDots" aria-hidden="true"></div></div>
+        <h2 id="fnTitle">Junglens dyr</h2>
+        <p class="fn-sub" id="fnSub"></p>
+        <div class="fn-row">
+          <button class="fn-pill" id="fnIntro" type="button"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Hør om junglen</span></button>
+          <div class="fn-prog" aria-live="polite"><i id="fnProgFill"></i><span id="fnProgText"></span></div>
+        </div>
+      </header>
+      <div class="fn-body" id="fnBody">
+        <div id="fnGrid"></div>
+        <p class="fn-hint" id="fnHint">Tryk på et dyr for at se det stort og høre fakta om det</p>
+        <section class="fn-detail" id="fnDetail" hidden>
+          <div class="fn-hero" id="fnHero">
+            <canvas id="fnCv"></canvas>
+            <button class="fn-hbtn" id="fnBack" type="button">← <span>Alle dyr</span></button>
+            <span class="fn-hbtn" id="fnRole"><i></i><span id="fnRoleTxt"></span></span>
+            <button class="fn-nav" id="fnPrev" type="button" aria-label="Forrige dyr">‹</button>
+            <button class="fn-nav" id="fnNext" type="button" aria-label="Næste dyr">›</button>
+            <span class="fn-hbtn" id="fnCount"></span>
+          </div>
+          <div class="fn-info">
+            <div class="fn-name"><h3 id="fnName"></h3><p class="fn-latin" id="fnLatin"></p></div>
+            <button class="fn-play" id="fnPlay" type="button">
+              <span class="ico"><svg class="pl" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="pa" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></span>
+              <span class="lbl"><span id="fnPlayTxt">Hør fakta</span><small id="fnPlaySub">Lyt og lær</small></span>
+              <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="bar" id="fnBar"></span>
+            </button>
+            <p class="fn-text" id="fnText"></p>
+            <div class="fn-stats" id="fnStats"></div>
+            <p class="fn-sec">Sådan kender du den</p>
+            <ul class="fn-tegn" id="fnTegn"></ul>
+            <p class="fn-tip" id="fnTip"></p>
+            <button class="btn green" id="fnPick" type="button" hidden>Vælg denne abe</button>
+          </div>
+        </section>
+      </div>
+      <footer class="fn-foot">
+        <button class="btn green" id="faunaGo" type="button">Videre →</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="overlay" id="unlock" hidden>
+    <div class="card unlock">
+      <p class="eyebrow">Ny abe!</p>
+      <h3 id="unName"></h3>
+      <canvas id="unCv" width="480" height="480"></canvas>
+      <p id="unText"></p>
+      <div class="row">
+        <button class="btn green" id="unPick" type="button">Spil som denne abe</button>
+        <button class="btn ghost" id="unGo" type="button">Videre →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="quiz" hidden>
+    <div class="card quiz">
+      <div class="left">
+        <div class="why"><span class="whyicon" id="quizIcon"></span><span id="quizWhy"></span></div>
+        <p class="eyebrow">Hvilket billede passer til ordet?</p>
+        <button class="wordbtn" id="quizWord" type="button" aria-label="Hør ordet igen">
+          <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="tw" id="quizTa"></span>
+          <span class="rm" id="quizRom"></span>
+        </button>
+        <div class="banner" id="quizBanner"></div>
+        <p class="mute-note" id="quizNote" hidden></p>
+        <button class="btn" id="quizRetry" type="button" hidden>↻ Start forfra i junglen</button>
+      </div>
+      <div class="choices" id="quizChoices"></div>
+    </div>
+  </div>
+
+  <div id="settings" hidden>
+    <label>Styring
+      <select id="optControl">
+        <option value="let">Let: aben griber selv næste liane</option>
+        <option value="normal">Normal: tryk for at gribe</option>
+      </select>
+    </label>
+    <label>Fart
+      <select id="optSpeed">
+        <option value="rolig">Rolig</option>
+        <option value="normal">Normal</option>
+        <option value="hurtig">Hurtig</option>
+      </select>
+    </label>
+    <label>Antal billeder i spørgsmål
+      <select id="optChoices">
+        <option value="auto">Automatisk (starter med 2)</option>
+        <option value="2">Altid 2</option>
+        <option value="3">Altid 3</option>
+        <option value="4">Altid 4</option>
+      </select>
+    </label>
+    <label>Junglens dyr i starten af hver runde
+      <select id="optFauna">
+        <option value="1">Vis dyrebogen</option>
+        <option value="0">Spring over</option>
+      </select>
+    </label>
+    <label>Udtale med latinske bogstaver
+      <select id="optRom">
+        <option value="1">Vis</option>
+        <option value="0">Skjul</option>
+      </select>
+    </label>
+  </div>
+
+  <script src="../../topbar.js"></script>
+  <script src="../urundai/ord.js"></script>
+  <script src="../urundai/laengder.js"></script>
+  <script src="../urundai/billeder.js"></script>
+  <script src="tegn.js"></script>
+  <script src="dyr-aber.js"></script>
+  <script src="dyr-fugle.js"></script>
+  <script src="dyr-krybdyr.js"></script>
+  <script src="dyr-pattedyr.js"></script>
+  <script src="dyr-smaadyr.js"></script>
+  <script src="arter.js"></script>
+  <script src="fakta.js"></script>
+  <script>
+  (() => {
+    "use strict";
+    // Ord, billeder og lydklip til quizzen er Urundais (samme tamilske ord, samme gentagelse). Ordstatistikken deles med Urundai og Hej Haj.
+    const R = window.UrundaiOrd;
+    const Art = window.UrundaiArt;
+    const AR = window.BananArter; // dyr, aber og de 7 jungler (arter.js)
+    const SP = AR.species;
+    const WORLDS = AR.worlds;
+    const MONKEYS = AR.monkeys;
+    const INFO = window.BananFakta.fakta;
+    const INTRO = window.BananFakta.verden;
+    const WORDS = R.words;
+    const ALL = Object.keys(WORDS);
+    const $ = (id) => document.getElementById(id);
+    const kid = "ari";
+    const key = (name) => `banan-${kid}-${name}`;
+    const WORDS_KEY = `urundai-${kid}-words`;
+    const read = (name, fallback) => { try { const v = localStorage.getItem(key(name)); return v === null ? fallback : v; } catch { return fallback; } };
+    const write = (name, value) => { try { localStorage.setItem(key(name), String(value)); } catch { /* ingen lagring */ } };
+    const readWords = () => { try { return JSON.parse(localStorage.getItem(WORDS_KEY) || "") || {}; } catch { return {}; } };
+    const qs = new URLSearchParams(location.search);
+
+    const wordState = readWords(); // id -> { box 0-3, seen, ok, bad, t }
+    let stars = Number(read("stars", "0")) || 0;
+    let done = clampInt(Number(read("klaret", "0")) || 0, 0, WORLDS.length); // hvor mange jungler der er klaret (låser aber og jungler op)
+    if (qs.has("klaret")) done = clampInt(Number(qs.get("klaret")) || 0, 0, WORLDS.length);
+    let selWorld = Math.min(done, WORLDS.length - 1); // den jungle, man spiller i
+    let apeId = read("abe", "chimpanse");
+    let muted = !Topbar.soundOn();
+    window.addEventListener("topbar:sound", (e) => { muted = !e.detail.on; if (muted) stopSpeech(); });
+    function clampInt(v, a, b) { return Math.max(a, Math.min(b, Math.floor(v))); }
+
+    const unlockedApes = () => MONKEYS.filter((m) => m.after < done);
+    const apeUnlocked = (id) => unlockedApes().some((m) => m.id === id);
+    if (!apeUnlocked(apeId)) apeId = "chimpanse";
+    const canPlay = (w) => w <= done;
+
+    const ws = (id) => wordState[id] || (wordState[id] = { box: 0, seen: false, ok: 0, bad: 0, t: 0 });
+    const saveWords = () => { try { localStorage.setItem(WORDS_KEY, JSON.stringify(wordState)); } catch { /* ingen lagring */ } };
+    const rnd = (n) => Math.floor(Math.random() * n);
+    const rr = (a, b) => a + Math.random() * (b - a);
+    const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const seenCount = () => ALL.filter((id) => ws(id).seen).length;
+    const seenIds = () => ALL.filter((id) => ws(id).seen);
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const worldAnimals = (w) => { const W = WORLDS[w]; return [...new Set([...W.friends, ...W.predators, ...W.hazards])]; };
+
+    // Gentagelse: ord, barnet er svagest til eller ikke har set længe, trækkes oftest (men altid med tilfældighed)
+    function weight(id) {
+      const st = ws(id);
+      const stale = Math.min(3, (Date.now() - (st.t || 0)) / 600000);
+      return Math.max(.6, 4 - st.box) + stale;
+    }
+    function pickWeighted(ids, n, exclude = []) {
+      const pool = ids.filter((id) => !exclude.includes(id));
+      const out = [];
+      while (out.length < n && pool.length) {
+        let r = Math.random() * pool.reduce((s, id) => s + weight(id), 0);
+        let k = 0;
+        for (; k < pool.length - 1; k++) { r -= weight(pool[k]); if (r <= 0) break; }
+        out.push(pool.splice(k, 1)[0]);
+      }
+      return out;
+    }
+
+    const FACT = { rolig: .65, normal: .85, hurtig: 1.05 };
+    let speedKey = FACT[read("fart", "")] ? read("fart", "") : "normal";
+    let easy = read("styring", "let") !== "normal"; // let: aben griber selv
+    const hintText = () => (easy ? "Tryk for at slippe lianen – aben griber selv den næste!" : "Tryk for at slippe – tryk igen for at gribe!");
+
+    // ---------- Billeder til ordene ----------
+    function pic(id) {
+      const p = WORDS[id].pic;
+      const el = document.createElement("div");
+      el.className = "pic";
+      if (p.color) el.innerHTML = Art.swatch(p.color);
+      else if (p.count) el.innerHTML = Art.get(`n${p.count}`);
+      else el.innerHTML = Art.get(p.art);
+      return el;
+    }
+    function picBox(id) {
+      const box = document.createElement("div");
+      box.className = "pbox";
+      box.append(pic(id));
+      return box;
+    }
+    const lenCls = (txt) => (txt.length >= 11 ? "xlong" : txt.length >= 8 ? "long" : "");
+    // Krymper tamilsk tekst, til den passer i sin ramme (aldrig ud over kanten)
+    const FIT = ".card-w .t, .mcard .t, .wordbtn .tw, #wordPop .tw";
+    function fitAll() {
+      for (const el of document.querySelectorAll(FIT)) {
+        el.style.fontSize = "";
+        if (!el.clientWidth) continue;
+        let fs = parseFloat(getComputedStyle(el).fontSize);
+        for (let i = 0; i < 30 && el.scrollWidth > el.clientWidth + 1 && fs > 10; i++) {
+          fs *= .92;
+          el.style.fontSize = `${fs.toFixed(1)}px`;
+        }
+      }
+    }
+    const fitSoon = () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 250); };
+    window.addEventListener("resize", fitSoon);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSoon);
+
+    // ---------- Lyd ----------
+    // Mobiler tillader kun lyd, hvis afspilleren er "låst op" af en berøring. Afvises et klip alligevel, gemmes det og spilles ved næste tryk.
+    const clip = new Audio();
+    clip.preload = "auto";
+    const SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+    let speechToken = 0;
+    let factToken = 0; // dyrefakta bruger samme afspiller; et nyt klip eller stopSpeech gør det gamle ugyldigt
+    let speechDone = null;
+    let unlocked = false;
+    let pendingSpeech = null;
+    function setNote(text) {
+      for (const id of ["quizNote", "meetNote"]) {
+        const el = $(id);
+        if (el) { el.textContent = text; el.hidden = !text; }
+      }
+    }
+    const refreshNote = () => setNote(muted ? "🔇 Lyden er slået fra. Slå den til i ⚙️." : pendingSpeech ? "🔈 Tryk på skærmen for at høre ordet." : "");
+    function unlockAudio() {
+      if (unlocked) return;
+      unlocked = true;
+      audio();
+      try {
+        clip.src = SILENT;
+        const p = clip.play();
+        if (p && p.catch) p.catch((err) => { if (err && err.name === "NotAllowedError") unlocked = false; });
+      } catch { unlocked = false; }
+    }
+    function stopSpeech() {
+      speechToken++;
+      factToken++;
+      clip.onended = null;
+      clip.onerror = null;
+      clip.onplaying = null;
+      clip.ontimeupdate = null;
+      clip.pause();
+      if (speechDone) { const d = speechDone; speechDone = null; d(false); }
+      if (typeof faunaAudioStopped === "function") faunaAudioStopped();
+    }
+    // Svarer true, når klippet er spillet til ende, og false, hvis noget andet afbrød det eller afspilningen blev afvist
+    const setSpeaking = (on) => $("quizWord").classList.toggle("speaking", on);
+    function speak(id) {
+      stopSpeech();
+      const token = speechToken;
+      return new Promise((resolve) => {
+        let finished = false;
+        let safety = 0;
+        let endTimer = 0;
+        setSpeaking(true);
+        const finish = (ok) => {
+          if (finished) return;
+          finished = true;
+          setSpeaking(false);
+          clearTimeout(safety);
+          clearTimeout(endTimer);
+          if (speechDone === done_) speechDone = null;
+          resolve(ok && token === speechToken);
+        };
+        const done_ = (ok) => finish(ok);
+        speechDone = done_;
+        if (muted) { setTimeout(() => finish(true), 500); return; }
+        clip.onended = () => finish(true);
+        clip.onerror = () => setTimeout(() => finish(true), 300);
+        // Stemmen lægger stilhed efter ordet: gå videre, så snart ordet er sagt
+        const len = (window.UrundaiLaengder || {})[id];
+        clip.onplaying = () => {
+          clip.onplaying = null;
+          if (len) endTimer = setTimeout(() => { if (token === speechToken) { clip.pause(); finish(true); } }, (len + .25) * 1000);
+        };
+        clip.src = `../urundai/lyd/${id}.mp3`;
+        const p = clip.play();
+        if (p && p.catch) {
+          p.catch((err) => {
+            if (token !== speechToken) return;
+            if (err && err.name === "NotAllowedError") { unlocked = false; pendingSpeech = id; refreshNote(); finish(false); } else setTimeout(() => finish(true), 300);
+          });
+        }
+        if (pendingSpeech === id) { pendingSpeech = null; refreshNote(); }
+        safety = setTimeout(() => finish(true), 6000);
+      });
+    }
+    for (const ev of ["pointerdown", "touchend", "keydown"]) {
+      document.addEventListener(ev, () => {
+        unlockAudio();
+        if (pendingSpeech) { const id = pendingSpeech; pendingSpeech = null; refreshNote(); speak(id); }
+      }, true);
+    }
+    window.addEventListener("topbar:sound", refreshNote);
+    let ac = null;
+    function audio() {
+      if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch { ac = null; } }
+      if (ac && ac.state === "suspended") ac.resume();
+      return ac;
+    }
+    function tone(freq, dur = .15, type = "sine", vol = .12, delay = 0, slide = 0) {
+      if (muted) return;
+      const a = audio();
+      if (!a) return;
+      const t = a.currentTime + delay;
+      const o = a.createOscillator();
+      const g = a.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + .012);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(a.destination);
+      o.start(t);
+      o.stop(t + dur + .03);
+    }
+    const sfx = {
+      eat: () => { tone(520, .08, "square", .05, 0, 500); tone(880, .08, "square", .045, .06); },
+      friend: () => [660, 880, 1100, 1320].forEach((f, i) => tone(f, .14, "triangle", .1, i * .06)),
+      grab: () => { tone(300, .07, "triangle", .08, 0, -120); },
+      swoosh: () => { tone(500, .22, "sine", .06, 0, 500); },
+      caught: () => { [440, 370, 311, 262, 196, 147].forEach((f, i) => tone(f, .16, "sawtooth", .08, i * .12)); },
+      ready: () => { [392, 523, 659, 784].forEach((f, i) => tone(f, .16, "triangle", .08, i * .15)); },
+      wrong: () => tone(220, .28, "triangle", .1, 0, -90),
+      right: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .22, "triangle", .12, i * .09)),
+      fanfare: () => [523, 659, 784, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .28, "triangle", .13, i * .12)),
+      pop: () => { tone(480, .1, "triangle", .12, 0, 380); tone(760, .12, "triangle", .08, .08); },
+      levelup: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .2, "triangle", .12, i * .07))
+    };
+    const buzz = (ms) => { if (!muted && navigator.vibrate) navigator.vibrate(ms); };
+
+    // ---------- Skærme ----------
+    const SCREENS = ["home", "jungleScreen", "dictScreen", "play"];
+    let screen = "home";
+    function show(name) {
+      screen = name;
+      for (const s of SCREENS) $(s).hidden = s !== name;
+      if (name === "play") resize();
+      document.body.classList.toggle("playing", name === "play");
+      if (name === "home") startHomeLoop();
+    }
+    const paintBg = () => { $("bg").style.backgroundImage = `url("${Art.dataUri(Art.scene("#6fd28a", "#0b4a2a", innerWidth > innerHeight))}")`; };
+    paintBg();
+    window.addEventListener("resize", paintBg);
+
+    // ---------- Forside ----------
+    // Aben på forsiden er den, man har valgt. Den sidder og vejrer og spiser en banan, når man trykker på den.
+    const mascot = $("mascot");
+    let mascotEat = 0;
+    let homeRaf = 0;
+    function drawMascot(now) {
+      const c = mascot.getContext("2d");
+      const w = mascot.width;
+      const h = mascot.height;
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      c.clearRect(0, 0, w, h);
+      const t = now / 1000;
+      const hop = mascotEat > 0 ? Math.abs(Math.sin(t * 9)) * 8 * Math.min(1, mascotEat) : Math.sin(t * 1.6) * 2;
+      c.translate(w / 2, h * .52 - hop);
+      AR.draw(c, apeId, { r: w * .3, t, mode: mascotEat > 0 ? "eat" : "sit" });
+      if (mascotEat > 0) mascotEat = Math.max(0, mascotEat - .016);
+    }
+    function startHomeLoop() {
+      if (homeRaf) return;
+      const loop = (now) => {
+        if (screen !== "home") { homeRaf = 0; return; }
+        drawMascot(now);
+        homeRaf = requestAnimationFrame(loop);
+      };
+      homeRaf = requestAnimationFrame(loop);
+    }
+    mascot.addEventListener("click", () => { audio(); sfx.pop(); mascotEat = 1.6; });
+
+    function renderHome() {
+      $("playBtn").textContent = `▶ Spil · ${WORLDS[selWorld].da}`;
+      $("apeCount").textContent = `(${unlockedApes().length}/${MONKEYS.length})`;
+      const ids = worldAnimals(selWorld);
+      $("faunaCount").textContent = `(${ids.filter((id) => heard.has(id)).length}/${ids.length})`;
+      $("dictCount").textContent = `(${seenCount()}/${ALL.length})`;
+    }
+
+    function renderJungles() {
+      const body = $("jungleBody");
+      body.replaceChildren();
+      WORLDS.forEach((W, i) => {
+        const ok = canPlay(i);
+        const ids = worldAnimals(i);
+        const met = ids.filter((id) => heard.has(id)).length;
+        const card = document.createElement("div");
+        card.className = `jg-card${ok ? "" : " locked"}`;
+        card.style.setProperty("--a", W.sky[1]);
+        card.style.setProperty("--b", W.sky[2]);
+        card.setAttribute("role", "button");
+        card.tabIndex = 0;
+        card.innerHTML = `<span class="nr">Jungle ${i + 1} af ${WORLDS.length}</span><h3>${W.da}</h3><p>${W.land}</p>` +
+          `<div class="jg-ico">${W.friends.slice(0, 3).map((id) => `<img alt="" src="${thumb(id)}">`).join("")}</div>` +
+          `<p>${ok ? `${met} af ${ids.length} dyr mødt` : `Klar ${WORLDS[i - 1].da} for at komme hertil`}</p>` +
+          `<div class="jg-foot"><span class="go">${ok ? (i === selWorld ? "Spil igen →" : "Spil →") : "Låst"}</span>${ok ? `<button class="book" type="button">📖 Dyr</button>` : ""}</div>${ok ? "" : `<span class="lock">🔒</span>`}`;
+        if (ok) {
+          card.addEventListener("click", (e) => {
+            audio();
+            selWorld = i;
+            write("jungle", i);
+            if (e.target.closest(".book")) { showFauna(i, null); return; }
+            startWorld(i);
+          });
+        }
+        body.append(card);
+      });
+      $("jungleSub").textContent = `${Math.min(done, WORLDS.length)} af ${WORLDS.length} klaret`;
+    }
+
+    function renderDict() {
+      const body = $("dictBody");
+      body.replaceChildren();
+      for (const id of ALL) {
+        const st = ws(id);
+        const card = document.createElement("button");
+        card.type = "button";
+        if (st.seen) {
+          card.className = "card-w";
+          card.append(picBox(id));
+          card.insertAdjacentHTML("beforeend", `<span class="t ${lenCls(WORDS[id].ta)}">${WORDS[id].ta}</span><span class="r rom">${WORDS[id].rom}</span><span class="d">${WORDS[id].da}</span><span class="medal">${[1, 2, 3].map((n) => `<i class="${st.box >= n ? "on" : ""}"></i>`).join("")}</span>`);
+          card.addEventListener("click", () => { audio(); speak(id); card.animate([{ transform: "scale(1)" }, { transform: "scale(1.08)" }, { transform: "scale(1)" }], { duration: 300 }); });
+        } else {
+          card.className = "card-w unseen";
+          card.innerHTML = `<span class="q">?</span>`;
+          card.disabled = true;
+        }
+        body.append(card);
+      }
+      $("dictSub").textContent = `${seenCount()} af ${ALL.length} ord`;
+      applyRom();
+    }
+
+    // ---------- Banen ----------
+    // Verden måles i enheder (u pixel pr. enhed). Spillezonen er 78 enheder høj: lianerne hænger fra kronetaget (y ≈ 3-7), jorden er ved y = 71.
+    const stage = $("stage");
+    const cv = $("cv");
+    const ctx = cv.getContext("2d");
+    let SW = 0;
+    let SH = 0;
+    let DPR = 1;
+    let u = 1;
+    let WV = 110; // synlig bredde i enheder
+    let HV = 78; // synlig højde i enheder
+    let offY = 0; // spillezonens top i forhold til lærredets top (enheder)
+    let time = 0;
+    let state = "home"; // home, meet, ready, play, dying, quiz, world
+    let G = null;
+    let mk = null; // aben
+    let vines = [];
+    let bananas = [];
+    let ents = [];
+    let particles = [];
+    let floaters = [];
+    let rings = [];
+    let camX = 0;
+    let shake = 0;
+    let flash = 0;
+    let vineSeq = 0;
+    const ZH = 78;
+    const FL = 71; // jordens højde
+    const GRAV = 95;
+    const FLYG = .86; // tyngden i luften er lidt blødere end på lianen
+    const MR = 5; // abens størrelse
+    const GOAL = 250; // bananpoint, der skal til for at klare en jungle
+    const MAXTH = 1.25; // størst udsving (radianer, ca. 70 grader)
+    const stageOf = (points) => Math.min(5, 1 + Math.floor(points / (GOAL / 5))); // 1-5, nyt trin for hver 50 point
+    const world = () => WORLDS[G.w];
+    const diff = () => G.w * 2 + (G.n - 1);
+    const speedFactor = () => FACT[speedKey] * Math.min(1.25, 1 + .02 * diff());
+    const ROLE_RGB = { friend: "74,222,128", predator: "251,113,133", hazard: "251,191,36" };
+
+    function resize() {
+      const w = stage.clientWidth;
+      const h = stage.clientHeight;
+      if (!w || !h) return;
+      DPR = Math.min(2, window.devicePixelRatio || 1);
+      if (cv.width !== Math.round(w * DPR) || cv.height !== Math.round(h * DPR)) { cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); }
+      SW = w;
+      SH = h;
+      u = Math.min(SW / (SW < SH ? 90 : 110), SH / ZH);
+      WV = SW / u;
+      HV = SH / u;
+      offY = (HV - ZH) * .6;
+      if (G) buildScenery();
+    }
+
+    // ---------- Start en jungle ----------
+    function loadWorld(w, keepWords, keepReview) {
+      const fresh = keepWords || shuffle(ALL.filter((id) => !ws(id).seen)).slice(0, 2);
+      G = {
+        w, n: 1, points: 0, total: 0, caught: 0, diedWorld: 0, grace: 0, dyT: 0, tT: 0, time: 0, killer: null, announce: true,
+        predCool: 6, hazCool: 12, frCool: 3, lastPred: "", lastHaz: "", lastFr: "", lastStatic: -99, checkpoint: null,
+        newWords: fresh,
+        reviewWords: keepReview || pickWeighted(seenIds(), 2, fresh)
+      };
+      const W = WORLDS[w];
+      stage.style.background = `linear-gradient(${W.sky[0]}, ${W.sky[1]} 55%, ${W.sky[2]})`;
+      $("play").style.backgroundColor = W.floor;
+      resize();
+      buildScenery();
+      newRun();
+      renderProg();
+    }
+
+    // Starter forfra på første liane (bruges ved ny jungle og efter forkert svar)
+    function newRun() {
+      vines = [];
+      bananas = [];
+      ents = [];
+      particles = [];
+      floaters = [];
+      rings = [];
+      vineSeq = 0;
+      camX = 0;
+      const first = { x: WV * .3, ay: 5, len: 30, ph: rr(0, 6.28), id: ++vineSeq, leaves: makeLeaves() };
+      vines.push(first);
+      ensureVines();
+      mk = { x: 0, y: 0, vx: 0, vy: 0, vine: null, L: 24, th: .5, w: 1.6, last: null, lastT: 0, flightT: 0, grabReq: 0, face: 1, pop: 0, tilt: 0, spin: 0, shrink: 1 };
+      attach(mk, first, 24, .5, 1.6);
+      G.checkpoint = first;
+      G.grace = 0;
+    }
+
+    function makeLeaves() {
+      return Array.from({ length: 12 }, () => ({ dx: rr(-5, 5), dy: rr(-2.5, 3), a: rr(0, 6.28), s: rr(3.2, 5.8), k: rnd(3) }));
+    }
+
+    // Aben hænger i en liane: pendul med længden L om forankringen
+    function attach(m, v, L, th, w) {
+      m.vine = v;
+      m.L = L;
+      m.th = th;
+      m.w = w;
+      m.x = v.x + Math.sin(th) * L;
+      m.y = v.ay + Math.cos(th) * L;
+      m.flightT = 0;
+      G.checkpoint = v;
+    }
+
+    function ensureVines() {
+      while (vines[vines.length - 1].x < camX + WV + 70) {
+        const last = vines[vines.length - 1];
+        const stg = G.n - 1;
+        const gap = rr(25, 31) + 1.6 * stg;
+        const nv = { x: last.x + gap, ay: rr(3.5, 7), len: rr(27, 34), ph: rr(0, 6.28), id: ++vineSeq, leaves: makeLeaves() };
+        vines.push(nv);
+        addBananas(last, nv);
+      }
+      while (vines.length > 3 && vines[1].x < camX - 40 && vines[0] !== mk?.vine && vines[0] !== G.checkpoint) vines.shift();
+      while (bananas.length && bananas[0].x < camX - 20) bananas.shift();
+    }
+
+    // Bananer mellem to lianer: buer, rækker og zigzag. Af og til en klase (5 point) og sjældent en gylden banan (10 point).
+    function addBananas(a, b) {
+      G.patN = (G.patN || 0) + 1;
+      const pat = rnd(4);
+      const n = pat === 3 ? 4 : 3 + rnd(2);
+      const x0 = a.x + 11;
+      const x1 = b.x - 4;
+      const base = a.ay + rr(17, 27);
+      for (let i = 0; i < n; i++) {
+        const f = n === 1 ? .5 : i / (n - 1);
+        let y = base;
+        if (pat === 0) y = base - 8 * Math.sin(Math.PI * f);
+        else if (pat === 1) y = base + 6 * Math.sin(Math.PI * f);
+        else if (pat === 2) y = base + (i % 2 ? 5 : -5);
+        else y = base - 4 + 8 * Math.sin(f * Math.PI * 2);
+        y = clamp(y, 8, 52);
+        bananas.push({ x: x0 + (x1 - x0) * f, y, type: "b", taken: false, ph: rr(0, 6.28) });
+      }
+      const mid = bananas[bananas.length - 1 - Math.floor(n / 2)];
+      if (G.patN % 6 === 0) { mid.type = "bunch"; mid.y = clamp(mid.y - 6, 9, 50); }
+      if (G.patN % 13 === 0) { const g = bananas[bananas.length - 1]; g.type = "gold"; g.y = rr(10, 20); }
+      // et par bananer langs selve svinget ned til lianen
+      if (G.patN % 2 === 0) for (const th of [-.5, -.8]) bananas.push({ x: b.x + Math.sin(th) * 22, y: b.ay + Math.cos(th) * 22, type: "b", taken: false, ph: rr(0, 6.28) });
+    }
+
+    function startWorld(w) {
+      show("play");
+      loadWorld(w);
+      const next = () => { if (G.newWords.length || G.reviewWords.length) showMeet(G.newWords, G.reviewWords); else beginReady(); };
+      if (read("dyr", "1") === "0") next(); else showFauna(w, next);
+    }
+
+    function beginReady() {
+      state = "ready";
+      resize();
+      $("startHint").textContent = hintText();
+      $("startHint").hidden = false;
+      sfx.ready();
+      if (G.announce) { G.announce = false; toast(WORLDS[G.w].da, WORLDS[G.w].fact); }
+      const w = pickWeighted(seenIds(), 1)[0];
+      if (w) setTimeout(() => { if (state === "ready") wordPop(w); }, 500);
+    }
+
+    // Ordkort under spillet: gentagelse uden at afbryde
+    let popTimer = 0;
+    function wordPop(id, isNew) {
+      const el = $("wordPop");
+      const w = WORDS[id];
+      el.replaceChildren(picBox(id));
+      el.insertAdjacentHTML("beforeend", `<div>${isNew ? `<span class="badge new">Nyt ord</span>` : ""}<span class="tw ${lenCls(w.ta)}">${w.ta}</span><span class="rm rom">${w.rom}</span></div>`);
+      el.hidden = false;
+      el.style.animation = "none";
+      void el.offsetWidth;
+      el.style.animation = "";
+      applyRom();
+      ws(id).t = Date.now();
+      speak(id);
+      clearTimeout(popTimer);
+      popTimer = setTimeout(hidePop, 2800);
+    }
+    function hidePop() { clearTimeout(popTimer); $("wordPop").hidden = true; }
+
+    function renderProg() {
+      $("playTitle").textContent = WORLDS[G.w].da;
+      $("progFill").style.width = `${Math.min(100, Math.round(100 * G.points / GOAL))}%`;
+      $("progText").textContent = `🍌 ${Math.min(G.points, GOAL)} / ${GOAL}`;
+    }
+
+    // ---------- Mød ordene ----------
+    let meetToken = 0;
+    function showMeet(newIds, reviewIds) {
+      state = "meet";
+      $("startHint").hidden = true;
+      hidePop();
+      const ids = [...newIds, ...reviewIds];
+      const cards = $("meetCards");
+      cards.replaceChildren();
+      cards.classList.toggle("many", ids.length > 2);
+      const els = ids.map((id) => {
+        const w = WORDS[id];
+        const c = document.createElement("button");
+        c.type = "button";
+        c.className = "mcard";
+        const isNew = newIds.includes(id);
+        c.insertAdjacentHTML("beforeend", `<span class="badge ${isNew ? "new" : ""}">${isNew ? "Nyt" : "Gentag"}</span>`);
+        c.append(picBox(id));
+        c.insertAdjacentHTML("beforeend", `<span class="t ${lenCls(w.ta)}">${w.ta}</span><span class="r rom">${w.rom}</span><span class="d">${w.da}</span>`);
+        c.addEventListener("click", () => { flashCard(c); speak(id); });
+        cards.append(c);
+        return c;
+      });
+      $("meetTitle").textContent = newIds.length ? "Nye ord!" : "Øv ordene igen!";
+      const flashCard = (c) => { els.forEach((e) => e.classList.toggle("on", e === c)); };
+      applyRom();
+      refreshNote();
+      $("meet").hidden = false;
+      const token = ++meetToken;
+      (async () => {
+        await new Promise((r) => setTimeout(r, 450));
+        for (let i = 0; i < ids.length && token === meetToken; i++) {
+          flashCard(els[i]);
+          const ok = await speak(ids[i]);
+          if (!ok || token !== meetToken) return;
+          await new Promise((r) => setTimeout(r, 350));
+        }
+        if (token === meetToken) flashCard(null);
+      })();
+    }
+    $("meetGo").addEventListener("click", () => {
+      meetToken++;
+      stopSpeech();
+      audio();
+      for (const id of [...G.newWords, ...G.reviewWords]) { const st = ws(id); st.t = Date.now(); if (G.newWords.includes(id)) st.seen = true; }
+      saveWords();
+      $("meet").hidden = true;
+      beginReady();
+    });
+
+    // ---------- Aben svinger og flyver ----------
+    function movePhys(dt) {
+      const m = mk;
+      if (m.lastT > 0) m.lastT -= dt;
+      if (m.grabReq > 0) m.grabReq -= dt;
+      if (m.pop > 0) m.pop = Math.max(0, m.pop - dt * 2.5);
+      if (m.vine) {
+        const steps = Math.max(1, Math.ceil(dt / (1 / 120)));
+        const h = dt / steps;
+        const Et = GRAV * m.L * (1 - Math.cos(.95)); // aben får altid et blødt skub, så svinget holder mindst så højt
+        for (let i = 0; i < steps; i++) {
+          m.w += -(GRAV / m.L) * Math.sin(m.th) * h;
+          m.w *= 1 - .1 * h;
+          const E = .5 * m.L * m.L * m.w * m.w + GRAV * m.L * (1 - Math.cos(m.th));
+          if (E < Et && Math.abs(m.w) > .05) m.w += Math.sign(m.w) * 4.2 * h;
+          m.th += m.w * h;
+          if (m.th > MAXTH) { m.th = MAXTH; if (m.w > 0) m.w *= -.4; }
+          if (m.th < -MAXTH) { m.th = -MAXTH; if (m.w < 0) m.w *= -.4; }
+        }
+        m.x = m.vine.x + Math.sin(m.th) * m.L;
+        m.y = m.vine.ay + Math.cos(m.th) * m.L;
+        m.vx = m.L * m.w * Math.cos(m.th);
+        m.vy = -m.L * m.w * Math.sin(m.th);
+      } else {
+        m.flightT += dt;
+        m.vy += GRAV * FLYG * dt;
+        if (m.vx < 26) m.vx += 10 * dt; // lidt medvind
+        m.x += m.vx * dt;
+        m.y += m.vy * dt;
+        if (m.x < camX + 3) { m.x = camX + 3; if (m.vx < 0) m.vx = 2; }
+        if (m.y < MR) { m.y = MR; if (m.vy < 0) m.vy *= -.2; }
+        tryGrab();
+      }
+      if (Math.abs(m.vx) > 2) m.face = m.vx > 0 ? 1 : -1;
+      const target = m.x - WV * .32;
+      if (target > camX) camX += (target - camX) * Math.min(1, dt * 3.5);
+    }
+
+    // Finder en liane inden for rækkevidde af aben hånd
+    function tryGrab() {
+      const m = mk;
+      const hx = m.x + MR * .5;
+      const hy = m.y - MR * 1.2;
+      const gx = easy ? 7 : 6;
+      let best = null;
+      let bd = 1e9;
+      for (const v of vines) {
+        if (v === m.last && m.lastT > 0) continue;
+        if (hy < v.ay + 4 || hy > v.ay + v.len + 4) continue;
+        const dx = Math.abs(hx - v.x);
+        if (dx < gx && dx < bd) { bd = dx; best = v; }
+      }
+      if (best && (easy ? m.flightT > .2 || m.grabReq > 0 : m.grabReq > 0)) doGrab(best);
+    }
+    function doGrab(v) {
+      const m = mk;
+      const dx = m.x - v.x;
+      const dy = Math.max(6, m.y - v.ay);
+      const L = clamp(Math.hypot(dx, dy), 13, v.len + MR * 1.6);
+      const th = clamp(Math.atan2(dx, dy), -1.2, 1.2);
+      const w = (m.vx * Math.cos(th) - m.vy * Math.sin(th)) / L;
+      attach(m, v, L, th, clamp(w, -3.6, 3.6));
+      m.pop = 1;
+      m.grabReq = 0;
+      sfx.grab();
+      burst(m.x, m.y - MR, 5, ["#86efac", "#fff"]);
+    }
+    function release() {
+      const m = mk;
+      if (!m.vine) return;
+      m.vx = m.L * m.w * Math.cos(m.th);
+      m.vy = -m.L * m.w * Math.sin(m.th);
+      m.last = m.vine;
+      m.lastT = .45;
+      m.vine = null;
+      m.flightT = 0;
+      sfx.swoosh();
+    }
+
+    // Et tryk: slip lianen, og (flyvende) grib den næste
+    function onTap() {
+      if (state === "ready") {
+        state = "play";
+        G.grace = 1.4;
+        $("startHint").hidden = true;
+        release();
+        return;
+      }
+      if (state !== "play") return;
+      if (mk.vine) release(); else mk.grabReq = .4;
+    }
+
+    // ---------- Dyr i junglen ----------
+    const pickFrom = (arr) => arr[rnd(arr.length)];
+    const spawnX = (extra = 0) => camX + WV + 10 + extra;
+    const nearVine = (x, d) => vines.some((v) => Math.abs(v.x - x) < d);
+    const centerY = (e) => (e.beh === "sit" || e.beh === "branch" ? e.y - e.size : e.y); // siddende dyr har y = grenen, de andre y = midten
+    function makeEnt(id, init) {
+      const sp = SP[id];
+      return Object.assign({ id, sp, role: sp.role, beh: sp.beh, size: sp.size, x: 0, y: 0, vx: 0, vy: 0, dir: -1, t: rr(0, 6), ph: rr(0, 6.28), state: "", st: 0, cd: rr(.4, 1.2), done: false, leave: false, hang: sp.len || 0, thanks: 0, mode: "sit" }, init);
+    }
+    function freeStaticX() {
+      let x = spawnX(rr(14, 30));
+      x = Math.max(x, G.lastStatic + 20);
+      for (let i = 0; i < 8 && nearVine(x, 8); i++) x += 6;
+      G.lastStatic = x;
+      return x;
+    }
+    function spawnPredator() {
+      const ids = world().predators;
+      const id = pickFrom(ids.filter((i) => i !== G.lastPred)) || pickFrom(ids);
+      G.lastPred = id;
+      const sp = SP[id];
+      if (sp.beh === "floor") ents.push(makeEnt(id, { x: spawnX(6), y: FL - sp.size, state: "run", vx: -8 }));
+      else if (sp.beh === "air") ents.push(makeEnt(id, { x: spawnX(4), y: rr(10, 44), vx: -(17 + 2 * G.n) * speedFactor() }));
+      else ents.push(makeEnt(id, { x: freeStaticX(), y: 0, hang: sp.len * rr(.6, .8) }));
+    }
+    function spawnHazard() {
+      const ids = world().hazards;
+      const id = pickFrom(ids.filter((i) => i !== G.lastHaz)) || pickFrom(ids);
+      G.lastHaz = id;
+      const sp = SP[id];
+      if (sp.beh === "air") ents.push(makeEnt(id, { x: spawnX(4), y: rr(12, 44), vx: -rr(5, 9) }));
+      else if (sp.beh === "thread") ents.push(makeEnt(id, { x: freeStaticX(), y: rr(14, 28) }));
+      else ents.push(makeEnt(id, { x: freeStaticX(), y: rr(20, 40) }));
+    }
+    function spawnFriend() {
+      const ids = world().friends;
+      const id = pickFrom(ids.filter((i) => i !== G.lastFr)) || pickFrom(ids);
+      G.lastFr = id;
+      const sp = SP[id];
+      if (sp.beh === "fly") ents.push(makeEnt(id, { x: spawnX(4), y: rr(12, 40), vx: -rr(9, 14) }));
+      else ents.push(makeEnt(id, { x: freeStaticX(), y: rr(22, 40) }));
+    }
+    // Hvor mange af hver ad gangen: ingen farer i starten, højst 1 rovdyr på trin 1-3 og 2 fra trin 4
+    function ensureEnts(dt) {
+      G.predCool -= dt;
+      G.hazCool -= dt;
+      G.frCool -= dt;
+      const count = (role) => ents.filter((e) => e.role === role && !e.leave && !e.done).length;
+      if (G.predCool <= 0 && count("predator") < (G.n <= 3 ? 1 : 2)) { spawnPredator(); G.predCool = Math.max(2.2, rr(4.2, 6.5) - .35 * diff()); }
+      if (G.n >= 2 && G.hazCool <= 0 && count("hazard") < (G.n <= 3 ? 1 : 2)) { spawnHazard(); G.hazCool = Math.max(3, rr(6, 9) - .3 * diff()); }
+      if (G.frCool <= 0 && count("friend") < (G.n >= 4 ? 2 : 1)) { spawnFriend(); G.frCool = rr(5, 9); }
+    }
+
+    const reach = () => 33 + 1.6 * G.n; // hvor højt en kat kan springe fra jorden
+    function updateEnts(dt) {
+      const sf = speedFactor();
+      for (const e of ents) {
+        e.t += dt;
+        if (e.thanks > 0) e.thanks -= dt;
+        if (e.role === "predator" && e.beh === "floor") updateFloor(e, dt, sf);
+        else if (e.role === "predator" && e.beh === "air") {
+          const homing = Math.min(.5, .05 + .06 * G.n);
+          e.vy += clamp((mk.y - e.y) * 6 * homing, -26, 26) * dt;
+          e.vy *= 1 - .8 * dt;
+          e.x += e.vx * dt;
+          e.y = clamp(e.y + e.vy * dt, 5, FL - 8);
+          e.mode = e.x < mk.x + 26 && e.x > mk.x - 4 ? "attack" : "fly";
+        } else if (e.beh === "air") {
+          e.x += e.vx * dt;
+          e.mode = "fly";
+        } else if (e.beh === "fly") {
+          e.x += e.vx * dt;
+          e.y += Math.sin(e.t * 1.7 + e.ph) * 7 * dt;
+          e.mode = "fly";
+        } else if (e.beh === "hang" || e.beh === "thread") {
+          e.mode = "hang";
+        } else e.mode = "sit";
+        e.dir = e.beh === "floor" ? (e.vx > 1 ? 1 : e.vx < -1 ? -1 : e.dir) : (e.vx > 1 ? 1 : -1);
+      }
+      ents = ents.filter((e) => e.x > camX - 28 && e.x < camX + WV + 80);
+    }
+
+    // Katte: løber efter aben på jorden, dukker sig og springer, hvis aben hænger lavt
+    function updateFloor(e, dt, sf) {
+      const dx = mk.x - e.x;
+      const S = (17 + 2 * G.n) * sf;
+      e.life = (e.life || 0) + dt;
+      if (e.life > 16 && e.state === "run") e.leave = true;
+      if (e.state === "run") {
+        const want = e.leave ? 34 : clamp(dx * 1.6, -S, S);
+        e.vx += (want - e.vx) * Math.min(1, dt * 4);
+        e.x += e.vx * dt;
+        e.y = FL - e.size;
+        e.mode = "move";
+        e.cd -= dt;
+        if (e.cd <= 0 && !e.leave && Math.abs(dx) < 20 && mk.y > FL - reach() - e.size * .6) { e.state = "crouch"; e.st = .5; }
+      } else if (e.state === "crouch") {
+        e.st -= dt;
+        e.vx *= 1 - 3 * dt;
+        e.x += e.vx * dt;
+        e.mode = "sit";
+        if (e.st <= 0) {
+          const g = 320;
+          const h = clamp(FL - e.size - mk.y + 5, 14, reach());
+          const vy0 = -Math.sqrt(2 * g * h);
+          const T = -2 * vy0 / g;
+          e.vy = vy0;
+          e.vx = clamp((mk.x + clamp(mk.vx, 0, 30) * .3 - e.x) / T, -48, 48);
+          e.state = "leap";
+        }
+      } else if (e.state === "leap") {
+        e.vy += 320 * dt;
+        e.x += e.vx * dt;
+        e.y += e.vy * dt;
+        e.mode = "attack";
+        if (e.y >= FL - e.size) { e.y = FL - e.size; e.state = "run"; e.cd = Math.max(1.6, rr(2.4, 3.4) - .12 * G.n); }
+      }
+    }
+
+    // Cirkler, som dyret kan ramme aben med (x, y, radius)
+    function hitPts(e) {
+      const s = e.size;
+      const d = e.dir;
+      if (e.role === "friend") return e.beh === "sit" ? [[e.x, e.y - s, s * 1.05]] : [[e.x, e.y, s * 1.0]];
+      if (e.beh === "floor") return [[e.x + d * s * .15, e.y, s * .8], [e.x + d * s * .8, e.y - s * .1, s * .55]];
+      if (e.beh === "air" && e.role === "predator") return [[e.x, e.y, s * .65], [e.x + d * s * .5, e.y + s * .1, s * .5]];
+      if (e.beh === "air") return [0, 1, 2].map((i) => [e.x + Math.sin(e.t * 2.3 + i * 2.1) * s * 1.3, e.y + Math.cos(e.t * 1.9 + i * 1.7) * s * 1.1, s * .75]);
+      if (e.beh === "hang") { const sw = Math.sin(e.t * 1.3 + e.ph) * 1.5; return [[e.x + sw, e.hang - e.size * .4, s * .85], [e.x + sw * .6, e.hang * .72, s * .6], [e.x + sw * .3, e.hang * .45, s * .55]]; }
+      if (e.beh === "thread") return [[e.x, e.y, s * .75]];
+      return [[e.x, e.y - s * .8, s * .8]]; // dyr på en gren
+    }
+
+    function collide() {
+      const mr = MR * .68;
+      for (const b of bananas) {
+        if (b.taken) continue;
+        if (Math.abs(b.x - mk.x) < 9 && Math.abs(b.y - mk.y) < 9 && Math.hypot(b.x - mk.x, b.y - mk.y) < MR * 1.15 + 2.2) takeBanana(b);
+      }
+      for (const e of ents) {
+        if (e.done) continue;
+        if (Math.abs(e.x - mk.x) > 40) continue;
+        for (const [x, y, r] of hitPts(e)) {
+          if (Math.hypot(x - mk.x, y - mk.y) < r + mr) {
+            if (e.role === "friend") friendHit(e);
+            else if (G.grace <= 0) { caught(e); return; }
+            break;
+          }
+        }
+      }
+      if (mk.y > FL - MR * .6 && !mk.vine) {
+        if (G.grace > 0) { mk.y = FL - MR * .6; mk.vy = -62; return; }
+        const f = pickFrom(world().predators.filter((id) => SP[id].beh === "floor"));
+        const e = makeEnt(f, { x: mk.x + 12, y: FL - SP[f].size, state: "leap", mode: "attack", dir: -1 });
+        ents.push(e);
+        caught(e);
+      }
+    }
+
+    // ---------- Point, trin og klaret jungle ----------
+    const POINT_COLOR = { 1: "#fff7b0", 5: "#fde047", 10: "#fb923c" };
+    function floatText(x, y, text, color = "#fff", big = false) { floaters.push({ x, y, text, life: 1, color, big }); }
+    function ring(x, y, r, color = "255,255,255") { rings.push({ x, y, r, life: 1, color }); }
+    function burst(x, y, n, colors) {
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const v = 6 + Math.random() * 16;
+        particles.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 6, life: 1, c: colors[rnd(colors.length)], s: .5 + Math.random() * 1.1 });
+      }
+    }
+    function takeBanana(b) {
+      b.taken = true;
+      const pts = b.type === "gold" ? 10 : b.type === "bunch" ? 5 : 1;
+      floatText(b.x, b.y - 3, `+${pts}`, POINT_COLOR[pts] || "#fff", pts >= 5);
+      burst(b.x, b.y, pts >= 5 ? 12 : 5, ["#fde047", "#fff", "#fbbf24"]);
+      sfx.eat();
+      buzz(pts >= 5 ? 30 : 12);
+      mk.pop = Math.max(mk.pop, .5);
+      addPoints(pts);
+    }
+    function friendHit(e) {
+      e.done = true;
+      e.thanks = 1.6;
+      const pts = e.sp.pts;
+      floatText(e.x, centerY(e) - e.size - 2, `${e.sp.da} +${pts}`, "#86efac", true);
+      ring(e.x, centerY(e), e.size * 1.2, "74,222,128");
+      burst(e.x, centerY(e), 12, ["#86efac", "#fde047", "#fff"]);
+      sfx.friend();
+      buzz(30);
+      if (e.beh === "fly") e.vx -= 6;
+      addPoints(pts);
+    }
+    function addPoints(pts) {
+      G.points += pts;
+      G.total++;
+      renderProg();
+      if (G.points >= GOAL) { worldDone(); return; }
+      if (stageOf(G.points) > G.n) { sizeUp(); return; }
+      if (G.total % 6 === 0) { const wd = pickWeighted(seenIds(), 1)[0]; if (wd) wordPop(wd); }
+    }
+    // Hver 20 point: en stjerne og et nyt ord (spillet stopper ikke), og junglen bliver lidt sværere
+    function sizeUp() {
+      G.n = stageOf(G.points);
+      stars += 1;
+      write("stars", stars);
+      Topbar.refreshStars(true);
+      mk.pop = 1;
+      for (let i = 0; i < 3; i++) ring(mk.x, mk.y, MR * (.8 + i * .5), "253,224,71");
+      burst(mk.x, mk.y, 22, ["#fde047", "#fff", "#86efac", "#fb923c"]);
+      sfx.levelup();
+      buzz(40);
+      toast(`Trin ${G.n}`, "+1 ⭐");
+      const nw = shuffle(ALL.filter((id) => !ws(id).seen))[0];
+      if (nw) { const st = ws(nw); st.seen = true; st.t = Date.now(); saveWords(); wordPop(nw, true); }
+    }
+
+    // 100 point: junglen er klaret
+    function worldDone() {
+      state = "world";
+      hidePop();
+      G.tT = 0;
+      G.proceeded = false;
+      ents = [];
+      const perfect = G.diedWorld === 0;
+      const got = perfect ? 5 : 3;
+      stars += got;
+      write("stars", stars);
+      Topbar.refreshStars(true);
+      mk.pop = 1;
+      for (let i = 0; i < 4; i++) ring(mk.x, mk.y, MR * (.8 + i * .6), "253,224,71");
+      burst(mk.x, mk.y, 36, ["#fde047", "#fff", "#86efac", "#fb923c", "#f472b6"]);
+      sfx.fanfare();
+      buzz(60);
+      const last = G.w === WORLDS.length - 1;
+      toast(`${WORLDS[G.w].da} klaret!`, last ? `Alle 7 jungler klaret! +${got} ⭐` : `${perfect ? "Aldrig fanget! " : ""}+${got} ⭐ · næste: ${WORLDS[G.w + 1].da}`);
+    }
+    let toastTimer = 0;
+    function toast(title, sub) {
+      const el = $("toast");
+      el.innerHTML = `<b>${title}</b><span>${sub}</span>`;
+      el.hidden = false;
+      el.style.animation = "none";
+      void el.offsetWidth;
+      el.style.animation = "";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.hidden = true; }, 2300);
+    }
+    function afterWorld() {
+      const w = G.w;
+      const first = w === done;
+      if (first) { done = w + 1; write("klaret", done); }
+      const m = first ? MONKEYS.find((x) => x.after === w) : null;
+      selWorld = (w + 1) % WORLDS.length;
+      write("jungle", selWorld);
+      const proceed = () => { if (w === WORLDS.length - 1) goHome(); else startWorld(selWorld); };
+      if (m) showUnlock(m, proceed); else proceed();
+    }
+
+    // En rovdyr fanger aben: skærmen ryster, aben suges ind, og dyret tygger. Så kommer quizzen.
+    function caught(e) {
+      state = "dying";
+      hidePop();
+      stopSpeech();
+      G.caught++;
+      G.diedWorld++;
+      G.dyT = 0;
+      G.killer = e;
+      shake = .6;
+      flash = 1;
+      mk.dx0 = mk.x;
+      mk.dy0 = mk.y;
+      mk.vine = null;
+      sfx.caught();
+      buzz(60);
+      burst(mk.x, mk.y, 14, ["#fde047", "#fff", "#fb7185"]);
+      ring(mk.x, mk.y, MR, "255,80,80");
+    }
+
+    // ---------- Opdatering ----------
+    function update(dt) {
+      time += dt;
+      if (!G || !mk) return;
+      if (shake > 0) shake = Math.max(0, shake - dt * 1.6);
+      if (flash > 0) flash = Math.max(0, flash - dt * 2);
+      if (state === "ready") { movePhys(dt); ensureVines(); }
+      else if (state === "play") {
+        G.time += dt;
+        if (G.grace > 0) G.grace -= dt;
+        movePhys(dt);
+        ensureVines();
+        ensureEnts(dt);
+        updateEnts(dt);
+        collide();
+      } else if (state === "dying") {
+        G.dyT += dt;
+        const e = G.killer;
+        const k = Math.min(1, G.dyT / .9);
+        e.t += dt;
+        e.mode = e.beh === "hang" ? "hang" : "attack";
+        if (e.beh === "floor") {
+          e.x += (mk.x - e.x) * Math.min(1, dt * 5);
+          e.y += (Math.min(FL - e.size, mk.y + e.size * .5) - e.y) * Math.min(1, dt * 5);
+        }
+        const [tx, ty] = killPos(e);
+        mk.x = mk.dx0 + (tx - mk.dx0) * k * k;
+        mk.y = mk.dy0 + (ty - mk.dy0) * k * k;
+        mk.shrink = 1 - .85 * k;
+        mk.spin += dt * 14;
+        if (G.dyT >= 1.35) openQuiz();
+      } else if (state === "world") {
+        movePhys(dt);
+        ensureVines();
+        G.tT += dt;
+        if (G.tT > 2.6 && !G.proceeded) { G.proceeded = true; afterWorld(); }
+      }
+      for (const p of particles) { p.vy += 40 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt * 1.5; }
+      particles = particles.filter((p) => p.life > 0);
+      for (const f of floaters) { f.y -= 7 * dt; f.life -= dt * .9; }
+      floaters = floaters.filter((f) => f.life > 0);
+      for (const r of rings) { r.r += 22 * dt; r.life -= dt * 1.8; }
+      rings = rings.filter((r) => r.life > 0);
+    }
+    function killPos(e) {
+      if (e.beh === "hang") return [e.x, e.hang - e.size * .4];
+      if (e.beh === "thread") return [e.x, e.y];
+      return [e.x + e.dir * e.size * .45, centerY(e)];
+    }
+
+    // ---------- Kulisser ----------
+    // Hvert lag tegnes én gang på et usynligt lærred (de gentager sig), og flyttes så med hver sin fart (parallaks).
+    const LAYERS = { far: null, mid: null, near: null, ground: null };
+    const PERIOD = { far: 210, mid: 170, near: 140, ground: 100 };
+    const PARALLAX = { far: .12, mid: .4, near: .75, ground: 1 };
+    function mulberry(seed) {
+      let a = seed >>> 0;
+      return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    }
+    const mixc = (a, b, k) => AR.mix(a, b.length === 4 ? "#" + b[1] + b[1] + b[2] + b[2] + b[3] + b[3] : b, k);
+    function leafShape(c, len, wid) { c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(len * .5, -wid, len, 0); c.quadraticCurveTo(len * .5, wid, 0, 0); c.closePath(); }
+    function leaf(c, x, y, len, ang, col) {
+      c.save(); c.translate(x, y); c.rotate(ang);
+      leafShape(c, len, len * .3); c.fillStyle = col; c.fill();
+      c.strokeStyle = "rgba(0,0,0,.18)"; c.lineWidth = len * .035; c.beginPath(); c.moveTo(0, 0); c.lineTo(len * .92, 0); c.stroke();
+      c.restore();
+    }
+    // En palmeblad/bregne: en bøjet midterstilk med småblade på begge sider
+    function frond(c, x, y, len, ang, col, droop) {
+      c.save(); c.translate(x, y); c.rotate(ang);
+      c.strokeStyle = col; c.lineWidth = len * .035; c.lineCap = "round";
+      const pts = [];
+      const n = 11;
+      for (let i = 0; i <= n; i++) { const f = i / n; pts.push([f * len, droop * len * f * f]); }
+      c.beginPath(); c.moveTo(0, 0); for (const [px, py] of pts) c.lineTo(px, py); c.stroke();
+      for (let i = 1; i < n; i++) {
+        const [px, py] = pts[i];
+        const l = len * .26 * (1 - Math.abs(i / n - .45) * 1.1);
+        c.beginPath(); c.moveTo(px, py); c.lineTo(px + l * .35, py - l); c.moveTo(px, py); c.lineTo(px + l * .35, py + l); c.stroke();
+      }
+      c.restore();
+    }
+    function bush(c, x, y, rad, cols, rng, n) {
+      for (let i = 0; i < n; i++) {
+        const a = rng() * 6.28;
+        const d = Math.sqrt(rng()) * rad;
+        const r = rad * (.28 + rng() * .3);
+        c.fillStyle = cols[Math.floor(rng() * cols.length)];
+        c.beginPath(); c.ellipse(x + Math.cos(a) * d, y + Math.sin(a) * d * .7, r, r * .8, 0, 0, 6.28); c.fill();
+      }
+    }
+    // Stamme med let sving, rodfod og mørk side
+    function trunk(c, x, y0, y1, w, col, rng) {
+      const g = c.createLinearGradient(x - w, 0, x + w, 0);
+      g.addColorStop(0, AR.dk(col, .35)); g.addColorStop(.45, col); g.addColorStop(1, AR.dk(col, .5));
+      c.fillStyle = g;
+      const bend = (rng() - .5) * w * 1.2;
+      c.beginPath();
+      c.moveTo(x - w * .5 + bend, y0);
+      c.quadraticCurveTo(x - w * .6, (y0 + y1) / 2, x - w * 1.5, y1);
+      c.lineTo(x + w * 1.5, y1);
+      c.quadraticCurveTo(x + w * .6, (y0 + y1) / 2, x + w * .5 + bend, y0);
+      c.closePath(); c.fill();
+      c.strokeStyle = "rgba(0,0,0,.16)"; c.lineWidth = w * .06;
+      for (let i = 0; i < 4; i++) { const sx = x + (rng() - .5) * w * .8; c.beginPath(); c.moveTo(sx, y0); c.lineTo(sx + (rng() - .5) * w * .4, y1); c.stroke(); }
+    }
+    function repeatX(P, x, fn) { for (const dx of [-P, 0, P]) fn(x + dx); } // alt, der krydser kanten, tegnes to gange, så laget gentager sig uden søm
+
+    function treeline(c, P, base, hMin, hMax, col, rng, step) {
+      for (let x = 0; x < P; x += step) {
+        const h = hMin + rng() * (hMax - hMin);
+        const rx = step * (.9 + rng() * .8);
+        repeatX(P, x, (xx) => { c.fillStyle = col; c.beginPath(); c.ellipse(xx, base - h * .5, rx, h * .62, 0, 0, 6.28); c.fill(); });
+      }
+      c.fillStyle = col; c.fillRect(0, base - 2, P, 80);
+    }
+    function farLayer(c, W, P, rng) {
+      const base = 52;
+      const col = mixc(W.farc, W.sky[1], .45);
+      const dark = mixc(W.farc, "#0a2a1a", .1);
+      const t = W.far;
+      if (t === "karst") {
+        for (let x = 6; x < P; x += 26 + rng() * 14) {
+          const w = 6 + rng() * 5; const h = 28 + rng() * 22;
+          repeatX(P, x, (xx) => {
+            const g = c.createLinearGradient(xx - w, 0, xx + w, 0); g.addColorStop(0, mixc(col, "#fff", .25)); g.addColorStop(1, mixc(col, "#000", .25));
+            c.fillStyle = g; c.beginPath(); c.moveTo(xx - w, base); c.lineTo(xx - w * .8, base - h * .8); c.quadraticCurveTo(xx, base - h * 1.12, xx + w * .8, base - h * .8); c.lineTo(xx + w, base); c.closePath(); c.fill();
+            c.fillStyle = mixc(W.leaf[1], W.sky[1], .4); c.beginPath(); c.ellipse(xx, base - h * .95, w * .8, h * .12, 0, 0, 6.28); c.fill();
+          });
+        }
+      } else if (t === "temple") {
+        for (let x = 20; x < P; x += 55 + rng() * 25) {
+          repeatX(P, x, (xx) => {
+            c.fillStyle = mixc(W.farc, W.sky[1], .25);
+            let w = 11; let y = base;
+            for (let i = 0; i < 5; i++) { const h = 5 - i * .4; c.fillRect(xx - w, y - h, w * 2, h); y -= h; w *= .78; }
+            c.beginPath(); c.moveTo(xx - w, y); c.lineTo(xx, y - 4); c.lineTo(xx + w, y); c.fill();
+          });
+        }
+      } else if (t === "hills") {
+        c.fillStyle = col; c.beginPath(); c.moveTo(0, base + 20);
+        for (let x = 0; x <= P; x += 4) c.lineTo(x, base - 12 - 9 * Math.sin(x / P * 6.283 * 2) - 6 * Math.sin(x / P * 6.283 * 5 + 1));
+        c.lineTo(P, base + 20); c.closePath(); c.fill();
+        c.strokeStyle = mixc(col, "#fff", .18); c.lineWidth = .35;
+        for (let k = 0; k < 4; k++) { c.beginPath(); for (let x = 0; x <= P; x += 4) c.lineTo(x, base - 8 + k * 3.2 - 9 * Math.sin(x / P * 6.283 * 2) - 6 * Math.sin(x / P * 6.283 * 5 + 1)); c.stroke(); }
+      } else if (t === "baobab") {
+        for (let x = 12; x < P; x += 34 + rng() * 18) {
+          const h = 20 + rng() * 10;
+          repeatX(P, x, (xx) => {
+            c.fillStyle = mixc("#8a5a3a", W.sky[1], .35);
+            c.beginPath(); c.moveTo(xx - 3, base); c.quadraticCurveTo(xx - 4.4, base - h * .5, xx - 2.2, base - h); c.lineTo(xx + 2.2, base - h); c.quadraticCurveTo(xx + 4.4, base - h * .5, xx + 3, base); c.fill();
+            c.lineWidth = 1.2; c.strokeStyle = c.fillStyle; c.lineCap = "round";
+            for (let b = -2; b <= 2; b++) { c.beginPath(); c.moveTo(xx + b * .4, base - h); c.lineTo(xx + b * 4.5, base - h - 4 - Math.abs(b)); c.stroke(); }
+            c.fillStyle = mixc("#6a8a2a", W.sky[1], .4);
+            for (let b = -2; b <= 2; b++) { c.beginPath(); c.ellipse(xx + b * 4.5, base - h - 4.8 - Math.abs(b), 3.2, 1.6, 0, 0, 6.28); c.fill(); }
+          });
+        }
+      } else if (t === "volcano") {
+        const vx = P * .5;
+        const g = c.createLinearGradient(0, base - 40, 0, base); g.addColorStop(0, mixc(col, "#fff", .25)); g.addColorStop(1, col);
+        c.fillStyle = g; c.beginPath(); c.moveTo(vx - 46, base); c.lineTo(vx - 9, base - 38); c.quadraticCurveTo(vx, base - 41, vx + 9, base - 38); c.lineTo(vx + 46, base); c.closePath(); c.fill();
+        c.fillStyle = "rgba(255,255,255,.55)";
+        for (let i = 0; i < 6; i++) { c.beginPath(); c.ellipse(vx - 16 + i * 6.5, base - 40 - (i % 2) * 2, 7, 3.4, 0, 0, 6.28); c.fill(); }
+      }
+      if (t === "river") {
+        c.fillStyle = mixc(W.sky[0], "#fff", .35); c.fillRect(0, base - 3, P, 4);
+      }
+      treeline(c, P, base + 2, 6, 15, col, rng, 7);
+      treeline(c, P, base + 8, 3, 9, dark, rng, 5);
+      const mist = c.createLinearGradient(0, base - 22, 0, base + 16);
+      mist.addColorStop(0, "rgba(255,255,255,0)"); mist.addColorStop(.7, mixc(W.sky[1], "#fff", .45) + "88"); mist.addColorStop(1, mixc(W.sky[1], "#fff", .3) + "cc");
+      c.fillStyle = mist; c.fillRect(0, base - 22, P, 40);
+    }
+
+    function midLayer(c, W, P, rng, top) {
+      const col = mixc(W.leaf[0], W.sky[1], .5);
+      const trunkC = mixc(W.trunk, W.sky[1], .45);
+      for (let x = 10; x < P; x += 24 + rng() * 22) {
+        const w = 1.7 + rng() * 1.6;
+        repeatX(P, x, (xx) => trunk(c, xx, top - 4, ZH + 12, w, trunkC, rng));
+      }
+      // hængende lianer
+      c.strokeStyle = mixc(W.leaf[0], W.sky[1], .35); c.lineWidth = .3;
+      for (let i = 0; i < 16; i++) { const x = rng() * P; const l = 14 + rng() * 26; repeatX(P, x, (xx) => { c.beginPath(); c.moveTo(xx, 0); c.quadraticCurveTo(xx + (rng() - .5) * 3, l / 2, xx + (rng() - .5) * 2, l); c.stroke(); }); }
+      // løvtag
+      const cols = [mixc(W.leaf[0], W.sky[1], .55), mixc(W.leaf[1], W.sky[1], .55), mixc(W.leaf[0], W.sky[1], .4)];
+      for (let x = 0; x < P; x += 8) repeatX(P, x, (xx) => bush(c, xx, 3 + rng() * 6, 9 + rng() * 5, cols, rng, 6));
+      c.fillStyle = cols[2]; c.fillRect(0, top - 30, P, top + 30 + 4);
+      // busk i bunden
+      for (let x = 0; x < P; x += 11) repeatX(P, x, (xx) => bush(c, xx, ZH - 6 + rng() * 5, 8, [col, mixc(W.leaf[1], W.sky[1], .45)], rng, 4));
+    }
+
+    function nearLayer(c, W, P, rng, top) {
+      const trunkC = mixc(W.trunk, "#000", .25);
+      for (let x = 18; x < P; x += 46 + rng() * 30) {
+        const w = 3.2 + rng() * 2.6;
+        repeatX(P, x, (xx) => {
+          trunk(c, xx, top - 4, ZH + 12, w, trunkC, rng);
+          c.strokeStyle = AR.dk(W.leaf[1], .4); c.lineWidth = .5; c.lineCap = "round"; // mos og liane langs stammen
+          c.beginPath(); c.moveTo(xx - w * .3, top); for (let y = 8; y < ZH; y += 8) c.lineTo(xx + Math.sin(y * .5) * w * .7, y); c.stroke();
+          for (let k = 0; k < 5; k++) leaf(c, xx + (rng() - .5) * w * 2, 10 + rng() * 40, 3 + rng() * 2.5, rng() * 6.28, mixc(W.leaf[1], "#000", .3));
+        });
+      }
+      // tung løvfrynse i toppen
+      const cols = [AR.dk(W.leaf[0], .15), W.leaf[0], mixc(W.leaf[1], "#000", .35)];
+      for (let x = 0; x < P; x += 6) repeatX(P, x, (xx) => { bush(c, xx, rng() * 4, 6 + rng() * 4, cols, rng, 5); frond(c, xx, 1 + rng() * 5, 9 + rng() * 6, 1.2 + rng() * .8, cols[1], .35); });
+      c.fillStyle = cols[0]; c.fillRect(0, top - 40, P, top + 40);
+    }
+
+    function groundLayer(c, W, P, rng) {
+      const g = c.createLinearGradient(0, FL - 1, 0, ZH + 60);
+      g.addColorStop(0, mixc(W.floor, W.leaf[0], .35)); g.addColorStop(.12, W.floor); g.addColorStop(1, AR.dk(W.floor, .55));
+      c.fillStyle = g; c.fillRect(0, FL, P, 120);
+      c.fillStyle = mixc(W.leaf[1], W.floor, .3); c.fillRect(0, FL - .6, P, 1.2);
+      // løv på jorden og småsten
+      for (let i = 0; i < 70; i++) { const x = rng() * P; const y = FL + 1 + rng() * 14; repeatX(P, x, (xx) => { c.fillStyle = rng() > .5 ? AR.dk(W.floor, .25) : mixc(W.floor, W.leaf[1], .3); c.beginPath(); c.ellipse(xx, y, .8 + rng() * 1.8, .4 + rng() * .6, rng(), 0, 6.28); c.fill(); }); }
+      // bregner, rødder og svampe langs kanten
+      for (let x = 0; x < P; x += 6 + rng() * 6) {
+        repeatX(P, x, (xx) => {
+          const k = rng();
+          if (k < .55) { for (let i = 0; i < 4; i++) frond(c, xx, FL + .5, 5 + rng() * 5, -1.9 + i * .4 + (rng() - .5) * .3, mixc(W.leaf[1], "#000", .15 + rng() * .25), .5); }
+          else if (k < .8) { const h = 2 + rng() * 3; c.fillStyle = "#f4e3c1"; c.fillRect(xx - .3, FL - h, .6, h + .6); c.fillStyle = rng() > .5 ? "#e0523f" : "#e8b13a"; c.beginPath(); c.ellipse(xx, FL - h, 1.6 + h * .3, .9 + h * .2, 0, Math.PI, 0); c.fill(); }
+          else { c.strokeStyle = mixc(W.trunk, "#000", .2); c.lineWidth = 1; c.lineCap = "round"; c.beginPath(); c.moveTo(xx - 4, FL + 2); c.quadraticCurveTo(xx - 1, FL - 3, xx + 4, FL + .5); c.stroke(); }
+        });
+      }
+    }
+
+    function buildScenery() {
+      if (!G || !SW) return;
+      const W = world();
+      for (const name of Object.keys(LAYERS)) {
+        const P = PERIOD[name];
+        const cvs = document.createElement("canvas");
+        cvs.width = Math.max(1, Math.round(P * u * DPR));
+        cvs.height = Math.max(1, Math.round(SH * DPR));
+        const c = cvs.getContext("2d");
+        c.setTransform(DPR * u, 0, 0, DPR * u, 0, offY * u * DPR);
+        const rng = mulberry(G.w * 977 + name.length * 31 + 7);
+        const top = -offY;
+        if (name === "far") farLayer(c, W, P, rng);
+        else if (name === "mid") midLayer(c, W, P, rng, top);
+        else if (name === "near") nearLayer(c, W, P, rng, top);
+        else groundLayer(c, W, P, rng);
+        LAYERS[name] = cvs;
+      }
+    }
+
+    // ---------- Bananer ----------
+    const BAN = {};
+    function bananaPath(c, ox, oy, s, rot) {
+      c.save(); c.translate(ox, oy); c.rotate(rot); c.scale(s, s);
+      c.beginPath(); c.moveTo(-34, 16); c.bezierCurveTo(-18, 48, 34, 38, 40, -20); c.bezierCurveTo(30, -4, 10, 14, -34, 16); c.closePath();
+      c.fillStyle = "#f7d52a"; c.fill();
+      const g = c.createLinearGradient(0, -20, 0, 40); g.addColorStop(0, "#fff08a"); g.addColorStop(.5, "#f7d52a"); g.addColorStop(1, "#d99a00");
+      c.fillStyle = g; c.fill();
+      c.strokeStyle = "#9a6a00"; c.lineWidth = 2.4; c.lineJoin = "round"; c.stroke();
+      c.strokeStyle = "rgba(255,255,255,.55)"; c.lineWidth = 3; c.beginPath(); c.moveTo(-24, 22); c.bezierCurveTo(-4, 38, 26, 28, 33, -6); c.stroke();
+      c.fillStyle = "#6b4a14"; c.beginPath(); c.arc(40, -22, 5, 0, 6.28); c.fill();
+      c.beginPath(); c.arc(-35, 16, 3.4, 0, 6.28); c.fill();
+      c.restore();
+    }
+    function bananaSprite(type) {
+      if (BAN[type]) return BAN[type];
+      const S = 128;
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = S;
+      const c = cv.getContext("2d");
+      c.translate(S / 2, S / 2 + 4);
+      if (type === "gold") {
+        const g = c.createRadialGradient(0, 0, 8, 0, 0, 60); g.addColorStop(0, "rgba(255,230,120,.8)"); g.addColorStop(1, "rgba(255,230,120,0)");
+        c.fillStyle = g; c.fillRect(-64, -64, 128, 128);
+        bananaPath(c, 0, 0, 1.3, -.2);
+        c.globalCompositeOperation = "source-atop"; c.fillStyle = "rgba(255,170,0,.35)"; c.fillRect(-64, -64, 128, 128);
+      } else if (type === "bunch") {
+        bananaPath(c, -8, 6, 1.1, -.55); bananaPath(c, 2, 2, 1.1, -.2); bananaPath(c, 10, -2, 1.1, .15);
+      } else bananaPath(c, 0, 0, 1.25, -.2);
+      return (BAN[type] = cv);
+    }
+
+    // ---------- Tegning ----------
+    function drawLayer(name) {
+      const cvs = LAYERS[name];
+      if (!cvs) return;
+      const Pw = PERIOD[name] * u;
+      const off = (camX * PARALLAX[name] * u) % Pw;
+      for (let x = -off; x < SW; x += Pw) ctx.drawImage(cvs, x, 0, Pw + 1, SH);
+    }
+    const toWorld = () => ctx.setTransform(DPR * u, 0, 0, DPR * u, -camX * u * DPR, offY * u * DPR);
+
+    function drawVine(v, next) {
+      const attached = mk && mk.vine === v;
+      const sw = Math.sin(time * 1.1 + v.ph) * .9;
+      const cols = [W_leaf(0), W_leaf(1), W_leaf(2)];
+      for (const l of v.leaves) leaf(ctx, v.x + l.dx, v.ay + l.dy - 1.5, l.s, l.a + Math.sin(time * 1.4 + l.dx) * .09, cols[l.k]);
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#5b4a22"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(v.x, v.ay);
+      if (attached) {
+        const hx = mk.x - Math.sin(mk.th) * MR * 1.6;
+        const hy = mk.y - Math.cos(mk.th) * MR * 1.6;
+        ctx.lineTo(hx, hy);
+        ctx.stroke();
+        ctx.strokeStyle = "#8fbf4a"; ctx.lineWidth = .35; ctx.beginPath(); ctx.moveTo(v.x, v.ay); ctx.lineTo(hx, hy); ctx.stroke();
+        return;
+      }
+      ctx.quadraticCurveTo(v.x + sw * .4, v.ay + v.len * .5, v.x + sw, v.ay + v.len);
+      ctx.stroke();
+      ctx.strokeStyle = "#8fbf4a"; ctx.lineWidth = .35; ctx.beginPath(); ctx.moveTo(v.x, v.ay); ctx.quadraticCurveTo(v.x + sw * .4, v.ay + v.len * .5, v.x + sw, v.ay + v.len); ctx.stroke();
+      for (let k = 1; k < 5; k++) { const f = k / 5; leaf(ctx, v.x + sw * f * f, v.ay + v.len * f, 2.6, (k % 2 ? -.6 : -2.5), cols[1]); }
+      ctx.fillStyle = "#e8d27a"; ctx.beginPath(); ctx.arc(v.x + sw, v.ay + v.len, 1.2, 0, 6.28); ctx.fill();
+      if (next === v && (state === "play" || state === "ready")) { // den næste liane lyser blidt
+        ctx.strokeStyle = `rgba(253,230,71,${.5 + .3 * Math.sin(time * 5)})`; ctx.lineWidth = .6;
+        ctx.beginPath(); ctx.arc(v.x + sw, v.ay + v.len, 3 + Math.sin(time * 5) * .5, 0, 6.28); ctx.stroke();
+      }
+    }
+    const W_leaf = (i) => world().leaf[i];
+
+    function drawEnt(e) {
+      const s = e.size;
+      const cy = centerY(e);
+      const rgb = ROLE_RGB[e.role];
+      ctx.save();
+      if (e.beh === "thread") { ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = .18; ctx.beginPath(); ctx.moveTo(e.x, -offY - 4); ctx.lineTo(e.x, e.y - s * .5); ctx.stroke(); }
+      if (e.beh === "sit" || e.beh === "branch") { // gren, der hænger i et rep fra kronetaget
+        ctx.strokeStyle = "#4a3a1c"; ctx.lineWidth = .35; ctx.beginPath(); ctx.moveTo(e.x, -offY - 4); ctx.lineTo(e.x, e.y + .6); ctx.stroke();
+        ctx.lineCap = "round"; ctx.strokeStyle = "#6b4a24"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(e.x - 8, e.y + 1.1); ctx.lineTo(e.x + 8, e.y + .5); ctx.stroke();
+        ctx.strokeStyle = "#8a6a38"; ctx.lineWidth = .4; ctx.beginPath(); ctx.moveTo(e.x - 7, e.y + .5); ctx.lineTo(e.x + 7, e.y - .1); ctx.stroke();
+        leaf(ctx, e.x - 8, e.y + 1, 3.4, -2.6, W_leaf(1)); leaf(ctx, e.x + 8, e.y + .5, 3.4, -.5, W_leaf(2));
+      }
+      if (e.beh === "hang") { // snoen hænger fra kronetaget
+        for (let i = 0; i < 5; i++) leaf(ctx, e.x + (i - 2) * 1.6, -1.5, 4.5, 1.2 + i * .45, W_leaf(i % 3));
+      }
+      const pulse = .28 + .12 * Math.sin(time * 4 + e.ph);
+      const gy = e.beh === "hang" ? e.hang * .6 : cy;
+      const gr = e.beh === "hang" ? e.hang * .6 : s * 1.7;
+      const grad = ctx.createRadialGradient(e.x, gy, 0, e.x, gy, gr);
+      grad.addColorStop(0, `rgba(${rgb},${pulse})`); grad.addColorStop(1, `rgba(${rgb},0)`);
+      ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(e.x, gy, gr, 0, 6.28); ctx.fill();
+      if (e.beh === "air" && e.role === "hazard") { // en lille sværm
+        for (let i = 0; i < 3; i++) {
+          ctx.save(); ctx.translate(e.x + Math.sin(e.t * 2.3 + i * 2.1) * s * 1.3, e.y + Math.cos(e.t * 1.9 + i * 1.7) * s * 1.1);
+          ctx.scale(-1, 1);
+          AR.draw(ctx, e.id, { r: s * .9, t: e.t + i * .4, mode: "fly", angry: true });
+          ctx.restore();
+        }
+        ctx.restore();
+        return;
+      }
+      ctx.translate(e.x, e.beh === "hang" ? 0 : cy);
+      if (e.beh !== "hang" && e.dir < 0) ctx.scale(-1, 1);
+      AR.draw(ctx, e.id, { r: s, t: e.t, mode: e.mode, angry: e.role !== "friend" || false, len: e.beh === "hang" ? e.hang / s : 0 });
+      ctx.restore();
+      if (e.role === "friend" && e.thanks > 0) { // hjerte over dyret, der takker
+        ctx.fillStyle = `rgba(255,120,150,${Math.min(1, e.thanks)})`;
+        ctx.font = `bold ${s * .9}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("♥", e.x, cy - s * 1.3 - (1.6 - e.thanks) * 3);
+      }
+      if (e.beh === "floor" && e.state === "crouch") { ctx.fillStyle = "#fecaca"; ctx.font = `bold ${s * 1.1}px sans-serif`; ctx.textAlign = "center"; ctx.strokeStyle = "#7f1d1d"; ctx.lineWidth = .4; ctx.strokeText("!", e.x, cy - s * 1.2); ctx.fillText("!", e.x, cy - s * 1.2); }
+    }
+
+    function drawMonkey() {
+      const m = mk;
+      if (!m) return;
+      // skygge på jorden viser, hvor højt aben er
+      const sh = clamp(1 - (FL - m.y) / 60, .15, .6);
+      ctx.fillStyle = `rgba(0,0,0,${sh * .5})`; ctx.beginPath(); ctx.ellipse(m.x, FL + 1.2, MR * (.5 + sh), MR * .22, 0, 0, 6.28); ctx.fill();
+      ctx.save();
+      const sc = 1 + .14 * m.pop;
+      if (state === "dying") {
+        ctx.translate(m.x, m.y); ctx.rotate(m.spin); ctx.scale(m.shrink, m.shrink);
+        AR.draw(ctx, apeId, { r: MR, t: time, mode: "dizzy" });
+      } else if (m.vine) {
+        const hx = m.x - Math.sin(m.th) * MR * 1.6;
+        const hy = m.y - Math.cos(m.th) * MR * 1.6;
+        ctx.translate(hx, hy); ctx.rotate(-m.th);
+        if (m.face < 0) ctx.scale(-1, 1);
+        AR.draw(ctx, apeId, { r: MR * sc, t: time, mode: "swing" });
+      } else {
+        ctx.translate(m.x, m.y);
+        ctx.rotate(clamp(m.vy / 60, -.7, .7) * .5 * m.face);
+        if (m.face < 0) ctx.scale(-1, 1);
+        AR.draw(ctx, apeId, { r: MR * sc, t: time, mode: "fly" });
+      }
+      ctx.restore();
+    }
+
+    function draw() {
+      if (!SW) return;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.clearRect(0, 0, SW, SH);
+      if (!G) return;
+      ctx.save();
+      if (shake > 0) ctx.translate((Math.random() - .5) * shake * 14, (Math.random() - .5) * shake * 14);
+      drawLayer("far");
+      drawLayer("mid");
+      // lysstråler gennem løvet
+      ctx.save();
+      for (let i = 0; i < 4; i++) {
+        const x = SW * (.1 + .26 * i) + Math.sin(time * .3 + i * 1.7) * SW * .04;
+        const g = ctx.createLinearGradient(x, 0, x + SW * .1, SH);
+        g.addColorStop(0, "rgba(255,255,220,.2)"); g.addColorStop(1, "rgba(255,255,220,0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + SW * .09, 0); ctx.lineTo(x + SW * .3, SH); ctx.lineTo(x + SW * .12, SH); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+      drawLayer("near");
+      drawLayer("ground");
+      toWorld();
+      const next = vines.find((v) => v.x > mk.x + 3 && v !== mk.vine);
+      for (const v of vines) if (v.x > camX - 12 && v.x < camX + WV + 12) drawVine(v, next);
+      for (const e of ents) if (e.beh === "hang" || e.beh === "thread" || e.beh === "sit" || e.beh === "branch") drawEnt(e);
+      for (const b of bananas) {
+        if (b.taken || b.x < camX - 6 || b.x > camX + WV + 6) continue;
+        const sp = bananaSprite(b.type);
+        const s = b.type === "gold" ? 4.4 : b.type === "bunch" ? 4.2 : 3.4;
+        ctx.drawImage(sp, b.x - s, b.y - s + Math.sin(time * 3 + b.ph) * .7, s * 2, s * 2);
+      }
+      for (const e of ents) if (!(e.beh === "hang" || e.beh === "thread" || e.beh === "sit" || e.beh === "branch")) drawEnt(e);
+      drawMonkey();
+      for (const r of rings) { ctx.strokeStyle = `rgba(${r.color},${r.life * .8})`; ctx.lineWidth = .5; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, 6.28); ctx.stroke(); }
+      for (const p of particles) { ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, 6.28); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      ctx.textAlign = "center";
+      for (const f of floaters) {
+        ctx.globalAlpha = Math.min(1, f.life * 1.6);
+        ctx.font = `800 ${f.big ? 4 : 3.2}px "Trebuchet MS", sans-serif`;
+        ctx.lineWidth = .7; ctx.strokeStyle = "rgba(0,0,0,.6)"; ctx.strokeText(f.text, f.x, f.y);
+        ctx.fillStyle = f.color; ctx.fillText(f.text, f.x, f.y);
+      }
+      ctx.globalAlpha = 1;
+      // rød advarselspil ved højre kant, mens en rovfugl er på vej ind
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      for (const e of ents) {
+        if (e.role === "predator" && e.beh === "air" && e.x > camX + WV) {
+          const y = clamp((e.y + offY) * u, 30, SH - 30);
+          ctx.fillStyle = `rgba(239,68,68,${.6 + .4 * Math.sin(time * 12)})`;
+          ctx.beginPath(); ctx.moveTo(SW - 6, y); ctx.lineTo(SW - 28, y - 14); ctx.lineTo(SW - 28, y + 14); ctx.closePath(); ctx.fill();
+        }
+      }
+      if (flash > 0) { ctx.fillStyle = `rgba(255,50,50,${flash * .35})`; ctx.fillRect(0, 0, SW, SH); }
+      ctx.restore();
+    }
+
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(.05, (now - last) / 1000);
+      last = now;
+      if (screen === "play" && !SW) resize();
+      if (screen === "play" && SW > 0) { update(dt); draw(); }
+      requestAnimationFrame(frame);
+    }
+
+    // ---------- Styring: et tryk slipper lianen (og griber den næste) ----------
+    stage.addEventListener("pointerdown", (e) => {
+      if (!G) return;
+      e.preventDefault();
+      onTap();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (screen !== "play" || (e.key !== " " && e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+      if (e.repeat) return;
+      e.preventDefault();
+      onTap();
+    });
+
+    // ---------- Dyrebogen ----------
+    // Viser junglens dyr som kort. Et tryk viser dyret stort, og en dansk stemme fortæller fakta (lyd/<id>.mp3, se fakta.js).
+    // Den bruges også til at vælge abe (mode "apes").
+    const heard = new Set((() => { try { return JSON.parse(read("fakta", "[]")); } catch { return []; } })());
+    const FN = { mode: "world", w: 0, list: [], groups: [], idx: -1, onDone: null, ctx: null, play: "idle", raf: 0, flies: [], last: 0, swipe: null };
+    const nameOf = (id) => AR.nameOf(id);
+    const apeOf = (id) => MONKEYS.find((m) => m.id === id);
+    const ROLE_TXT = {
+      friend: (id) => `Ven · ${SP[id].pts} point`,
+      predator: () => "Rovdyr · hold dig væk!",
+      hazard: () => "Farlig · rør ikke!",
+      ape: (id) => (id === apeId ? "Din abe" : "Spilbar abe")
+    };
+    const PRED_TIP = {
+      floor: "Den løber på jorden og springer efter dig, hvis du hænger lavt. Hold dig højt oppe!",
+      air: "Den flyver efter dig. Skift højde, når du ser den komme!",
+      hang: "Den hænger fra grenene. Sving forbi i god afstand!"
+    };
+    const ROLE_TIP = {
+      friend: (id) => `Rør den, så får du ${SP[id].pts} bonuspoint.`,
+      predator: (id) => PRED_TIP[SP[id].beh],
+      hazard: () => "Den kan ikke spises, og den forsvarer sig, hvis du rører den. Hold afstand!",
+      ape: (id) => (id === apeId ? "Det er den abe, du spiller som lige nu." : "Du kan vælge denne abe som din helt.")
+    };
+    const heroMode = (id) => {
+      const s = SP[id];
+      if (!s) return "sit";
+      if (s.role === "friend") return s.beh === "fly" ? "fly" : "sit";
+      if (s.role === "predator") return s.beh === "floor" ? "move" : s.beh === "air" ? "fly" : "sit";
+      return s.beh === "air" ? "fly" : s.beh === "thread" ? "hang" : "sit";
+    };
+
+    function faunaGroups(w) {
+      const W = WORLDS[w];
+      return [
+        { key: "friend", title: "Venner", sub: "Rør dem for bonuspoint", ids: W.friends },
+        { key: "predator", title: "Rovdyr", sub: "De fanger dig. Hold dig væk!", ids: W.predators },
+        { key: "hazard", title: "Farer", sub: "Rør dem ikke", ids: W.hazards }
+      ].filter((g) => g.ids.length);
+    }
+    const roleOf = (id) => (SP[id] ? SP[id].role : "ape");
+
+    // Hvert dyr tegnes, så det fylder rammen: først måles dyrets rammer (alle dyr har forskellig form), så skaleres det
+    const boxCache = {};
+    function boxOf(id) {
+      if (boxCache[id]) return boxCache[id];
+      const S = 760;
+      const c0 = document.createElement("canvas");
+      c0.width = c0.height = S;
+      const c = c0.getContext("2d", { willReadFrequently: true });
+      c.translate(S / 2, S / 2);
+      const mode = heroMode(id);
+      AR.draw(c, id, { r: 100, t: 0, mode, len: SP[id] && SP[id].len ? SP[id].len / SP[id].size : 5 });
+      const d = c.getImageData(0, 0, S, S).data;
+      let x0 = S, x1 = 0, y0 = S, y1 = 0;
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+        if (d[(y * S + x) * 4 + 3] > 24) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      if (x1 <= x0) { x0 = -100; x1 = 100; y0 = -100; y1 = 100; } else { x0 -= S / 2; x1 -= S / 2; y0 -= S / 2; y1 -= S / 2; }
+      return (boxCache[id] = { x0, x1, y0, y1 });
+    }
+    function paintAnimal(c, id, w, h, t, pad, bottom, o) {
+      const b = boxOf(id);
+      const k = Math.min(w * (1 - 2 * pad) / (b.x1 - b.x0), (h - bottom) * (1 - 2 * pad) / (b.y1 - b.y0));
+      c.save();
+      c.translate(w / 2 - (b.x0 + b.x1) / 2 * k, (h - bottom) / 2 - (b.y0 + b.y1) / 2 * k);
+      AR.draw(c, id, Object.assign({ r: 100 * k, t, mode: heroMode(id), len: SP[id] && SP[id].len ? SP[id].len / SP[id].size : 5 }, o));
+      c.restore();
+    }
+    const thumbs = {};
+    function thumb(id) {
+      if (thumbs[id]) return thumbs[id];
+      const c0 = document.createElement("canvas");
+      c0.width = 270; c0.height = 180;
+      paintAnimal(c0.getContext("2d"), id, 270, 180, 0, .06, 0);
+      return (thumbs[id] = c0.toDataURL());
+    }
+
+    function updateFaunaProgress() {
+      const ids = FN.list;
+      const n = ids.filter((id) => heard.has(id)).length;
+      $("fnProgFill").style.width = `${ids.length ? Math.round(100 * n / ids.length) : 0}%`;
+      $("fnProgText").textContent = n === ids.length && n ? `Du har mødt alle ${n} dyr` : `${n} af ${ids.length} ${FN.mode === "apes" ? "aber hørt" : "dyr mødt"}`;
+      for (const el of document.querySelectorAll(".fn-tile")) el.classList.toggle("heard", heard.has(el.dataset.id));
+    }
+    function markHeard(id) {
+      if (!id || heard.has(id)) return;
+      heard.add(id);
+      write("fakta", JSON.stringify([...heard]));
+      updateFaunaProgress();
+      renderHome();
+    }
+
+    function renderFaunaGrid() {
+      const grid = $("fnGrid");
+      grid.replaceChildren();
+      let n = 0;
+      for (const g of FN.groups) {
+        const sec = document.createElement("section");
+        sec.className = `fn-group ${g.key}`;
+        sec.innerHTML = `<h4><i></i><b>${g.title}</b><span>${g.sub}</span></h4>`;
+        const wrap = document.createElement("div");
+        wrap.className = "fn-tiles";
+        for (const id of g.ids) {
+          const b = document.createElement("button");
+          b.type = "button";
+          const lockedApe = FN.mode === "apes" && !apeUnlocked(id);
+          b.className = `fn-tile${lockedApe ? " locked" : ""}${FN.mode === "apes" && id === apeId ? " picked" : ""}`;
+          b.dataset.id = id;
+          b.style.setProperty("--i", n++);
+          b.setAttribute("aria-label", nameOf(id));
+          const extra = g.key === "friend" ? `<span class="pt">+${SP[id].pts}</span>` : "";
+          b.innerHTML = `<img alt="" src="${thumb(id)}"><span class="nm">${lockedApe ? `🔒 Klar ${WORLDS[apeOf(id).after].da}` : nameOf(id)}</span>${extra}<span class="tick" aria-hidden="true">✓</span>`;
+          b.addEventListener("click", () => { audio(); if (lockedApe) { b.animate([{ transform: "translateX(0)" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "translateX(0)" }], { duration: 260 }); return; } openDetail(id); });
+          wrap.append(b);
+        }
+        sec.append(wrap);
+        grid.append(sec);
+      }
+    }
+
+    // Lydafspilning af fakta (samme afspiller som ordene)
+    function setPlayUi(st) {
+      FN.play = st;
+      const on = st === "playing";
+      $("fnPlay").classList.toggle("speaking", on && FN.ctx !== "intro");
+      $("fnIntro").classList.toggle("speaking", on && FN.ctx === "intro");
+      $("fnPlayTxt").textContent = on ? "Pause" : st === "paused" ? "Fortsæt" : heard.has(FN.ctx) ? "Hør igen" : "Hør fakta";
+      $("fnPlaySub").textContent = muted ? "Lyden er slået fra i ⚙️" : on ? "Lytter …" : "Lyt og lær";
+      if (st === "idle") $("fnBar").style.width = "0";
+    }
+    function faunaAudioStopped() { if ($("fauna").hidden === false || FN.play !== "idle") setPlayUi("idle"); }
+    function playFact(file, ctxId) {
+      stopSpeech();
+      FN.ctx = ctxId;
+      const token = ++factToken;
+      const finish = () => { if (token !== factToken) return; if (ctxId !== "intro") markHeard(ctxId); setPlayUi("idle"); };
+      if (muted) { setPlayUi("idle"); if (ctxId !== "intro") markHeard(ctxId); return; }
+      setPlayUi("playing");
+      clip.onended = finish;
+      clip.onerror = finish;
+      clip.ontimeupdate = () => {
+        if (token !== factToken || !clip.duration) return;
+        const p = clip.currentTime / clip.duration;
+        $("fnBar").style.width = `${Math.round(p * 100)}%`;
+        if (p > .6 && ctxId !== "intro") markHeard(ctxId);
+      };
+      clip.src = `lyd/${file}`;
+      const p = clip.play();
+      if (p && p.catch) p.catch(() => { if (token === factToken) setPlayUi("idle"); });
+    }
+    const playIntro = () => playFact(`verden-${WORLDS[FN.w].id}.mp3`, "intro");
+
+    function showFaunaGrid() {
+      FN.idx = -1;
+      document.querySelector(".card.fauna").classList.remove("detail");
+      $("fnDetail").hidden = true;
+      $("fnGrid").hidden = false;
+      $("fnHint").hidden = false;
+      $("fnBody").scrollTop = 0;
+      cancelAnimationFrame(FN.raf);
+      FN.raf = 0;
+    }
+    function updatePick(id) {
+      const pk = $("fnPick");
+      pk.hidden = !(FN.mode === "apes");
+      if (pk.hidden) return;
+      pk.textContent = id === apeId ? "✓ Du spiller som denne abe" : `Spil som ${nameOf(id)}`;
+      pk.disabled = id === apeId;
+    }
+    function openDetail(id) {
+      const idx = FN.list.indexOf(id);
+      if (idx < 0) return;
+      FN.idx = idx;
+      const info = INFO[id] || { latin: "", str: "", lever: "", tegn: [], tekst: "" };
+      const role = roleOf(id);
+      const d = $("fnDetail");
+      d.className = `fn-detail ${role}`;
+      d.hidden = false;
+      document.querySelector(".card.fauna").classList.add("detail");
+      d.style.animation = "none";
+      void d.offsetWidth;
+      d.style.animation = "";
+      $("fnGrid").hidden = true;
+      $("fnHint").hidden = true;
+      $("fnBody").scrollTop = 0;
+      const W = WORLDS[FN.mode === "apes" ? Math.min(done, WORLDS.length - 1) : FN.w];
+      $("fnHero").style.background = `linear-gradient(${W.sky[0]}, ${W.sky[1]} 55%, ${W.sky[2]})`;
+      $("fnName").textContent = nameOf(id);
+      $("fnLatin").textContent = info.latin;
+      $("fnText").textContent = info.tekst;
+      $("fnRoleTxt").textContent = ROLE_TXT[role](id);
+      $("fnCount").textContent = `${idx + 1} / ${FN.list.length}`;
+      const third = role === "friend" ? ["Point", `${SP[id].pts} point`] : role === "ape" ? ["Låses op", apeOf(id).after < 0 ? "Fra start" : `Klar ${WORLDS[apeOf(id).after].da}`] : ["Fare", role === "predator" ? "Rovdyr" : "Forsvarer sig"];
+      $("fnStats").innerHTML = `<div class="fn-stat"><small>Størrelse</small><b>${info.str}</b></div><div class="fn-stat"><small>Bor</small><b>${info.lever}</b></div><div class="fn-stat"><small>${third[0]}</small><b>${third[1]}</b></div>`;
+      $("fnTegn").innerHTML = info.tegn.map((t) => `<li>${t}</li>`).join("");
+      $("fnTip").textContent = ROLE_TIP[role](id);
+      updatePick(id);
+      FN.flies = Array.from({ length: 14 }, () => ({ x: Math.random(), y: Math.random(), r: .004 + Math.random() * .006, v: .02 + Math.random() * .03, ph: Math.random() * 6.3 }));
+      setPlayUi("idle");
+      FN.ctx = id;
+      playFact(`${id}.mp3`, id);
+      startHero();
+    }
+
+    // Stort, levende billede: junglens farver, lysstråler, svævende støv og dyret, der bevæger sig blidt
+    const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function sizeHero() {
+      const c0 = $("fnCv");
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const w = c0.clientWidth;
+      const h = c0.clientHeight;
+      if (!w || !h) return null;
+      if (c0.width !== Math.round(w * dpr) || c0.height !== Math.round(h * dpr)) { c0.width = Math.round(w * dpr); c0.height = Math.round(h * dpr); }
+      return { cv: c0, w, h, dpr };
+    }
+    function heroFrame(now) {
+      if ($("fauna").hidden || $("fnDetail").hidden) { FN.raf = 0; return; }
+      const z = sizeHero();
+      if (z) {
+        const c = z.cv.getContext("2d");
+        const { w, h } = z;
+        const t = REDUCED ? 0 : now / 1000;
+        const dt = Math.min(.05, (now - (FN.last || now)) / 1000);
+        FN.last = now;
+        const id = FN.list[FN.idx];
+        const acc = { friend: "74,222,128", predator: "251,113,133", hazard: "251,191,36", ape: "253,224,71" }[roleOf(id)];
+        c.setTransform(z.dpr, 0, 0, z.dpr, 0, 0);
+        c.clearRect(0, 0, w, h);
+        for (let i = 0; i < 4; i++) { // lysstråler gennem løvet
+          const x = w * (.1 + .26 * i) + Math.sin(t * .35 + i * 1.7) * w * .05;
+          const g = c.createLinearGradient(x, 0, x + w * .1, h * .85);
+          g.addColorStop(0, "rgba(255,255,210,.28)"); g.addColorStop(1, "rgba(255,255,210,0)");
+          c.fillStyle = g; c.beginPath(); c.moveTo(x, 0); c.lineTo(x + w * .13, 0); c.lineTo(x + w * .32, h); c.lineTo(x + w * .12, h); c.closePath(); c.fill();
+        }
+        const halo = c.createRadialGradient(w / 2, h * .46, 0, w / 2, h * .46, Math.max(w, h) * .55);
+        halo.addColorStop(0, `rgba(${acc},.3)`); halo.addColorStop(1, `rgba(${acc},0)`);
+        c.fillStyle = halo; c.fillRect(0, 0, w, h);
+        for (const b of FN.flies) { // svævende støv og ildfluer
+          b.y -= b.v * dt; if (b.y < -.05) { b.y = 1.05; b.x = Math.random(); }
+          c.fillStyle = `rgba(255,255,180,${.35 + .25 * Math.sin(t * 2 + b.ph)})`;
+          c.beginPath(); c.arc((b.x + Math.sin(t * 1.1 + b.ph) * .015) * w, b.y * h, b.r * Math.min(w, h), 0, 6.3); c.fill();
+        }
+        const mode = heroMode(id);
+        const perch = mode === "sit" && roleOf(id) !== "ape" || mode === "move" || (roleOf(id) === "ape");
+        let bottom = 0;
+        if (perch) { // en gren under dyret
+          bottom = h * .12;
+          c.lineCap = "round"; c.strokeStyle = "#5a3d1e"; c.lineWidth = h * .035;
+          c.beginPath(); c.moveTo(w * .12, h - bottom * .55); c.quadraticCurveTo(w * .5, h - bottom * .8, w * .88, h - bottom * .5); c.stroke();
+          c.strokeStyle = "#8a6a38"; c.lineWidth = h * .01; c.beginPath(); c.moveTo(w * .16, h - bottom * .62); c.quadraticCurveTo(w * .5, h - bottom * .9, w * .84, h - bottom * .58); c.stroke();
+        }
+        c.save();
+        if (!perch) c.translate(0, Math.sin(t * 1.3) * h * .014);
+        c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 24; c.shadowOffsetY = 10;
+        paintAnimal(c, id, w, h, t, .13, bottom, { angry: roleOf(id) === "predator" || roleOf(id) === "hazard" ? false : false });
+        c.restore();
+        const vg = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .35, w / 2, h / 2, Math.max(w, h) * .75);
+        vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,20,8,.42)");
+        c.fillStyle = vg; c.fillRect(0, 0, w, h);
+      }
+      FN.raf = REDUCED ? 0 : requestAnimationFrame(heroFrame);
+    }
+    function startHero() {
+      cancelAnimationFrame(FN.raf);
+      FN.last = 0;
+      FN.raf = requestAnimationFrame(heroFrame);
+    }
+    function step(dir) {
+      const n = FN.list.length;
+      if (FN.idx < 0 || n < 2) return;
+      openDetail(FN.list[(FN.idx + dir + n) % n]);
+    }
+
+    function openFaunaOverlay() {
+      showFaunaGrid();
+      renderFaunaGrid();
+      updateFaunaProgress();
+      setPlayUi("idle");
+      $("fauna").hidden = false;
+    }
+    function showFauna(w, onDone) {
+      FN.mode = "world";
+      FN.w = w;
+      FN.onDone = onDone || null;
+      FN.groups = faunaGroups(w);
+      FN.list = FN.groups.flatMap((g) => g.ids);
+      const W = WORLDS[w];
+      if (onDone) { state = "meet"; $("startHint").hidden = true; hidePop(); }
+      $("fnEyebrow").textContent = `Jungle ${w + 1} af ${WORLDS.length} · ${W.land}`;
+      $("fnDots").innerHTML = WORLDS.map((_, i) => `<i class="${i === w ? "on" : ""}"></i>`).join("");
+      $("fnTitle").textContent = W.da;
+      $("fnSub").textContent = `${W.fact}.`;
+      $("fnIntro").hidden = false;
+      $("faunaGo").textContent = !onDone ? "Færdig" : G.newWords.length || G.reviewWords.length ? "Videre til ordene →" : "Lad os svinge →";
+      openFaunaOverlay();
+      FN.ctx = "intro";
+      setTimeout(() => { if (!$("fauna").hidden && FN.idx < 0 && FN.mode === "world" && FN.w === w) playIntro(); }, 600);
+    }
+    // Aberne: vælg, hvem du vil spille som. Nye aber låses op, når du klarer junglerne.
+    function showApeBook() {
+      FN.mode = "apes";
+      FN.onDone = null;
+      FN.groups = [{ key: "ape", title: "Aberne", sub: "Klar junglerne for at låse nye op", ids: MONKEYS.map((m) => m.id) }];
+      FN.list = unlockedApes().map((m) => m.id);
+      $("fnEyebrow").textContent = `${FN.list.length} af ${MONKEYS.length} aber`;
+      $("fnDots").innerHTML = MONKEYS.map((m) => `<i class="${apeUnlocked(m.id) ? "on" : ""}"></i>`).join("");
+      $("fnTitle").textContent = "Vælg din abe";
+      $("fnSub").textContent = "Tryk på en abe for at høre om den og vælge den.";
+      $("fnIntro").hidden = true;
+      $("faunaGo").textContent = "Færdig";
+      openFaunaOverlay();
+    }
+    function closeFauna() {
+      stopSpeech();
+      showFaunaGrid();
+      $("fauna").hidden = true;
+      const cb = FN.onDone;
+      FN.onDone = null;
+      if (cb) { audio(); cb(); } else renderHome();
+    }
+    $("faunaGo").addEventListener("click", closeFauna);
+    $("fnBack").addEventListener("click", () => { stopSpeech(); showFaunaGrid(); if (FN.mode === "apes") renderFaunaGrid(); });
+    $("fnPrev").addEventListener("click", () => step(-1));
+    $("fnNext").addEventListener("click", () => step(1));
+    $("fnPick").addEventListener("click", () => {
+      const id = FN.list[FN.idx];
+      if (!id || !apeUnlocked(id)) return;
+      apeId = id;
+      write("abe", id);
+      sfx.levelup();
+      updatePick(id);
+      $("fnRoleTxt").textContent = ROLE_TXT.ape(id);
+      $("fnTip").textContent = ROLE_TIP.ape(id);
+      renderHome();
+    });
+    $("fnIntro").addEventListener("click", () => {
+      audio();
+      if (FN.play === "playing" && FN.ctx === "intro") { stopSpeech(); setPlayUi("idle"); return; }
+      showFaunaGrid();
+      playIntro();
+    });
+    $("fnPlay").addEventListener("click", () => {
+      audio();
+      const id = FN.list[FN.idx];
+      if (FN.play === "playing" && FN.ctx === id) { clip.pause(); setPlayUi("paused"); }
+      else if (FN.play === "paused" && FN.ctx === id) { setPlayUi("playing"); const p = clip.play(); if (p && p.catch) p.catch(() => setPlayUi("idle")); }
+      else playFact(`${id}.mp3`, id);
+    });
+    // Stryg til siden på billedet for at skifte dyr
+    $("fnHero").addEventListener("pointerdown", (e) => { FN.swipe = { x: e.clientX, y: e.clientY }; });
+    $("fnHero").addEventListener("pointerup", (e) => {
+      const s0 = FN.swipe;
+      FN.swipe = null;
+      if (s0 && Math.abs(e.clientX - s0.x) > 55 && Math.abs(e.clientX - s0.x) > Math.abs(e.clientY - s0.y) * 1.5) step(e.clientX < s0.x ? 1 : -1);
+    });
+    document.addEventListener("keydown", (e) => {
+      if ($("fauna").hidden) return;
+      if (e.key === "ArrowRight") step(1);
+      else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "Escape") { if (FN.idx >= 0) { stopSpeech(); showFaunaGrid(); } else closeFauna(); }
+    });
+    window.addEventListener("resize", () => { if (!$("fauna").hidden && !$("fnDetail").hidden && !FN.raf) { FN.raf = requestAnimationFrame(heroFrame); } });
+    window.addEventListener("topbar:sound", () => { if (!$("fauna").hidden) setPlayUi(FN.play); });
+
+    // ---------- Ny abe låst op ----------
+    let unRaf = 0;
+    let unAfter = null;
+    function showUnlock(m, proceed) {
+      unAfter = proceed;
+      $("unName").textContent = m.da;
+      $("unText").textContent = `Du har klaret junglen og fået en ny abe: ${m.da}! ${(INFO[m.id] && INFO[m.id].lever) || ""}`;
+      $("unPick").textContent = `Spil som ${m.da}`;
+      $("unPick").dataset.id = m.id;
+      $("unlock").hidden = false;
+      sfx.fanfare();
+      playFact(`${m.id}.mp3`, m.id);
+      const c0 = $("unCv");
+      const c = c0.getContext("2d");
+      cancelAnimationFrame(unRaf);
+      const loop = (now) => {
+        if ($("unlock").hidden) return;
+        const t = now / 1000;
+        c.setTransform(1, 0, 0, 1, 0, 0);
+        c.clearRect(0, 0, 480, 480);
+        for (let i = 0; i < 12; i++) { // stråler
+          c.save(); c.translate(240, 250); c.rotate(i * .5236 + t * .2);
+          c.fillStyle = "rgba(255,240,150,.12)"; c.beginPath(); c.moveTo(0, 0); c.lineTo(-30, -300); c.lineTo(30, -300); c.fill(); c.restore();
+        }
+        c.translate(240, 255 - Math.abs(Math.sin(t * 3)) * 14);
+        AR.draw(c, m.id, { r: 150, t, mode: Math.sin(t * .8) > .3 ? "eat" : "sit" });
+        unRaf = requestAnimationFrame(loop);
+      };
+      unRaf = requestAnimationFrame(loop);
+    }
+    function closeUnlock(pick) {
+      stopSpeech();
+      $("unlock").hidden = true;
+      cancelAnimationFrame(unRaf);
+      if (pick) { apeId = $("unPick").dataset.id; write("abe", apeId); }
+      const cb = unAfter;
+      unAfter = null;
+      if (cb) cb();
+    }
+    $("unPick").addEventListener("click", () => closeUnlock(true));
+    $("unGo").addEventListener("click", () => closeUnlock(false));
+
+    // ---------- Quiz (når man bliver fanget) ----------
+    let quiz = null;
+    let lastTarget = null;
+    function choiceCount() {
+      const v = read("valg", "auto");
+      if (v !== "auto") return Number(v);
+      const d = G ? diff() : 0;
+      return d <= 1 ? 2 : d <= 4 ? 3 : 4;
+    }
+    function pickTarget() {
+      const known = ALL.filter((id) => ws(id).seen || G.newWords.includes(id));
+      let pool = known.length ? known : ALL;
+      if (pool.length > 1) pool = pool.filter((id) => id !== lastTarget);
+      return pickWeighted(pool, 1)[0] || pool[0];
+    }
+    // De forkerte billeder er mest ord, barnet har mødt, så det skal kende forskel på dem
+    function pickDistractors(target, count) {
+      const others = ALL.filter((id) => id !== target);
+      const known = shuffle(others.filter((id) => ws(id).seen));
+      const unknown = shuffle(others.filter((id) => !ws(id).seen));
+      const fromKnown = Math.min(known.length, Math.ceil(count * .7));
+      const out = [...known.slice(0, fromKnown), ...unknown.slice(0, count - fromKnown)];
+      for (const id of known.slice(fromKnown)) if (out.length < count) out.push(id);
+      return out;
+    }
+
+    function openQuiz() {
+      state = "quiz";
+      $("startHint").hidden = true;
+      hidePop();
+      const target = pickTarget();
+      lastTarget = target;
+      const n = Math.min(choiceCount(), ALL.length);
+      const options = shuffle([target, ...pickDistractors(target, n - 1)]);
+      quiz = { target, options, locked: false, idle: 0 };
+      const w = WORDS[target];
+      $("quizTa").textContent = w.ta;
+      $("quizTa").className = `tw ${lenCls(w.ta)}`;
+      $("quizRom").textContent = w.rom;
+      $("quizBanner").textContent = "";
+      $("quizBanner").className = "banner";
+      $("quizRetry").hidden = true;
+      const k = G.killer;
+      $("quizIcon").innerHTML = `<img src="${AR.icon(k.id, 54, { mode: heroMode(k.id) === "move" ? "sit" : heroMode(k.id), angry: true, len: SP[k.id].len ? SP[k.id].len / SP[k.id].size : 5 })}" width="54" height="40" alt="">`;
+      const nm = nameOf(k.id).toLowerCase();
+      $("quizWhy").textContent = k.role === "hazard" ? `Av! Du blev stukket af ${nm}` : `Du blev fanget af ${nm}`;
+      const box = $("quizChoices");
+      box.replaceChildren();
+      box.className = `choices n${n}`;
+      box.style.setProperty("--n", n);
+      box.style.setProperty("--cols", n === 3 ? 3 : 2);
+      for (const id of options) {
+        const t = document.createElement("button");
+        t.type = "button";
+        t.className = "tile";
+        t.dataset.id = id;
+        t.setAttribute("aria-label", WORDS[id].da);
+        t.append(pic(id));
+        t.addEventListener("click", () => answer(id, t));
+        box.append(t);
+      }
+      applyRom();
+      refreshNote();
+      sfx.pop();
+      $("quiz").hidden = false;
+      setTimeout(() => { if (quiz && quiz.target === target) speak(target); }, 380);
+    }
+
+    function record(id, ok) {
+      const st = ws(id);
+      if (ok) { st.ok++; st.box = Math.min(3, st.box + 1); } else { st.bad++; st.box = Math.max(0, st.box - 1); }
+      st.seen = true;
+      st.t = Date.now();
+      saveWords();
+    }
+
+    function answer(id, tile) {
+      if (!quiz || quiz.locked) return;
+      quiz.locked = true;
+      const q = quiz;
+      const ok = id === q.target;
+      record(q.target, ok);
+      const tiles = [...$("quizChoices").children];
+      tiles.forEach((t) => { t.disabled = true; });
+      if (ok) {
+        tile.classList.add("right");
+        tiles.forEach((t) => { if (t !== tile) t.classList.add("dim"); });
+        const praise = Object.keys(R.praise)[rnd(Object.keys(R.praise).length)];
+        $("quizBanner").innerHTML = `<span class="tw">${R.praise[praise].ta}</span> ${R.praise[praise].da}`;
+        sfx.right();
+        buzz(30);
+        const minimum = new Promise((r) => setTimeout(r, 1500));
+        const spoken = speak(id).then((d) => (d ? speak(`ros-${praise}`) : false));
+        Promise.all([minimum, spoken]).then(() => { if (quiz === q) closeQuiz(true); });
+      } else {
+        tile.classList.add("wrong");
+        tiles.forEach((t) => {
+          if (t.dataset.id === q.target) t.classList.add("right");
+          else if (t !== tile) t.classList.add("dim");
+        });
+        const w = WORDS[q.target];
+        $("quizBanner").className = "banner bad";
+        $("quizBanner").innerHTML = `<span class="tw">${w.ta}</span> = ${w.da}`;
+        sfx.wrong();
+        speak(id).then((d) => (d ? new Promise((r) => setTimeout(r, 300)).then(() => speak(q.target)) : false));
+        $("quizRetry").hidden = false;
+      }
+    }
+    $("quizRetry").addEventListener("click", () => { if (quiz && quiz.locked) closeQuiz(false); });
+    $("quizWord").addEventListener("click", () => { audio(); if (quiz) speak(quiz.target); });
+    setInterval(() => {
+      if (!quiz || quiz.locked || $("quiz").hidden) return;
+      if (++quiz.idle >= 9) { quiz.idle = 0; speak(quiz.target); }
+    }, 1000);
+
+    function closeQuiz(ok) {
+      quiz = null;
+      stopSpeech();
+      $("quiz").hidden = true;
+      if (!ok) { restartLevel(); return; }
+      resumeRun();
+    }
+
+    // Rigtigt svar: aben hænger igen i den sidste liane, og dyrene er væk. Point og trin er bevaret.
+    function resumeRun() {
+      const v = G.checkpoint || vines[0];
+      ents = [];
+      particles = [];
+      floaters = [];
+      rings = [];
+      mk.shrink = 1;
+      mk.spin = 0;
+      mk.last = null;
+      mk.lastT = 0;
+      camX = Math.max(0, v.x - WV * .3);
+      attach(mk, v, 24, .5, 1.6);
+      G.predCool = 5;
+      G.hazCool = 9;
+      G.frCool = 3;
+      G.lastStatic = -99;
+      beginReady();
+    }
+
+    // Forkert svar: du starter forfra i den samme jungle. Stjernerne beholdes.
+    function restartLevel() {
+      loadWorld(G.w, G.newWords, G.reviewWords);
+      beginReady();
+      toast("Forfra!", "Du starter forfra i junglen");
+    }
+
+    function goHome() {
+      stopSpeech();
+      hidePop();
+      meetToken++;
+      quiz = null;
+      $("quiz").hidden = true;
+      $("meet").hidden = true;
+      $("unlock").hidden = true;
+      $("startHint").hidden = true;
+      state = "home";
+      G = null;
+      mk = null;
+      ents = [];
+      vines = [];
+      bananas = [];
+      renderHome();
+      show("home");
+    }
+    $("playBack").addEventListener("click", goHome);
+
+    // ---------- Indstillinger og start ----------
+    function applyRom() {
+      const hide = read("rom", "1") === "0";
+      for (const el of document.querySelectorAll(".rom, #quizRom")) el.style.display = hide ? "none" : "";
+      fitSoon();
+    }
+    $("optSpeed").value = speedKey;
+    $("optControl").value = easy ? "let" : "normal";
+    $("optControl").addEventListener("change", (e) => { easy = e.target.value !== "normal"; write("styring", easy ? "let" : "normal"); $("startHint").textContent = hintText(); });
+    $("optChoices").value = read("valg", "auto");
+    $("optRom").value = read("rom", "1");
+    $("optSpeed").addEventListener("change", (e) => { write("fart", e.target.value); speedKey = e.target.value; });
+    $("optChoices").addEventListener("change", (e) => write("valg", e.target.value));
+    $("optRom").addEventListener("change", (e) => { write("rom", e.target.value); applyRom(); });
+    $("optFauna").value = read("dyr", "1");
+    $("optFauna").addEventListener("change", (e) => write("dyr", e.target.value));
+
+    $("playBtn").addEventListener("click", () => { audio(); startWorld(selWorld); });
+    $("jungleBtn").addEventListener("click", () => { renderJungles(); show("jungleScreen"); $("jungleScreen").scrollTop = 0; });
+    $("jungleBack").addEventListener("click", () => { renderHome(); show("home"); });
+    $("apeBtn").addEventListener("click", () => { audio(); showApeBook(); });
+    $("faunaBtn").addEventListener("click", () => { audio(); showFauna(selWorld, null); });
+    $("dictBtn").addEventListener("click", () => { renderDict(); show("dictScreen"); $("dictScreen").scrollTop = 0; });
+    $("dictBack").addEventListener("click", () => { stopSpeech(); renderHome(); show("home"); });
+
+    // Siden følger den højde, der faktisk kan ses (iPhone-Safari tæller nogle gange værktøjslinjerne med)
+    const fitViewport = () => {
+      const vv = window.visualViewport;
+      document.documentElement.style.setProperty("--app-h", `${Math.round(vv ? vv.height : window.innerHeight)}px`);
+    };
+    fitViewport();
+    window.addEventListener("resize", fitViewport);
+    window.addEventListener("orientationchange", () => setTimeout(fitViewport, 300));
+    if (window.visualViewport) visualViewport.addEventListener("resize", fitViewport);
+    new ResizeObserver(() => { if (screen === "play") resize(); }).observe(stage);
+    window.addEventListener("resize", () => { if (screen === "play") resize(); });
+
+    Topbar.init({ kid, controls: [$("settings")] });
+    renderHome();
+    startHomeLoop();
+    requestAnimationFrame(frame);
+
+    // Testværktøj: ?l=<jungle 1-7> åbner en jungle direkte, ?klaret=<0-7> låser op. window.__banan giver adgang til tilstanden, og tick(sek) kører spillet frem.
+    window.__banan = {
+      get G() { return G; }, get mk() { return mk; }, get ents() { return ents; }, get vines() { return vines; }, get bananas() { return bananas; }, get state() { return state; },
+      get quiz() { return quiz; }, get camX() { return camX; }, get done() { return done; }, get SW() { return SW; }, get SH() { return SH; }, get u() { return u; },
+      onTap, release, startWorld, answer, closeQuiz, worldDone, sizeUp, caught, addPoints, spawnPredator, spawnHazard, spawnFriend, showFauna, showApeBook, openDetail, showUnlock, afterWorld,
+      setApe(id) { apeId = id; }, heard, WORLDS, SP, MONKEYS, FL, MR,
+      tick(sec) { for (let i = 0; i < sec * 60; i++) update(1 / 60); draw(); }
+    };
+    if (qs.has("l")) startWorld(Math.max(0, (Number(qs.get("l")) || 1) - 1) % WORLDS.length);
+    // ?demo=<sek> (sammen med ?l=) springer dyrebog og ord over, starter og kører spillet frem med dyr på skærmen, til skærmbilleder
+    if (qs.has("demo") && qs.has("l")) {
+      if (!$("fauna").hidden) $("faunaGo").click();
+      if (!$("meet").hidden) $("meetGo").click();
+      onTap();
+      G.grace = 99;
+      for (const id of (qs.get("ents") || "").split(",").filter(Boolean)) ents.push(makeEnt(id, SP[id].beh === "floor" ? { x: mk.x + 25, y: FL - SP[id].size, state: "run" } : SP[id].beh === "air" ? { x: mk.x + 30, y: 25, vx: -10 } : SP[id].beh === "hang" ? { x: mk.x + 30, hang: SP[id].len * .7 } : SP[id].beh === "fly" ? { x: mk.x + 35, y: 25, vx: -8 } : { x: mk.x + 35, y: 28 }));
+      window.__banan.tick(Number(qs.get("demo")) || 1);
+    }
+    // ?bog=<id> (sammen med ?l=) åbner dyrebogen på et dyr
+    if (qs.has("bog") && qs.has("l")) openDetail(qs.get("bog"));
+    if (qs.get("vis") === "aber") showApeBook();
+    if (qs.get("vis") === "ny") showUnlock(MONKEYS[Math.min(done, MONKEYS.length - 1)], () => {});
+  })();
+  </script>
+</body>
+</html>

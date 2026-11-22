@@ -819,6 +819,34 @@
           </div>
         </div>
       </a>
+      <a class="game" data-for="ari" href="spil/hej-banan/hej-banan.html?barn=ari">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="hbA" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#bff0d2"/><stop offset=".55" stop-color="#3fae6a"/><stop offset="1" stop-color="#0d5a30"/></linearGradient>
+            <linearGradient id="hbB" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff08a"/><stop offset="1" stop-color="#e0a800"/></linearGradient>
+          </defs>
+          <rect width="500" height="340" fill="url(#hbA)"/>
+          <path d="M-10 0H510V50C440 80 380 40 310 70C240 100 180 50 110 80C60 100 20 70 -10 90Z" fill="#0b4a26"/>
+          <path d="M70 70C60 150 90 200 80 240M250 60C262 130 238 190 250 230M420 70C410 140 440 190 430 230" fill="none" stroke="#6b4a22" stroke-width="8" stroke-linecap="round"/>
+          <path d="M70 70C95 150 150 120 200 175" fill="none" stroke="#7a5a2a" stroke-width="7" stroke-linecap="round" opacity=".0"/>
+          <g transform="translate(250 150)">
+            <circle cx="0" cy="0" r="46" fill="#6b4630"/><circle cx="-38" cy="-4" r="16" fill="#6b4630"/><circle cx="38" cy="-4" r="16" fill="#6b4630"/>
+            <ellipse cx="0" cy="8" rx="32" ry="30" fill="#e8c9a0"/><circle cx="-14" cy="-6" r="7" fill="#fff"/><circle cx="14" cy="-6" r="7" fill="#fff"/><circle cx="-13" cy="-5" r="3.6" fill="#2b1a0e"/><circle cx="15" cy="-5" r="3.6" fill="#2b1a0e"/>
+            <path d="M-14 20Q0 32 14 20" fill="none" stroke="#5a2a1a" stroke-width="4" stroke-linecap="round"/>
+          </g>
+          <g transform="translate(120 245) rotate(-20)"><path d="M-34 16C-18 48 34 38 40 -20C30 -4 10 14 -34 16Z" fill="url(#hbB)" stroke="#9a6a00" stroke-width="3"/></g>
+          <g transform="translate(395 255) rotate(15) scale(.9)"><path d="M-34 16C-18 48 34 38 40 -20C30 -4 10 14 -34 16Z" fill="url(#hbB)" stroke="#9a6a00" stroke-width="3"/></g>
+          <g fill="#2fa150"><ellipse cx="60" cy="40" rx="30" ry="12" transform="rotate(25 60 40)"/><ellipse cx="440" cy="36" rx="30" ry="12" transform="rotate(-25 440 36)"/></g>
+        </svg>
+        <div class="info">
+          <h2>Hej Banan</h2>
+          <p>Sving fra træ til træ i 7 jungler, spis bananer, mød dyrene, og lås nye aber op.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="banan-ari-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
       <a class="game" data-for="riyana" href="spil/urundai/urundai.html?barn=riyana">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <defs>
@@ -984,7 +1012,7 @@
       <button class="menu-item" id="sound-toggle" type="button">🔊 Lyd: til</button>
       <button class="menu-item danger" id="reset" type="button">🗑️ Nulstil stjerner</button>
       <p class="offline-status" id="offline-status" aria-live="polite"></p>
-      <p class="version" id="version">Version 1.38.1</p>
+      <p class="version" id="version">Version 1.39.0</p>
     </div>
   </div>
 
@@ -1137,7 +1165,7 @@
     }
 
     // Nulstil stjerner og fremskridt. Nye spil skal bruge et præfiks herfra til deres nøgler i localStorage.
-    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-", "dino-", "farvehave-", "urundai-", "haj-", "tamil-"];
+    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-", "dino-", "farvehave-", "urundai-", "haj-", "banan-", "tamil-"];
     const resetDialog = document.getElementById("reset-dialog");
     document.getElementById("reset").addEventListener("click", () => resetDialog.showModal());
     document.getElementById("reset-cancel").addEventListener("click", () => resetDialog.close());
