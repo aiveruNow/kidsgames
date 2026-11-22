@@ -459,7 +459,8 @@
 
     <div class="sizes" role="group" aria-label="Ordniveau">
       <span>Ord:</span>
-      <button class="size" type="button" data-size="3">Let<small>lydrette ord</small></button>
+      <button class="size" type="button" data-size="2">Start<small>2 · lydrette ord</small></button>
+      <button class="size" type="button" data-size="3">Let<small>3 · lydrette ord</small></button>
       <button class="size" type="button" data-size="4">Mellem<small>4 · blandede ord</small></button>
       <button class="size" type="button" data-size="5">Svær<small>5 · blandede ord</small></button>
     </div>
@@ -665,11 +666,13 @@
     const load = (key, fallback) => { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; } };
     const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* ingen lagring */ } };
 
-    const phonicsDefaultApplied = load("leo-phonics-default-v1", false);
-    let size = phonicsDefaultApplied && [3, 4, 5].includes(load("leo-size", 3)) ? load("leo-size", 3) : 3;
-    if (!phonicsDefaultApplied) {
-      save("leo-size", 3);
+    // Alle starter på trinnet med 2 bogstaver, én gang; derefter gemmes det valgte niveau
+    const startTwoApplied = load("leo-start-2-v1", false);
+    let size = startTwoApplied && [2, 3, 4, 5].includes(load("leo-size", 2)) ? load("leo-size", 2) : 2;
+    if (!startTwoApplied) {
+      save("leo-size", 2);
       save("leo-phonics-default-v1", true);
+      save("leo-start-2-v1", true);
     }
     let WORDS = WORD_SETS[size];
     let stars = load("leo-stars", 0);
