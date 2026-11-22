@@ -256,6 +256,116 @@
     #toast span { color: #fde68a; font-weight: 800; }
     @keyframes toastIn { 0% { opacity: 0; transform: translate(-50%, 14px) scale(.85); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 20% { transform: translate(-50%, 0) scale(1); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -12px); } }
 
+    /* ===== Havets dyr: dyrebogen i starten af hver runde (2027: glas, store billeder, lyd med fakta) ===== */
+    #fauna { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+    .card.fauna { width: min(100%, 1040px); height: min(100%, 900px); max-height: none; align-self: center; justify-self: center; padding: 0; gap: 0; align-items: stretch; overflow: hidden; border-radius: 34px; }
+    .fn-head { flex: none; display: grid; gap: 8px; padding: 18px 22px 12px; background: linear-gradient(#ffffff17, #ffffff00); }
+    .fn-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .fn-dots { display: flex; align-items: center; gap: 5px; }
+    .fn-dots i { width: 16px; height: 5px; border-radius: 3px; background: #ffffff33; transition: width .3s; }
+    .fn-dots i.on { width: 30px; background: linear-gradient(90deg, #5eead4, #a3e635); box-shadow: 0 0 12px #5eead499; }
+    .fn-head h2 { margin: 0; font-size: clamp(1.7rem, 6.5vw, 2.5rem); font-weight: 800; line-height: 1.05; letter-spacing: -.03em; background: linear-gradient(180deg, #fff 30%, #a5f3fc); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+    .fn-sub { margin: 0; color: #bae6fde0; font-size: .95rem; font-weight: 600; line-height: 1.35; }
+    .fn-row { display: flex; align-items: center; gap: 10px; }
+    .fn-pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: 40px; padding: 6px 16px 6px 12px; border: 1px solid #ffffff38; border-radius: 999px; background: #ffffff1a; color: #fff; font-size: .88rem; font-weight: 800; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), background .2s; }
+    .fn-pill:active { transform: scale(.95); }
+    .fn-pill.speaking { background: #5eead42e; border-color: #5eead499; }
+    .fn-pill .wave { height: 16px; }
+    .fn-pill .wave i { opacity: 1; }
+    .fn-prog { position: relative; flex: 1; min-width: 0; height: 32px; overflow: hidden; border: 1px solid #ffffff24; border-radius: 999px; background: #ffffff14; }
+    .fn-prog i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, #5eead4aa, #a3e635aa); transition: width .5s cubic-bezier(.16, 1, .3, 1); }
+    .fn-prog span { position: absolute; inset: 0; display: grid; place-items: center; font-size: .8rem; font-weight: 800; color: #fff; }
+
+    .card.fauna.detail .fn-sub, .card.fauna.detail .fn-row { display: none; }
+    .card.fauna.detail .fn-head { padding-bottom: 4px; }
+    .card.fauna.detail .fn-head h2 { font-size: clamp(1.3rem, 5vw, 1.7rem); }
+    .fn-body { position: relative; flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 2px 18px 18px; scrollbar-width: thin; }
+    .fn-group { --acc: #4ade80; margin-top: 12px; }
+    .fn-group.evil { --acc: #fb7185; }
+    .fn-group.hazard { --acc: #fbbf24; }
+    .fn-group h4 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 9px; margin: 0 2px 10px; color: #fff; font-size: 1.02rem; font-weight: 800; }
+    .fn-group h4 i { width: 10px; height: 10px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 12px var(--acc); }
+    .fn-group h4 span { color: #ffffffa6; font-size: .78rem; font-weight: 700; }
+    .fn-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+    .fn-tile { --acc: inherit; position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 8px 6px 10px; overflow: hidden; border: 1px solid #ffffff2e; border-radius: 22px; background: linear-gradient(180deg, #ffffff26, #ffffff0a); color: #fff; box-shadow: 0 10px 24px #0000004d, inset 0 1px 0 #ffffff40; animation: tileIn .55s cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--i, 0) * 32ms); transition: transform .25s cubic-bezier(.2, .9, .3, 1.4), border-color .2s, box-shadow .2s; }
+    .fn-tile::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 4%; width: 120%; aspect-ratio: 1; transform: translateX(-50%); background: radial-gradient(closest-side, var(--acc), #0000); opacity: .26; }
+    .fn-tile:hover { transform: translateY(-3px); border-color: #ffffff66; }
+    .fn-tile:active { transform: scale(.95); }
+    .fn-tile img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: contain; filter: drop-shadow(0 6px 8px #0007); pointer-events: none; }
+    .fn-tile .nm { display: grid; place-items: center; min-height: 2.3em; font-size: .8rem; font-weight: 800; line-height: 1.15; text-align: center; overflow-wrap: anywhere; }
+    .fn-tile .pt { position: absolute; left: 7px; top: 7px; padding: 1px 8px; border-radius: 999px; background: #0000004d; color: #fde68a; font-size: .7rem; font-weight: 900; }
+    .fn-tile .tick { position: absolute; right: 7px; top: 7px; display: none; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #22c55e; color: #fff; font-size: 12px; font-weight: 900; box-shadow: 0 3px 8px #0006; }
+    .fn-tile.heard .tick { display: grid; }
+    .fn-hint { margin: 14px 4px 0; color: #ffffff8c; font-size: .82rem; font-weight: 700; text-align: center; }
+    @keyframes tileIn { from { opacity: 0; transform: translateY(14px) scale(.94); } }
+
+    .fn-detail { --acc: #4ade80; display: grid; gap: 14px; padding-top: 6px; animation: fnIn .5s cubic-bezier(.16, 1, .3, 1); }
+    .fn-detail.evil { --acc: #fb7185; }
+    .fn-detail.hazard { --acc: #fbbf24; }
+    @keyframes fnIn { from { opacity: 0; transform: translateY(18px) scale(.98); filter: blur(5px); } }
+    .fn-hero { position: relative; aspect-ratio: 4 / 3; max-height: 52dvh; width: 100%; overflow: hidden; border: 1px solid #ffffff3d; border-radius: 28px; box-shadow: 0 24px 50px #00000066, 0 0 0 1px #ffffff0f, inset 0 1px 0 #ffffff40; touch-action: pan-y; }
+    .fn-hero canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+    .fn-hbtn { position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 4px 14px; border: 1px solid #ffffff38; border-radius: 999px; background: #081c3278; color: #fff; font-size: .82rem; font-weight: 800; backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
+    .fn-hbtn:active { transform: scale(.95); }
+    #fnBack { left: 10px; top: 10px; }
+    #fnRole { right: 10px; bottom: 10px; cursor: default; gap: 7px; }
+    #fnRole i { width: 9px; height: 9px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); }
+    #fnCount { left: 10px; bottom: 10px; min-height: 30px; padding: 2px 12px; font-size: .75rem; letter-spacing: .06em; pointer-events: none; }
+    .fn-nav { position: absolute; z-index: 2; top: 50%; display: grid; place-items: center; width: 46px; height: 46px; padding: 0 0 3px; transform: translateY(-50%); border: 1px solid #ffffff38; border-radius: 50%; background: #081c3278; color: #fff; font-size: 1.7rem; font-weight: 700; line-height: 1; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); }
+    .fn-nav:active { transform: translateY(-50%) scale(.9); }
+    #fnPrev { left: 8px; }
+    #fnNext { right: 8px; }
+    .fn-info { display: grid; gap: 12px; align-content: start; min-width: 0; }
+    .fn-name h3 { margin: 0; color: #fff; font-size: clamp(1.8rem, 7vw, 2.7rem); font-weight: 800; line-height: 1.05; letter-spacing: -.03em; text-align: left; }
+    .fn-latin { margin: 3px 0 0; color: #a5f3fc; font-size: 1rem; font-style: italic; font-weight: 600; }
+    .fn-play { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; width: 100%; padding: 10px 16px 10px 10px; overflow: hidden; border: 1px solid #ffffff38; border-radius: 22px; background: linear-gradient(180deg, #ffffff29, #ffffff0d); color: #fff; text-align: left; box-shadow: 0 12px 28px #0000004d, inset 0 1px 0 #ffffff40; transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); }
+    .fn-play:active { transform: scale(.98); }
+    .fn-play .ico { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #5eead4, #22d3ee 60%, #38bdf8); color: #032a33; box-shadow: 0 8px 20px #22d3ee66; }
+    .fn-play .ico svg { width: 20px; height: 20px; fill: currentColor; }
+    .fn-play .ico .pa { display: none; }
+    .fn-play.speaking .ico .pl { display: none; }
+    .fn-play.speaking .ico .pa { display: block; }
+    .fn-play .lbl { display: grid; gap: 1px; min-width: 0; font-weight: 800; }
+    .fn-play .lbl small { color: #bae6fdb3; font-size: .75rem; font-weight: 700; }
+    .fn-play .bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: linear-gradient(90deg, #5eead4, #a3e635); box-shadow: 0 0 12px #5eead4; }
+    .fn-play .wave i { opacity: .55; }
+    .fn-play.speaking .wave i { opacity: 1; animation: wv .9s ease-in-out infinite; }
+    .fn-pill.speaking .wave i { animation: wv .9s ease-in-out infinite; }
+    .fn-text { margin: 0; color: #f0f9ff; font-size: 1.06rem; font-weight: 600; line-height: 1.55; }
+    .fn-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .fn-stat { min-width: 0; padding: 10px 12px; border: 1px solid #ffffff24; border-radius: 18px; background: #ffffff14; }
+    .fn-stat small { display: block; margin-bottom: 2px; color: #bae6fdb3; font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .fn-stat b { display: block; font-size: .92rem; line-height: 1.25; overflow-wrap: anywhere; }
+    .fn-sec { margin: 2px 2px -4px; color: #bae6fdcc; font-size: .7rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .fn-tegn { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .fn-tegn li { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px 7px 9px; border: 1px solid #ffffff2b; border-radius: 999px; background: #ffffff17; font-size: .86rem; font-weight: 700; line-height: 1.2; }
+    .fn-tegn li::before { content: "✓"; display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50%; background: #5eead433; color: #5eead4; font-size: 11px; font-weight: 900; }
+    .fn-tip { margin: 0; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--acc) 45%, transparent); border-left: 5px solid var(--acc); border-radius: 16px; background: color-mix(in srgb, var(--acc) 14%, transparent); color: #fff; font-size: .92rem; font-weight: 700; line-height: 1.4; }
+    .fn-foot { flex: none; display: flex; gap: 10px; padding: 12px 18px 14px; border-top: 1px solid #ffffff14; background: linear-gradient(#0a1e3600, #030c1a99 40%); }
+    .fn-foot .btn { flex: 1; }
+    @media (min-width: 820px) and (orientation: landscape) {
+      .fn-detail { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; gap: 22px; }
+      .fn-hero { position: sticky; top: 0; max-height: none; }
+      .fn-tiles { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+    }
+    @media (orientation: landscape) and (max-height: 560px) {
+      .card.fauna { padding: 0; border-radius: 26px; }
+      .fn-head { grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 14px; padding: 10px 16px 6px; }
+      .fn-top { display: none; }
+      .fn-head h2 { font-size: 1.5rem; }
+      .fn-sub { display: none; }
+      .fn-row { gap: 8px; }
+      .fn-detail { grid-template-columns: minmax(0, 44%) minmax(0, 1fr); align-items: start; gap: 14px; }
+      .fn-hero { aspect-ratio: auto; height: max(150px, calc(100dvh - 190px)); max-height: none; position: sticky; top: 0; }
+      .fn-foot { padding: 8px 16px 10px; }
+      #fnBack span { display: none; }
+      #fnCount { display: none; }
+      #fnRole { font-size: .72rem; padding: 2px 10px; min-height: 30px; }
+      .fn-foot .btn { min-height: 46px; font-size: 1.05rem; }
+      .fn-tiles { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) { .fn-tile, .fn-detail, .fn-prog i { animation: none !important; transition: none !important; } .fn-play.speaking .wave i, .fn-pill.speaking .wave i { animation: none !important; } }
+
     @media (max-width: 380px) { .card { padding: 16px 10px 12px; } .choices { gap: 8px; } .btn { padding: 8px 16px; } .hud .title { padding: 4px 8px; } }
     @media (min-width: 700px) { .card { width: min(100%, 640px); padding: 22px 22px 20px; } .tile { border-radius: 30px; } .mcard .pbox { width: 78%; } .btn { font-size: 1.3rem; } }
     @media (min-width: 1000px) and (min-height: 700px) { .card { width: min(100%, 720px); } }
@@ -305,6 +415,7 @@
       <p class="tagline">Svøm rundt i det sunkne tempel, og lær tamilsk!</p>
       <div class="homebtns">
         <button class="btn green big" id="playBtn" type="button">▶ Spil</button>
+        <button class="btn ghost" id="faunaBtn" type="button">Havets dyr <span id="faunaCount"></span></button>
         <button class="btn ghost" id="dictBtn" type="button">Min ordbog <span id="dictCount"></span></button>
       </div>
     </section>
@@ -335,6 +446,51 @@
       <p class="mute-note" id="meetNote" hidden></p>
       <p class="hintline">Tryk på et ord for at høre det igen</p>
       <button class="btn green" id="meetGo" type="button">Lad os svømme</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="fauna" hidden>
+    <div class="card fauna" role="dialog" aria-modal="true" aria-labelledby="fnTitle">
+      <header class="fn-head">
+        <div class="fn-top"><p class="eyebrow" id="fnEyebrow">Havets dyr</p><div class="fn-dots" id="fnDots" aria-hidden="true"></div></div>
+        <h2 id="fnTitle">Havets dyr</h2>
+        <p class="fn-sub" id="fnSub"></p>
+        <div class="fn-row">
+          <button class="fn-pill" id="fnIntro" type="button"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Hør om havet</span></button>
+          <div class="fn-prog" aria-live="polite"><i id="fnProgFill"></i><span id="fnProgText"></span></div>
+        </div>
+      </header>
+      <div class="fn-body" id="fnBody">
+        <div id="fnGrid"></div>
+        <p class="fn-hint" id="fnHint">Tryk på et dyr for at se det stort og høre fakta om det</p>
+        <section class="fn-detail" id="fnDetail" hidden>
+          <div class="fn-hero" id="fnHero">
+            <canvas id="fnCv"></canvas>
+            <button class="fn-hbtn" id="fnBack" type="button">← <span>Alle dyr</span></button>
+            <span class="fn-hbtn" id="fnRole"><i></i><span id="fnRoleTxt"></span></span>
+            <button class="fn-nav" id="fnPrev" type="button" aria-label="Forrige dyr">‹</button>
+            <button class="fn-nav" id="fnNext" type="button" aria-label="Næste dyr">›</button>
+            <span class="fn-hbtn" id="fnCount"></span>
+          </div>
+          <div class="fn-info">
+            <div class="fn-name"><h3 id="fnName"></h3><p class="fn-latin" id="fnLatin"></p></div>
+            <button class="fn-play" id="fnPlay" type="button">
+              <span class="ico"><svg class="pl" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="pa" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></span>
+              <span class="lbl"><span id="fnPlayTxt">Hør fakta</span><small id="fnPlaySub">Lyt og lær</small></span>
+              <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="bar" id="fnBar"></span>
+            </button>
+            <p class="fn-text" id="fnText"></p>
+            <div class="fn-stats" id="fnStats"></div>
+            <p class="fn-sec">Sådan kender du den</p>
+            <ul class="fn-tegn" id="fnTegn"></ul>
+            <p class="fn-tip" id="fnTip"></p>
+          </div>
+        </section>
+      </div>
+      <footer class="fn-foot">
+        <button class="btn green" id="faunaGo" type="button">Videre →</button>
+      </footer>
     </div>
   </div>
 
@@ -378,6 +534,12 @@
         <option value="4">Altid 4</option>
       </select>
     </label>
+    <label>Havets dyr i starten af hver runde
+      <select id="optFauna">
+        <option value="1">Vis dyrebogen</option>
+        <option value="0">Spring over</option>
+      </select>
+    </label>
     <label>Udtale med latinske bogstaver
       <select id="optRom">
         <option value="1">Vis</option>
@@ -396,6 +558,7 @@
   <script src="../urundai/laengder.js"></script>
   <script src="../urundai/billeder.js"></script>
   <script src="arter.js"></script>
+  <script src="fakta.js"></script>
   <script>
   (() => {
     "use strict";
@@ -508,6 +671,7 @@
     clip.preload = "auto";
     const SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
     let speechToken = 0;
+    let factToken = 0; // dyrefakta bruger samme afspiller; et nyt klip eller stopSpeech gør det gamle ugyldigt
     let speechDone = null;
     let unlocked = false;
     let pendingSpeech = null;
@@ -530,11 +694,14 @@
     }
     function stopSpeech() {
       speechToken++;
+      factToken++;
       clip.onended = null;
       clip.onerror = null;
       clip.onplaying = null;
+      clip.ontimeupdate = null;
       clip.pause();
       if (speechDone) { const d = speechDone; speechDone = null; d(false); }
+      if (typeof faunaAudioStopped === "function") faunaAudioStopped();
     }
     // Svarer true, når klippet er spillet til ende, og false, hvis noget andet afbrød det eller afspilningen blev afvist
     const setSpeaking = (on) => $("quizWord").classList.toggle("speaking", on);
@@ -639,6 +806,8 @@
     function renderHome() {
       $("playBtn").textContent = `▶ Spil · ${WORLDS[curWorld].da}`;
       $("dictCount").textContent = `(${seenCount()}/${ALL.length})`;
+      const total = Object.keys(INFO).length;
+      $("faunaCount").textContent = `(${Object.keys(INFO).filter((id) => heard.has(id)).length}/${total})`;
     }
 
     function renderDict() {
@@ -841,8 +1010,8 @@
     function startWorld(w) {
       show("play");
       loadWorld(w);
-      if (G.newWords.length || G.reviewWords.length) showMeet(G.newWords, G.reviewWords);
-      else beginReady();
+      const next = () => { if (G.newWords.length || G.reviewWords.length) showMeet(G.newWords, G.reviewWords); else beginReady(); };
+      if (read("dyr", "1") === "0") next(); else showFauna(w, next);
     }
 
     function beginReady() {
@@ -931,6 +1100,314 @@
       $("meet").hidden = true;
       beginReady();
     });
+
+    // ---------- Havets dyr: dyrebogen i starten af hver runde ----------
+    // Viser havets dyr som kort. Et tryk på et dyr viser det stort, og en dansk stemme fortæller fakta om det (lyd/<id>.mp3, se fakta.js).
+    const INFO = window.HajFakta.fakta;
+    const INTRO = window.HajFakta.hav;
+    const heard = new Set((() => { try { return JSON.parse(read("fakta", "[]")); } catch { return []; } })());
+    const FN = { w: 0, list: [], groups: [], idx: -1, onDone: null, ctx: null, play: "idle", raf: 0, bubbles: [], last: 0, swipe: null };
+    const ROLE_TXT = { food: (s) => `Mad · ${s.pts} point`, evil: () => "Rovfisk · flygt!", hazard: () => "Farlig · rør ikke!" };
+    const ROLE_TIP = {
+      food: (s) => (s.ground ? `Den bor på bunden. Svøm ned og spis den for at få ${s.pts} point.` : `Spis den for at få ${s.pts} point.`),
+      evil: (s) => `Den er lidt større end dig, så svøm væk! Når du er vokset forbi den, kan du spise den og få ${s.pts} point.`,
+      hazard: () => "Den kan ikke spises, og den stikker, hvis du rører den. Svøm udenom!"
+    };
+
+    function faunaGroups(w) {
+      const W = WORLDS[w];
+      const edible = [...new Set([...W.food, ...W.ground.filter((id) => !SPECIES[id].hazard)])];
+      return [
+        { key: "food", title: "Mad", sub: "Spis dem for at få point", ids: edible },
+        { key: "evil", title: "Rovdyr", sub: "Større end dig. Flygt!", ids: W.evil },
+        { key: "hazard", title: "Farer", sub: "Kan ikke spises. Rør dem ikke", ids: [...new Set([...W.hazards, ...W.float])] }
+      ].filter((g) => g.ids.length);
+    }
+    const roleOf = (id) => FN.groups.find((g) => g.ids.includes(id)).key;
+
+    // Hvert dyr tegnes, så det fylder rammen: først måles dyrets rammer (alle dyr har forskellig form), så skaleres det
+    const boxCache = {};
+    function boxOf(spec) {
+      if (boxCache[spec.id]) return boxCache[spec.id];
+      const S = 760;
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = S;
+      const c = cv.getContext("2d", { willReadFrequently: true });
+      c.translate(S / 2, S / 2);
+      AR.draw(c, spec, { r: 100, t: 0 });
+      const d = c.getImageData(0, 0, S, S).data;
+      let x0 = S, x1 = 0, y0 = S, y1 = 0;
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+        if (d[(y * S + x) * 4 + 3] > 24) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      return (boxCache[spec.id] = { x0: x0 - S / 2, x1: x1 - S / 2, y0: y0 - S / 2, y1: y1 - S / 2 });
+    }
+    function paintAnimal(c, spec, w, h, t, pad, bottom) {
+      const b = boxOf(spec);
+      const k = Math.min(w * (1 - 2 * pad) / (b.x1 - b.x0), (h - bottom) * (1 - 2 * pad) / (b.y1 - b.y0));
+      c.save();
+      c.translate(w / 2 - (b.x0 + b.x1) / 2 * k, (h - bottom) / 2 - (b.y0 + b.y1) / 2 * k);
+      AR.draw(c, spec, { r: 100 * k, t });
+      c.restore();
+    }
+    const thumbs = {};
+    function thumb(id) {
+      if (thumbs[id]) return thumbs[id];
+      const cv = document.createElement("canvas");
+      cv.width = 270; cv.height = 180;
+      paintAnimal(cv.getContext("2d"), SPECIES[id], 270, 180, 0, .06, 0);
+      return (thumbs[id] = cv.toDataURL());
+    }
+
+    function updateFaunaProgress() {
+      const ids = FN.list;
+      const n = ids.filter((id) => heard.has(id)).length;
+      $("fnProgFill").style.width = `${ids.length ? Math.round(100 * n / ids.length) : 0}%`;
+      $("fnProgText").textContent = n === ids.length && n ? `Du har mødt alle ${n} dyr` : `${n} af ${ids.length} dyr mødt`;
+      for (const el of document.querySelectorAll(".fn-tile")) el.classList.toggle("heard", heard.has(el.dataset.id));
+    }
+    function markHeard(id) {
+      if (!id || heard.has(id)) return;
+      heard.add(id);
+      write("fakta", JSON.stringify([...heard]));
+      updateFaunaProgress();
+      renderHome();
+    }
+
+    function renderFaunaGrid() {
+      const grid = $("fnGrid");
+      grid.replaceChildren();
+      let n = 0;
+      for (const g of FN.groups) {
+        const sec = document.createElement("section");
+        sec.className = `fn-group ${g.key}`;
+        sec.innerHTML = `<h4><i></i><b>${g.title}</b><span>${g.sub}</span></h4>`;
+        const wrap = document.createElement("div");
+        wrap.className = "fn-tiles";
+        for (const id of g.ids) {
+          const s = SPECIES[id];
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "fn-tile";
+          b.dataset.id = id;
+          b.style.setProperty("--i", n++);
+          b.setAttribute("aria-label", s.da);
+          b.innerHTML = `<img alt="" src="${thumb(id)}"><span class="nm">${s.da}</span>${g.key === "food" ? `<span class="pt">+${s.pts}</span>` : ""}<span class="tick" aria-hidden="true">✓</span>`;
+          b.addEventListener("click", () => { audio(); openDetail(id); });
+          wrap.append(b);
+        }
+        sec.append(wrap);
+        grid.append(sec);
+      }
+    }
+
+    // Lydafspilning af fakta (samme afspiller som ordene)
+    function setPlayUi(state) {
+      FN.play = state;
+      const on = state === "playing";
+      $("fnPlay").classList.toggle("speaking", on && FN.ctx !== "intro");
+      $("fnIntro").classList.toggle("speaking", on && FN.ctx === "intro");
+      $("fnPlayTxt").textContent = on ? "Pause" : state === "paused" ? "Fortsæt" : heard.has(FN.ctx) ? "Hør igen" : "Hør fakta";
+      $("fnPlaySub").textContent = muted ? "Lyden er slået fra i ⚙️" : on ? "Lytter …" : "Lyt og lær";
+      if (state === "idle") $("fnBar").style.width = "0";
+    }
+    function faunaAudioStopped() { if ($("fauna").hidden === false || FN.play !== "idle") setPlayUi("idle"); }
+    function playFact(file, ctx) {
+      stopSpeech();
+      FN.ctx = ctx;
+      const token = ++factToken;
+      const finish = () => { if (token !== factToken) return; if (ctx !== "intro") markHeard(ctx); setPlayUi("idle"); };
+      if (muted) { setPlayUi("idle"); if (ctx !== "intro") markHeard(ctx); return; }
+      setPlayUi("playing");
+      clip.onended = finish;
+      clip.onerror = finish;
+      clip.ontimeupdate = () => {
+        if (token !== factToken || !clip.duration) return;
+        const p = clip.currentTime / clip.duration;
+        $("fnBar").style.width = `${Math.round(p * 100)}%`;
+        if (p > .6 && ctx !== "intro") markHeard(ctx);
+      };
+      clip.src = `lyd/${file}`;
+      const p = clip.play();
+      if (p && p.catch) p.catch(() => { if (token === factToken) setPlayUi("idle"); });
+    }
+    const playIntro = () => playFact(`hav-${WORLDS[FN.w].id}.mp3`, "intro");
+
+    function showFaunaGrid() {
+      FN.idx = -1;
+      document.querySelector(".card.fauna").classList.remove("detail");
+      $("fnDetail").hidden = true;
+      $("fnGrid").hidden = false;
+      $("fnHint").hidden = false;
+      $("fnBody").scrollTop = 0;
+      cancelAnimationFrame(FN.raf);
+      FN.raf = 0;
+    }
+    function openDetail(id) {
+      const idx = FN.list.indexOf(id);
+      if (idx < 0) return;
+      FN.idx = idx;
+      const s = SPECIES[id];
+      const info = INFO[id] || { latin: "", str: "", lever: "", tegn: [], tekst: "" };
+      const role = roleOf(id);
+      const d = $("fnDetail");
+      d.className = `fn-detail ${role}`;
+      d.hidden = false;
+      document.querySelector(".card.fauna").classList.add("detail");
+      d.style.animation = "none";
+      void d.offsetWidth;
+      d.style.animation = "";
+      $("fnGrid").hidden = true;
+      $("fnHint").hidden = true;
+      $("fnBody").scrollTop = 0;
+      const W = WORLDS[FN.w];
+      $("fnHero").style.background = `linear-gradient(${W.grad[0]}, ${W.grad[1]} 55%, ${W.grad[2]})`;
+      $("fnName").textContent = s.da;
+      $("fnLatin").textContent = info.latin;
+      $("fnText").textContent = info.tekst;
+      $("fnRoleTxt").textContent = ROLE_TXT[role](s);
+      $("fnCount").textContent = `${idx + 1} / ${FN.list.length}`;
+      $("fnStats").innerHTML = `<div class="fn-stat"><small>Størrelse</small><b>${info.str}</b></div><div class="fn-stat"><small>Bor</small><b>${info.lever}</b></div><div class="fn-stat"><small>${role === "food" ? "Point" : "Fare"}</small><b>${role === "food" ? `${s.pts} point` : role === "evil" ? "Rovfisk" : "Stikker"}</b></div>`;
+      $("fnTegn").innerHTML = info.tegn.map((t) => `<li>${t}</li>`).join("");
+      $("fnTip").textContent = ROLE_TIP[role](s);
+      FN.bubbles = Array.from({ length: 16 }, () => ({ x: Math.random(), y: Math.random(), r: .006 + Math.random() * .012, v: .02 + Math.random() * .04, ph: Math.random() * 6.3 }));
+      setPlayUi("idle");
+      FN.ctx = id;
+      playFact(`${id}.mp3`, id);
+      startHero();
+    }
+
+    // Stort, levende billede: vandets farver, lysstråler, bobler og dyret, der svæver blidt
+    const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function sizeHero() {
+      const cv = $("fnCv");
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const w = cv.clientWidth;
+      const h = cv.clientHeight;
+      if (!w || !h) return null;
+      if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      return { cv, w, h, dpr };
+    }
+    function heroFrame(now) {
+      if ($("fauna").hidden || $("fnDetail").hidden) { FN.raf = 0; return; }
+      const z = sizeHero();
+      if (z) {
+        const c = z.cv.getContext("2d");
+        const { w, h } = z;
+        const t = REDUCED ? 0 : now / 1000;
+        const dt = Math.min(.05, (now - (FN.last || now)) / 1000);
+        FN.last = now;
+        const id = FN.list[FN.idx];
+        const s = SPECIES[id];
+        const W = WORLDS[FN.w];
+        const acc = { food: "74,222,128", evil: "251,113,133", hazard: "251,191,36" }[roleOf(id)];
+        c.setTransform(z.dpr, 0, 0, z.dpr, 0, 0);
+        c.clearRect(0, 0, w, h);
+        for (let i = 0; i < 4; i++) { // lysstråler fra overfladen
+          const x = w * (.1 + .26 * i) + Math.sin(t * .35 + i * 1.7) * w * .05;
+          const g = c.createLinearGradient(x, 0, x + w * .1, h * .85);
+          g.addColorStop(0, "rgba(255,255,255,.2)"); g.addColorStop(1, "rgba(255,255,255,0)");
+          c.fillStyle = g; c.beginPath(); c.moveTo(x, 0); c.lineTo(x + w * .13, 0); c.lineTo(x + w * .32, h); c.lineTo(x + w * .12, h); c.closePath(); c.fill();
+        }
+        const halo = c.createRadialGradient(w / 2, h * .46, 0, w / 2, h * .46, Math.max(w, h) * .55);
+        halo.addColorStop(0, `rgba(${acc},.3)`); halo.addColorStop(1, `rgba(${acc},0)`);
+        c.fillStyle = halo; c.fillRect(0, 0, w, h);
+        let bottom = 0;
+        if (s.ground) { // bunddyr sidder på sandet
+          bottom = h * .17;
+          const sg = c.createLinearGradient(0, h - bottom, 0, h);
+          sg.addColorStop(0, W.sand); sg.addColorStop(1, mixShade(W.sand));
+          c.fillStyle = sg; c.beginPath(); c.moveTo(0, h); c.lineTo(0, h - bottom * .7); c.quadraticCurveTo(w * .5, h - bottom * 1.35, w, h - bottom * .7); c.lineTo(w, h); c.closePath(); c.fill();
+        }
+        for (const b of FN.bubbles) { // bobler
+          b.y -= b.v * dt; if (b.y < -.05) { b.y = 1.05; b.x = Math.random(); }
+          c.strokeStyle = "rgba(255,255,255,.45)"; c.lineWidth = 1.4;
+          c.beginPath(); c.arc((b.x + Math.sin(t * 1.3 + b.ph) * .012) * w, b.y * h, b.r * Math.min(w, h), 0, 6.3); c.stroke();
+        }
+        c.save();
+        if (!s.ground) c.translate(0, Math.sin(t * 1.3) * h * .014);
+        c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 24; c.shadowOffsetY = 10;
+        paintAnimal(c, s, w, h, t, .13, bottom);
+        c.restore();
+        const vg = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .35, w / 2, h / 2, Math.max(w, h) * .75);
+        vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,12,30,.42)");
+        c.fillStyle = vg; c.fillRect(0, 0, w, h);
+      }
+      FN.raf = REDUCED ? 0 : requestAnimationFrame(heroFrame);
+    }
+    const mixShade = (hex) => AR.dk(hex, .28);
+    function startHero() {
+      cancelAnimationFrame(FN.raf);
+      FN.last = 0;
+      FN.raf = requestAnimationFrame(heroFrame);
+    }
+
+    function step(dir) {
+      const n = FN.list.length;
+      if (FN.idx < 0 || n < 2) return;
+      openDetail(FN.list[(FN.idx + dir + n) % n]);
+    }
+
+    function showFauna(w, onDone) {
+      FN.w = w;
+      FN.onDone = onDone || null;
+      FN.groups = faunaGroups(w);
+      FN.list = FN.groups.flatMap((g) => g.ids);
+      const W = WORLDS[w];
+      if (onDone) { state = "meet"; $("startHint").hidden = true; hidePop(); }
+      $("fnEyebrow").textContent = `Hav ${w + 1} af ${WORLDS.length}`;
+      $("fnDots").innerHTML = WORLDS.map((_, i) => `<i class="${i === w ? "on" : ""}"></i>`).join("");
+      $("fnTitle").textContent = W.da;
+      $("fnSub").textContent = `${W.fact}.`;
+      $("faunaGo").textContent = !onDone ? "Færdig" : G.newWords.length || G.reviewWords.length ? "Videre til ordene →" : "Lad os svømme →";
+      showFaunaGrid();
+      renderFaunaGrid();
+      updateFaunaProgress();
+      setPlayUi("idle");
+      $("fauna").hidden = false;
+      FN.ctx = "intro";
+      setTimeout(() => { if (!$("fauna").hidden && FN.idx < 0 && FN.w === w) playIntro(); }, 600);
+    }
+    function closeFauna() {
+      stopSpeech();
+      showFaunaGrid();
+      $("fauna").hidden = true;
+      const cb = FN.onDone;
+      FN.onDone = null;
+      if (cb) { audio(); cb(); }
+    }
+    $("faunaGo").addEventListener("click", closeFauna);
+    $("fnBack").addEventListener("click", () => { stopSpeech(); showFaunaGrid(); });
+    $("fnPrev").addEventListener("click", () => step(-1));
+    $("fnNext").addEventListener("click", () => step(1));
+    $("fnIntro").addEventListener("click", () => {
+      audio();
+      if (FN.play === "playing" && FN.ctx === "intro") { stopSpeech(); setPlayUi("idle"); return; }
+      showFaunaGrid();
+      playIntro();
+    });
+    $("fnPlay").addEventListener("click", () => {
+      audio();
+      const id = FN.list[FN.idx];
+      if (FN.play === "playing" && FN.ctx === id) { clip.pause(); setPlayUi("paused"); }
+      else if (FN.play === "paused" && FN.ctx === id) { setPlayUi("playing"); const p = clip.play(); if (p && p.catch) p.catch(() => setPlayUi("idle")); }
+      else playFact(`${id}.mp3`, id);
+    });
+    // Stryg til siden på billedet for at skifte dyr
+    $("fnHero").addEventListener("pointerdown", (e) => { FN.swipe = { x: e.clientX, y: e.clientY }; });
+    $("fnHero").addEventListener("pointerup", (e) => {
+      const s0 = FN.swipe;
+      FN.swipe = null;
+      if (s0 && Math.abs(e.clientX - s0.x) > 55 && Math.abs(e.clientX - s0.x) > Math.abs(e.clientY - s0.y) * 1.5) step(e.clientX < s0.x ? 1 : -1);
+    });
+    document.addEventListener("keydown", (e) => {
+      if ($("fauna").hidden) return;
+      if (e.key === "ArrowRight") step(1);
+      else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "Escape") { if (FN.idx >= 0) { stopSpeech(); showFaunaGrid(); } else closeFauna(); }
+    });
+    window.addEventListener("resize", () => { if (!$("fauna").hidden && !$("fnDetail").hidden && !FN.raf) { FN.raf = requestAnimationFrame(heroFrame); } });
+    window.addEventListener("topbar:sound", () => { if (!$("fauna").hidden) setPlayUi(FN.play); });
 
     // ---------- Spillet ----------
     // Lille lyd-ring, der breder sig fra hajens mund
@@ -1657,6 +2134,9 @@
     $("mascot").addEventListener("click", (e) => { audio(); sfx.pop(); e.currentTarget.animate([{ transform: "scale(1)" }, { transform: "scale(1.15) rotate(8deg)" }, { transform: "scale(1)" }], { duration: 380 }); });
     $("playBtn").addEventListener("click", () => { audio(); startWorld(curWorld); });
     $("dictBtn").addEventListener("click", () => { renderDict(); show("dictScreen"); $("dictScreen").scrollTop = 0; });
+    $("faunaBtn").addEventListener("click", () => { audio(); showFauna(curWorld, null); });
+    $("optFauna").value = read("dyr", "1");
+    $("optFauna").addEventListener("change", (e) => write("dyr", e.target.value));
     $("dictBack").addEventListener("click", () => { stopSpeech(); renderHome(); show("home"); });
 
     // Siden følger den højde, der faktisk kan ses (iPhone-Safari tæller nogle gange værktøjslinjerne med)
@@ -1680,14 +2160,14 @@
     const qs = new URLSearchParams(location.search);
     window.__haj = {
       get G() { return G; }, get sh() { return sh; }, get fish() { return fish; }, get state() { return state; }, get quiz() { return quiz; },
-      pointer, answer, closeQuiz, startWorld, speak, wordState, ALL, WORLDS, SPECIES,
+      pointer, answer, closeQuiz, startWorld, speak, wordState, ALL, WORLDS, SPECIES, openDetail, showFauna, heard,
       get SW() { return SW; }, get SH() { return SH; }, get curWorld() { return curWorld; },
       tick(sec) { for (let i = 0; i < sec * 60; i++) update(1 / 60); draw(); },
       worldDone, sizeUp, caught, eat, spawnFish, get stars() { return stars; }
     };
     if (qs.has("l")) startWorld(Math.max(0, (Number(qs.get("l")) || 1) - 1) % WORLDS.length);
     // ?quiz=1 (sammen med ?l=) åbner quizzen direkte, til skærmbilleder
-    if (qs.has("quiz") && qs.has("l")) setTimeout(() => { $("meetGo").click(); state = "play"; pointer.active = false; G.grace = 0; spawnFish("evil", false); const e = fish.find((f) => f.big); e.x = sh.x; e.y = sh.y; for (let i = 0; i < 100; i++) update(1 / 60); }, 800);
+    if (qs.has("quiz") && qs.has("l")) setTimeout(() => { if (!$("fauna").hidden) $("faunaGo").click(); $("meetGo").click(); state = "play"; pointer.active = false; G.grace = 0; spawnFish("evil", false); const e = fish.find((f) => f.big); e.x = sh.x; e.y = sh.y; for (let i = 0; i < 100; i++) update(1 / 60); }, 800);
   })();
   </script>
 </body>

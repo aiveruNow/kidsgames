@@ -132,7 +132,15 @@
     // brystfinne
     c.fillStyle = fin; c.globalAlpha = .85; c.beginPath(); c.ellipse(L * .15, H * .5, H * .5, H * .18, .7, 0, PI2); c.fill(); c.globalAlpha = 1;
     if (s.gills) { c.strokeStyle = dk(s.body, .5); c.lineWidth = .035; c.beginPath(); for (let i = 0; i < 4; i++) { c.moveTo(L * (.3 - i * .06), -H * .4); c.quadraticCurveTo(L * (.26 - i * .06), 0, L * (.3 - i * .06), H * .4); } c.stroke(); }
-    if (s.hammer) { c.fillStyle = s.body; c.beginPath(); c.ellipse(L * .9, 0, L * .13, H * 1.7, 0, 0, PI2); c.fill(); c.strokeStyle = dk(s.body, .45); c.lineWidth = .04; c.stroke(); }
+    if (s.hammer) { // hammerhovedet: bredt, fladt hoved med øjet yderst
+      const hg = c.createLinearGradient(0, -H * 1.9, 0, H * 1.9);
+      hg.addColorStop(0, s.back || s.body); hg.addColorStop(.5, s.body); hg.addColorStop(1, s.belly || lt(s.body, .3));
+      c.fillStyle = hg; c.beginPath();
+      c.moveTo(L * .7, -H * .35); c.quadraticCurveTo(L * .8, -H * 1.95, L * .98, -H * 1.8); c.quadraticCurveTo(L * 1.1, -H * .95, L * 1.04, 0);
+      c.quadraticCurveTo(L * 1.1, H * .95, L * .98, H * 1.8); c.quadraticCurveTo(L * .8, H * 1.95, L * .7, H * .35); c.closePath(); c.fill();
+      c.strokeStyle = "rgba(0,0,0,.38)"; c.lineWidth = .03; c.stroke();
+      c.fillStyle = "rgba(255,255,255,.22)"; c.beginPath(); c.ellipse(L * .92, -H * .9, L * .05, H * .7, .1, 0, PI2); c.fill();
+    }
     if (s.bill) { c.fillStyle = s.billc || "#aab4c2"; c.beginPath(); c.moveTo(L * .92, -H * .12); c.lineTo(L * (1 + s.bill), -H * .01); c.lineTo(L * .92, H * .14); c.closePath(); c.fill(); }
     if (s.lure) { // havtaskens lys
       c.strokeStyle = "#2b2b2b"; c.lineWidth = .045; c.beginPath(); c.moveTo(L * .45, -H * .9); c.quadraticCurveTo(L * .8, -H * 2.2, L * 1.15, -H * 1.5); c.stroke();
@@ -156,8 +164,8 @@
     if (s.barbel) { c.strokeStyle = dk(s.body, .4); c.lineWidth = .04; c.beginPath(); c.moveTo(L * .8, H * .2); c.quadraticCurveTo(L * .8, H * .55, L * .62, H * .6); c.stroke(); }
     // øje
     const er = s.eye || Math.max(.1, H * .22);
-    const ex = L * (s.ex || .56);
-    const ey = -H * .2;
+    const ex = L * (s.hammer ? .96 : s.ex || .56);
+    const ey = s.hammer ? -H * 1.5 : -H * .2;
     eyeReal(c, ex, ey, er, s.iris || (s.tri ? "#4a5a62" : "#d9a93a"), s.pupil);
     if (o.angry) { c.strokeStyle = "#0f1c2c"; c.lineWidth = Math.max(.05, er * .7); c.beginPath(); c.moveTo(ex - er * 1.4, ey - er * 1.7); c.lineTo(ex + er * 1.5, ey - er * .6); c.stroke(); }
     // mund
@@ -224,6 +232,29 @@
     c.globalAlpha = 1;
     c.fillStyle = "#fff"; c.beginPath(); c.arc(-.3, -.35, .1, 0, PI2); c.arc(.3, -.35, .1, 0, PI2); c.fill();
     c.fillStyle = "#1c2440"; c.beginPath(); c.arc(-.28, -.34, .05, 0, PI2); c.arc(.32, -.34, .05, 0, PI2); c.fill();
+  }
+
+  // ---------- Orlogsmand: en flyder med sejl og lange tråde ----------
+  function manowar(c, s, o) {
+    const t = o.t || 0;
+    c.lineCap = "round";
+    for (let i = 0; i < 7; i++) {
+      const x = -.6 + i * .2;
+      const thick = i % 3 === 0;
+      c.strokeStyle = thick ? "#2a3aa8" : "#6f84f5"; c.globalAlpha = .9; c.lineWidth = thick ? .1 : .055;
+      c.beginPath(); c.moveTo(x, .28);
+      c.bezierCurveTo(x + Math.sin(t * 3 + i) * .3, .8, x - Math.sin(t * 3 + i * 1.7) * .3, 1.4, x + Math.sin(t * 2.4 + i) * .2, 2.0 + (i % 3) * .3); c.stroke();
+    }
+    c.globalAlpha = 1;
+    const cr = c.createLinearGradient(0, -1.2, 0, -.1);
+    cr.addColorStop(0, "#ffb3e6"); cr.addColorStop(.55, "#d58cf2"); cr.addColorStop(1, "#8a7cf5");
+    c.fillStyle = cr; c.beginPath(); c.moveTo(-.55, -.2); c.bezierCurveTo(-.5, -1.0, .1, -1.45, .8, -.3); c.bezierCurveTo(.4, -.55, -.2, -.5, -.55, -.2); c.closePath(); c.fill();
+    c.strokeStyle = "rgba(90,40,140,.5)"; c.lineWidth = .035; c.stroke();
+    const bg = c.createRadialGradient(-.2, -.2, .05, 0, 0, 1.1);
+    bg.addColorStop(0, "#e4f2ff"); bg.addColorStop(.5, s.body); bg.addColorStop(1, s.tent || "#3a4ec0");
+    c.fillStyle = bg; c.globalAlpha = .93; c.beginPath(); c.ellipse(0, .02, 1.0, .36, -.05, 0, PI2); c.fill(); c.globalAlpha = 1;
+    c.strokeStyle = "rgba(30,40,120,.55)"; c.lineWidth = .04; c.stroke();
+    c.fillStyle = "rgba(255,255,255,.55)"; c.beginPath(); c.ellipse(-.25, -.13, .45, .08, -.05, 0, PI2); c.fill();
   }
 
   // ---------- Blæksprutter ----------
@@ -377,8 +408,14 @@
     const g = c.createLinearGradient(0, -.7, 0, .3); g.addColorStop(0, lt(s.body, .25)); g.addColorStop(1, s.body);
     c.fillStyle = g; c.beginPath(); c.moveTo(-1, .15); c.bezierCurveTo(-1, -.95, 1, -.95, 1, .15); c.closePath(); c.fill();
     c.strokeStyle = dk(s.body, .45); c.lineWidth = .05; c.stroke();
-    c.strokeStyle = dk(s.body, .3); c.lineWidth = .04;
-    c.beginPath(); c.moveTo(-.4, -.7); c.lineTo(-.25, .1); c.moveTo(.25, -.7); c.lineTo(.2, .1); c.moveTo(-.9, -.3); c.lineTo(.9, -.3); c.stroke();
+    c.save(); c.clip(); c.strokeStyle = dk(s.body, .35); c.lineWidth = .035; // skjoldplader
+    for (const [x, y] of [[-.62, -.12], [0, -.12], [.62, -.12], [-.32, -.5], [.32, -.5], [0, -.82]]) {
+      c.beginPath();
+      for (let k = 0; k < 6; k++) { const a = k / 6 * PI2 + .52; const px = x + Math.cos(a) * .33; const py = y + Math.sin(a) * .27; if (k) c.lineTo(px, py); else c.moveTo(px, py); }
+      c.closePath(); c.stroke();
+    }
+    c.restore();
+    c.fillStyle = "rgba(255,255,255,.18)"; c.beginPath(); c.ellipse(-.1, -.6, .6, .12, -.05, 0, PI2); c.fill();
     c.fillStyle = "#fff"; c.beginPath(); c.arc(1.12, -.04, .08, 0, PI2); c.fill();
     c.fillStyle = "#101c2c"; c.beginPath(); c.arc(1.14, -.04, .045, 0, PI2); c.fill();
   }
@@ -413,7 +450,7 @@
     for (let i = 0; i < 5; i++) { const q = ((t * .5 + i * .2) % 1); c.fillStyle = `rgba(40,30,30,${.55 * (1 - q)})`; c.beginPath(); c.arc(Math.sin(q * 6 + i) * .15, -1.3 - q * 1.6, .18 + q * .25, 0, PI2); c.fill(); }
   }
 
-  const KINDS = { fish, eel, jelly, octo, squid, seahorse, manta, crab, star, urchin, turtle, chest, tubeworm, vent };
+  const KINDS = { fish, eel, jelly, manowar, octo, squid, seahorse, manta, crab, star, urchin, turtle, chest, tubeworm, vent };
 
   function draw(c, art, o) {
     c.save();
@@ -476,7 +513,7 @@
   add("elektrisk_aal", "Elektrisk ål", 0, "eel", { body: "#3d3a3a", belly: "#e09a3a", spark: true, len: 1.8, h: .3, hazard: true });
   add("manta", "Mantarokke", 10, "manta", { body: "#2d3e56", belly: "#f0f4f8" });
   add("brandmand", "Brandmand", 0, "jelly", { body: "#e8734a", tent: "#a8431f", hazard: true, sting: true });
-  add("orlogsmand", "Orlogsmand", 0, "jelly", { body: "#7a8cf0", tent: "#3a4ec0", hazard: true, sting: true });
+  add("orlogsmand", "Orlogsmand", 0, "manowar", { body: "#7aa8f0", tent: "#3a4ec0", hazard: true, sting: true });
   add("blaeksprutte", "Blæksprutte", 5, "octo", { body: "#d2563a", dots: "#f4a080" });
   add("vampyr_blaeksprutte", "Vampyrblæksprutte", 5, "octo", { body: "#8a1f2f", eye: "#3a6aff" });
   add("dumbo", "Dumbo-blæksprutte", 5, "octo", { body: "#f2a0c0", ears: true });

@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v1.33.0";
+const CACHE = "regnespil-v1.34.0";
 
 // Prinsesse Riyanas lydklip hentes fra samme replikliste som spillet bruger
 let prinsesseClips = [];
@@ -36,6 +36,15 @@ try {
   console.warn("Kunne ikke læse ordene til Løven Ari.", error);
 }
 
+// Hej Hajs danske dyrefakta (lydklip) hentes fra samme faktafil som spillet bruger
+let hajClips = [];
+try {
+  importScripts("spil/hej-haj/fakta.js");
+  hajClips = HajFakta.allFiles().map((f) => `spil/hej-haj/lyd/${f}`);
+} catch (error) {
+  console.warn("Kunne ikke læse dyrefakta til Hej Haj.", error);
+}
+
 const FILES = [
   "./",
   "index.html",
@@ -61,10 +70,12 @@ const FILES = [
   "spil/urundai/laengder.js",
   "spil/hej-haj/hej-haj.html",
   "spil/hej-haj/arter.js",
+  "spil/hej-haj/fakta.js",
   ...clipFiles,
   ...prinsesseClips,
   ...urundaiClips,
-  ...leoClips
+  ...leoClips,
+  ...hajClips
 ];
 
 // Forsiden spørger, hvor mange filer der skal gemmes, så den kan vise offline-status
