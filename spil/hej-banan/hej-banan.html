@@ -111,7 +111,8 @@
     #startHint { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); padding: 10px 22px; border: 1px solid #ffffff38; border-radius: 999px; background: #04200fa6; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: #fff; font-weight: 800; white-space: nowrap; box-shadow: 0 12px 30px #00000059; pointer-events: none; animation: pulse 1.2s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: .85; } 50% { opacity: 1; transform: translateX(-50%) scale(1.06); } }
     body.playing .app { padding: 0; }
-    body.playing #play { position: fixed; left: 0; right: 0; top: var(--tb-h, 54px); bottom: 0; height: auto; padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); background: #0a4a2a; z-index: 1; }
+    /* Banen følger den højde, der faktisk kan ses (--app-h = visualViewport), ikke bare "bund 0": på iPhone kan bunden ligge under værktøjslinjen */
+    body.playing #play { position: fixed; left: 0; right: 0; top: var(--tb-h, 54px); bottom: auto; height: calc(var(--app-h, 100dvh) - var(--tb-h, 54px)); max-height: calc(100% - var(--tb-h, 54px)); padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); background: #0a4a2a; z-index: 1; }
     @media (max-width: 520px) { .hud { gap: 6px; } #startHint { font-size: .9rem; padding: 8px 16px; } }
 
     #wordPop { position: absolute; left: 50%; top: 58px; z-index: 5; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 16px); min-width: 0; padding: 6px 16px 6px 8px; border: 1px solid #ffffff38; border-radius: 22px; background: #04200f94; backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); box-shadow: 0 14px 34px #00000059; color: #fff; pointer-events: none; transform: translateX(-50%); animation: popin .3s cubic-bezier(.2, 1.5, .4, 1); }
@@ -876,6 +877,7 @@
     let flash = 0;
     let vineSeq = 0;
     const ZH = 78;
+    const ZT = 92; // zonen plus ekstra jord under (aldrig tæt på skærmens kant: hjemmelinje og Safari-værktøjslinje kan dække de nederste pixels)
     const FL = 71; // jordens højde
     const GRAV = 95;
     const FLYG = .86; // tyngden i luften er lidt blødere end på lianen
@@ -896,10 +898,10 @@
       if (cv.width !== Math.round(w * DPR) || cv.height !== Math.round(h * DPR)) { cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); }
       SW = w;
       SH = h;
-      u = Math.min(SW / (SW < SH ? 90 : 110), SH / ZH);
+      u = Math.min(SW / (SW < SH ? 90 : 110), SH / ZT);
       WV = SW / u;
       HV = SH / u;
-      offY = (HV - ZH) * .6;
+      offY = Math.max(0, (HV - ZT) * .6);
       if (G) buildScenery();
     }
 
