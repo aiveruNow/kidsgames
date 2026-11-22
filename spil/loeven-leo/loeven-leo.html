@@ -90,6 +90,9 @@
     .size[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: #fff; }
     .size[aria-pressed="true"] small { color: #fff6c9; }
     .tb-panel .size:not([aria-pressed="true"]) { border-color: #d3e8c8; background: #f3faee; }
+    .tb-panel .sizes { flex-wrap: wrap; }
+    .tb-panel .sizes > span { flex-basis: 100%; text-align: center; }
+    .tb-panel .size { flex: 1 1 40%; }
 
     /* ---------- Scene ---------- */
     .scene-card {
@@ -281,6 +284,7 @@
     .pic.eaten { visibility: hidden; }
     .pic.wrong { opacity: .28; filter: grayscale(.8); pointer-events: none; animation: shake .45s; }
     .pic.hint { animation: nudge 1s ease-in-out infinite; border-color: #ffb300; }
+    .pic svg { width: 78%; height: 78%; pointer-events: none; }
 
     .flyer {
       position: fixed;
@@ -629,6 +633,7 @@
 
   <script src="../../topbar.js"></script>
   <script src="./ord.js"></script>
+  <script src="./billeder.js"></script>
   <script>
     const WORD_SETS = LoevenOrd.sets;
 
@@ -1101,7 +1106,9 @@
         btn.type = "button";
         btn.className = "pic";
         btn.dataset.index = i;
-        btn.textContent = w[1];
+        const art = LoevenArt.get(w[0]);
+        if (art) btn.innerHTML = art;
+        else btn.textContent = w[1];
         btn.setAttribute("aria-label", `Billede ${i + 1}`);
         return btn;
       }));
