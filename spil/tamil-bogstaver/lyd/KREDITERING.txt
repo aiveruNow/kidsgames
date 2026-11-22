@@ -1,0 +1,14 @@
+Lydklip i denne mappe
+=====================
+
+mei-01 til mei-18 (de 18 rene konsonanter: க் ங் ச் ஞ் ட் ண் த் ந் ப் ம் ய் ர் ல் வ் ழ் ள் ற் ன்)
+og vowel-a / vowel-aa (vokalerne அ og ஆ) er optagelser af en tamilsk talende.
+
+  Optagelse: Booradleyp, Wikimedia Commons (filerne "Ta-<bogstav>.ogg", 2011)
+  Licens:    Creative Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0)
+             https://creativecommons.org/licenses/by-sa/3.0/
+  Ændringer: klippet til selve lyden, gjort lige høje og lavet om til mp3
+             (lydvaerktoej\lav-bogstav-lyd.mjs). Disse klip må deles videre på samme vilkår.
+
+Alle andre klip (a-NN og aa-NN, konsonant + vokal) er lavet med Microsofts tamilske stemme
+(ta-LK-SaranyaNeural) af lydvaerktoej\lav-bogstav-lyd.mjs.
