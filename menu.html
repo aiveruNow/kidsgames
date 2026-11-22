@@ -731,6 +731,36 @@
           </div>
         </div>
       </a>
+      <a class="game" data-for="ari" href="spil/tamil-bogstaver/tamil-bogstaver.html">
+        <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <rect width="500" height="340" fill="#f4efe2"/>
+          <rect x="0" y="0" width="500" height="54" fill="#0f4c5c"/>
+          <text x="250" y="39" text-anchor="middle" font-size="34" font-weight="800" fill="#fff" font-family="'Noto Sans Tamil','Nirmala UI','Latha','Tamil Sangam MN',sans-serif">தமிழ்மொழி</text>
+          <g font-family="'Noto Sans Tamil','Nirmala UI','Latha','Tamil Sangam MN',sans-serif" font-weight="700" font-size="34" text-anchor="middle">
+            <rect x="40" y="82" width="420" height="52" rx="26" fill="#e0534a"/>
+            <rect x="48" y="88" width="76" height="40" rx="20" fill="#fbd9d5"/><rect x="154" y="88" width="62" height="40" rx="20" fill="#fbd9d5"/><rect x="246" y="88" width="204" height="40" rx="20" fill="#fff"/>
+            <text x="86" y="120" fill="#1d1d1d">க்</text><text x="185" y="120" fill="#1d1d1d">அ</text><text x="348" y="120" fill="#a8261f">க</text>
+            <g fill="#fff" font-size="30"><text x="139" y="118">+</text><text x="231" y="118">=</text></g>
+            <rect x="40" y="148" width="420" height="52" rx="26" fill="#6fb23c"/>
+            <rect x="48" y="154" width="76" height="40" rx="20" fill="#e3f2d3"/><rect x="154" y="154" width="62" height="40" rx="20" fill="#e3f2d3"/><rect x="246" y="154" width="204" height="40" rx="20" fill="#fff"/>
+            <text x="86" y="186" fill="#1d1d1d">ங்</text><text x="185" y="186" fill="#1d1d1d">அ</text>
+            <g fill="#fff" font-size="30"><text x="139" y="184">+</text><text x="231" y="184">=</text></g>
+            <rect x="40" y="214" width="420" height="52" rx="26" fill="#e68ab8"/>
+            <rect x="48" y="220" width="76" height="40" rx="20" fill="#f9dcea"/><rect x="154" y="220" width="62" height="40" rx="20" fill="#f9dcea"/><rect x="246" y="220" width="204" height="40" rx="20" fill="#fff"/>
+            <text x="86" y="252" fill="#1d1d1d">ய்</text><text x="185" y="252" fill="#1d1d1d">ஆ</text><text x="348" y="252" fill="#b0306f">யா</text>
+            <g fill="#fff" font-size="30"><text x="139" y="250">+</text><text x="231" y="250">=</text></g>
+          </g>
+          <g class="bob"><circle cx="420" cy="300" r="26" fill="#ff8a3d" stroke="#fff" stroke-width="3"/><ellipse cx="411" cy="294" rx="5" ry="7" fill="#fff"/><ellipse cx="429" cy="294" rx="5" ry="7" fill="#fff"/><circle cx="413" cy="296" r="3" fill="#1c1233"/><circle cx="431" cy="296" r="3" fill="#1c1233"/></g>
+        </svg>
+        <div class="info">
+          <h2>Tamil-bogstaver</h2>
+          <p>Konsonant + vokal = bogstav. Vælg det rigtige tamilske bogstav, hør lyden, og rul Urundai helt i mål.</p>
+          <div class="info-foot">
+            <span class="play">Spil nu →</span>
+            <span class="stars" data-store="tamil-ari-stars" aria-label="Stjerner: 0">⭐ <span>0</span></span>
+          </div>
+        </div>
+      </a>
       <a class="game" data-for="ari" href="spil/urundai/urundai.html?barn=ari">
         <svg class="art" viewBox="0 0 500 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <defs>
@@ -954,7 +984,7 @@
       <button class="menu-item" id="sound-toggle" type="button">🔊 Lyd: til</button>
       <button class="menu-item danger" id="reset" type="button">🗑️ Nulstil stjerner</button>
       <p class="offline-status" id="offline-status" aria-live="polite"></p>
-      <p class="version" id="version">Version 1.37.0</p>
+      <p class="version" id="version">Version 1.38.0</p>
     </div>
   </div>
 
@@ -1107,7 +1137,7 @@
     }
 
     // Nulstil stjerner og fremskridt. Nye spil skal bruge et præfiks herfra til deres nøgler i localStorage.
-    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-", "dino-", "farvehave-", "urundai-", "haj-"];
+    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-", "dino-", "farvehave-", "urundai-", "haj-", "tamil-"];
     const resetDialog = document.getElementById("reset-dialog");
     document.getElementById("reset").addEventListener("click", () => resetDialog.showModal());
     document.getElementById("reset-cancel").addEventListener("click", () => resetDialog.close());

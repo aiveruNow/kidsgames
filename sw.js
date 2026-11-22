@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v1.37.0";
+const CACHE = "regnespil-v1.38.0";
 
 // Prinsesse Riyanas lydklip hentes fra samme replikliste som spillet bruger
 let prinsesseClips = [];
@@ -25,6 +25,15 @@ try {
   urundaiClips = UrundaiOrd.allClips().map((c) => `spil/urundai/lyd/${UrundaiOrd.clipFile(c.id)}`);
 } catch (error) {
   console.warn("Kunne ikke læse ordene til Urundai.", error);
+}
+
+// Tamil-bogstavers lydklip hentes fra samme bogstavliste som spillet bruger
+let tamilClips = [];
+try {
+  importScripts("spil/tamil-bogstaver/bogstaver.js");
+  tamilClips = TamilBogstaver.allClips().map((c) => `spil/tamil-bogstaver/lyd/${TamilBogstaver.clipFile(c.id)}`);
+} catch (error) {
+  console.warn("Kunne ikke læse bogstaverne til Tamil-bogstaver.", error);
 }
 
 // Løven Aris ordklip hentes fra samme ordliste som spillet bruger
@@ -69,12 +78,16 @@ const FILES = [
   "spil/urundai/ord.js",
   "spil/urundai/billeder.js",
   "spil/urundai/laengder.js",
+  "spil/tamil-bogstaver/tamil-bogstaver.html",
+  "spil/tamil-bogstaver/bogstaver.js",
+  "spil/tamil-bogstaver/laengder.js",
   "spil/hej-haj/hej-haj.html",
   "spil/hej-haj/arter.js",
   "spil/hej-haj/fakta.js",
   ...clipFiles,
   ...prinsesseClips,
   ...urundaiClips,
+  ...tamilClips,
   ...leoClips,
   ...hajClips
 ];
