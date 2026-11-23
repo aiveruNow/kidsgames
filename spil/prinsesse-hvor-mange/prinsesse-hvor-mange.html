@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd6ec">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Prinsesse Riyana">
+  <title>Prinsesse Riyana: Hvor mange?</title>
+  <link rel="stylesheet" href="../prinsesse-tal/faelles.css">
+  <style>
+    /* ---------- Hvor mange? ---------- */
+    .field {
+      position: relative; display: flex; flex: 1; align-items: center; justify-content: center; width: min(100%, 720px); min-height: 0; padding: calc(var(--u) * 2);
+      border-radius: 30px; background: linear-gradient(#e6f5ff 0 58%, #bdf0b4 58% 100%); box-shadow: inset 0 0 0 5px #fff, 0 10px 22px #8a2f7d22;
+    }
+    .field .items { position: relative; z-index: 1; }
+    .answers { display: flex; flex: none; justify-content: center; gap: calc(var(--u) * 2.4); width: 100%; }
+    .ans {
+      display: grid; place-items: center; width: calc(var(--u) * 21); height: calc(var(--u) * 21); min-width: 4.4rem; min-height: 4.4rem; border-radius: 50%; color: #fff;
+      font-weight: 900; font-size: calc(var(--u) * 11); line-height: 1; text-shadow: 0 4px 0 #0003;
+      background: radial-gradient(circle at 35% 30%, var(--a), var(--b)); box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000), 0 0 0 5px #fff, 0 14px 22px #8a2f7d22; transition: transform .12s;
+    }
+    .ans:active { transform: translateY(5px); }
+    .ans.shake { animation: shake .45s; }
+    .ans.hint, .ans.win { animation: glow .8s ease-in-out infinite alternate; }
+    .ans.win { transform: scale(1.1); }
+    .ans:disabled { cursor: default; }
+  </style>
+</head>
+<body>
+  <div id="bg" aria-hidden="true"><div class="rainbow"></div></div>
+
+  <div class="app">
+    <main class="act" id="view"></main>
+  </div>
+
+  <div class="settings" id="settings" hidden>
+    <div class="parent" id="rangeBox">Tal: 1–<span id="maxN">3</span>
+      <button id="sMaxDown" type="button" aria-label="Færre tal">−</button>
+      <button id="sMaxUp" type="button" aria-label="Flere tal">+</button>
+    </div>
+  </div>
+
+  <button class="start" id="start" type="button" aria-label="Start legen">
+    <span class="start-card">
+      <span class="start-ico">🌸</span>
+      <h1>Hvor mange?</h1>
+      <span class="play">▶</span>
+    </span>
+  </button>
+
+  <div id="pop" hidden></div>
+  <div id="fx" aria-hidden="true"></div>
+
+  <script src="../../topbar.js"></script>
+  <script src="../prinsesse-tal/replikker.js"></script>
+  <script src="../prinsesse-tal/faelles.js"></script>
+  <script>
+    /* ---------- Hvor mange? Tryk på tingene og tæl ---------- */
+    function countRound() {
+      const v = ver, n = pick(), t = rnd(THINGS), opts = choices(n);
+      const stage = scaffold();
+      ask(`Hvor mange ${t.e}?`, L.countAsk(t));
+      const row = items(n, t, { tappable: true });
+      stage.innerHTML = `<div class="field" id="field"></div>
+        <div class="answers" id="answers">${opts.map(o => `<button class="ans c${cc(o)}" data-n="${o}" type="button" aria-label="${o}">${o}</button>`).join("")}</div>`;
+      $("#field").append(row);
+      let counted = 0, wrong = 0, busy = false, idle = 0;
+
+      const nudge = () => {
+        clearTimeout(idle);
+        row.querySelectorAll(".it.hint").forEach(x => x.classList.remove("hint"));
+        idle = setTimeout(() => {
+          if (v !== ver || busy) return;
+          row.querySelector(".it:not([data-c])")?.classList.add("hint");
+        }, 4500);
+      };
+      nudge();
+
+      const mark = (el, i) => {
+        el.classList.add("counted");
+        el.dataset.c = i;
+        el.insertAdjacentHTML("beforeend", `<i>${i}</i>`);
+      };
+
+      row.addEventListener("click", e => {
+        const el = e.target.closest(".it");
+        if (!el || busy || el.dataset.c) return;
+        mark(el, ++counted);
+        el.classList.remove("hop", "hint");
+        void el.offsetWidth;
+        el.classList.add("hop");
+        sfx.note(counted);
+        burstEl(el, ["✨", "💖"], 5, 60);
+        speak(W[counted]);
+        nudge();
+      });
+
+      async function autoCount() {
+        row.querySelectorAll(".it").forEach(el => { el.classList.remove("counted", "hint"); delete el.dataset.c; el.querySelector("i")?.remove(); });
+        counted = 0;
+        for (const el of row.querySelectorAll(".it")) {
+          mark(el, ++counted);
+          el.classList.remove("hop");
+          void el.offsetWidth;
+          el.classList.add("hop");
+          sfx.note(counted);
+          await speak(W[counted]);
+          if (v !== ver) return false;
+          await sleep(100);
+        }
+        return true;
+      }
+
+      $("#answers").addEventListener("click", async e => {
+        const b = e.target.closest(".ans");
+        if (!b || busy) return;
+        clearTimeout(idle);
+        const m = Number(b.dataset.n);
+        if (m !== n) {
+          wrong++;
+          sfx.oops();
+          avatarDo("oops");
+          b.classList.remove("shake");
+          void b.offsetWidth;
+          b.classList.add("shake");
+          if (wrong === 1) {
+            busy = true;
+            await speak([L.notNumber(m), L.letsCount]);
+            if (v !== ver || !(await autoCount())) return;
+            busy = false;
+          } else {
+            speak([L.notNumber(m), L.tryAgain]);
+            $(`.ans[data-n="${n}"]`).classList.add("hint");
+          }
+          return;
+        }
+        busy = true;
+        $("#answers").querySelectorAll(".ans").forEach(c => c.classList.remove("hint"));
+        b.classList.add("win");
+        burstEl(b, ["💖", "✨", "⭐"], 12, 120);
+        if (counted < n && !(await autoCount())) return;
+        dance(row);
+        if (await reward(v, wrong === 0, [phrase(n, t), rnd(PRAISE)])) countRound();
+      });
+    }
+
+    startGame({ id: "count", round: countRound });
+  </script>
+</body>
+</html>

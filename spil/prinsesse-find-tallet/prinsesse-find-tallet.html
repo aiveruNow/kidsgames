@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd6ec">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Prinsesse Riyana">
+  <title>Prinsesse Riyana: Find tallet</title>
+  <link rel="stylesheet" href="../prinsesse-tal/faelles.css">
+  <style>
+    /* ---------- Find tallet: balloner ---------- */
+    .sky { display: flex; flex: 1; align-items: center; justify-content: center; gap: calc(var(--u) * 3); width: 100%; min-height: 0; }
+    .balloon {
+      position: relative; display: grid; place-items: center; width: calc(var(--u) * 24); height: calc(var(--u) * 30); min-width: 4.8rem; min-height: 6rem;
+      border-radius: 50% 50% 46% 46% / 56% 56% 44% 44%; color: #fff; font-weight: 900; font-size: calc(var(--u) * 13); line-height: 1; text-shadow: 0 4px 0 #0003;
+      background: radial-gradient(circle at 34% 28%, #fff9 0 9%, transparent 10%), radial-gradient(circle at 40% 35%, var(--a), var(--b));
+      box-shadow: inset -.8rem -1rem 1.6rem #0002, 0 12px 20px #8a2f7d26; animation: bob 3s ease-in-out infinite alternate; animation-delay: calc(var(--i, 0) * -.9s);
+      transform-origin: 50% 100%;
+    }
+    .balloon::before { content: ""; position: absolute; left: 50%; bottom: -9%; width: 12%; height: 8%; background: var(--b); transform: translateX(-50%); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+    .balloon::after { content: ""; position: absolute; left: 50%; top: 100%; width: 3px; height: calc(var(--u) * 12); background: #ffffffcc; transform: translateX(-50%); border-radius: 3px; }
+    .balloon.wobble { animation: wobble .6s; }
+    .balloon.hint { animation: glowBob .8s ease-in-out infinite alternate; }
+    .balloon.boom { animation: boom .3s ease-out forwards; }
+    .balloon.away { animation: away 1.1s ease-in forwards; pointer-events: none; }
+    .reveal { display: flex; flex: none; min-height: calc(var(--it) + 8px); align-items: center; justify-content: center; }
+
+    @keyframes bob { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-3vmin) rotate(3deg); } }
+    @keyframes glowBob { from { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 #fff); } to { transform: translateY(-3vmin) scale(1.08); filter: drop-shadow(0 0 18px #fff) drop-shadow(0 0 30px #ffe27a); } }
+    @keyframes wobble { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-12deg); } 40% { transform: rotate(10deg); } 60% { transform: rotate(-7deg); } 80% { transform: rotate(5deg); } }
+    @keyframes boom { 0% { transform: scale(1); opacity: 1; } 55% { transform: scale(1.35); opacity: 1; } 100% { transform: scale(1.7); opacity: 0; } }
+    @keyframes away { to { transform: translateY(-120vh) rotate(8deg); opacity: .6; } }
+  </style>
+</head>
+<body>
+  <div id="bg" aria-hidden="true"><div class="rainbow"></div></div>
+
+  <div class="app">
+    <main class="act" id="view"></main>
+  </div>
+
+  <div class="settings" id="settings" hidden>
+    <div class="parent" id="rangeBox">Tal: 1–<span id="maxN">3</span>
+      <button id="sMaxDown" type="button" aria-label="Færre tal">−</button>
+      <button id="sMaxUp" type="button" aria-label="Flere tal">+</button>
+    </div>
+  </div>
+
+  <button class="start" id="start" type="button" aria-label="Start legen">
+    <span class="start-card">
+      <span class="start-ico">🎈</span>
+      <h1>Find tallet</h1>
+      <span class="play">▶</span>
+    </span>
+  </button>
+
+  <div id="pop" hidden></div>
+  <div id="fx" aria-hidden="true"></div>
+
+  <script src="../../topbar.js"></script>
+  <script src="../prinsesse-tal/replikker.js"></script>
+  <script src="../prinsesse-tal/faelles.js"></script>
+  <script>
+    /* ---------- Find tallet: prik den rigtige ballon ---------- */
+    function findRound() {
+      const v = ver, n = pick(), t = rnd(THINGS), opts = choices(n);
+      const stage = scaffold();
+      ask(`Find ${chip(n)}`, L.findAsk(n));
+      stage.innerHTML = `
+        <div class="sky" id="sky">${opts.map((o, i) => `<button class="balloon c${cc(o)}" data-n="${o}" style="--i:${i}" type="button" aria-label="${o}">${o}</button>`).join("")}</div>
+        <div class="reveal" id="reveal"></div>`;
+      let wrong = 0, locked = false;
+      $("#sky").addEventListener("click", async e => {
+        const b = e.target.closest(".balloon");
+        if (!b || locked) return;
+        const m = Number(b.dataset.n);
+        if (m !== n) {
+          wrong++;
+          sfx.oops();
+          avatarDo("oops");
+          b.classList.remove("wobble");
+          void b.offsetWidth;
+          b.classList.add("wobble");
+          speak([L.isNumber(m), L.findAgain(n)]);
+          if (wrong >= 2) $(`.balloon[data-n="${n}"]`).classList.add("hint");
+          return;
+        }
+        locked = true;
+        sfx.balloon();
+        burstEl(b, ["💖", "✨", "⭐", "🎉"], 14, 150);
+        b.classList.remove("hint", "wobble");
+        b.classList.add("boom");
+        $("#sky").querySelectorAll(".balloon").forEach(o => { if (o !== b) o.classList.add("away"); });
+        await sleep(350);
+        const row = items(n, t, { hide: true });
+        $("#reveal").append(row);
+        if (!(await countAloud(v, row))) return;
+        dance(row);
+        if (await reward(v, wrong === 0, [phrase(n, t), rnd(PRAISE)])) findRound();
+      });
+    }
+
+    startGame({ id: "find", round: findRound });
+  </script>
+</body>
+</html>

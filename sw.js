@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v1.40.0";
+const CACHE = "regnespil-v1.41.0";
 
 // Prinsesse Riyanas lydklip hentes fra samme replikliste som spillet bruger
 let prinsesseClips = [];
@@ -79,7 +79,12 @@ const FILES = [
   "spil/loeven-leo/billeder.js",
   "spil/aris-maal/aris-maal.html",
   "spil/dino-broen/dino-broen.html",
-  "spil/prinsesse-tal/prinsesse-tal.html",
+  "spil/prinsesse-laer-tallene/prinsesse-laer-tallene.html",
+  "spil/prinsesse-smykkeskrinet/prinsesse-smykkeskrinet.html",
+  "spil/prinsesse-find-tallet/prinsesse-find-tallet.html",
+  "spil/prinsesse-hvor-mange/prinsesse-hvor-mange.html",
+  "spil/prinsesse-tal/faelles.css",
+  "spil/prinsesse-tal/faelles.js",
   "spil/prinsesse-tal/replikker.js",
   "spil/farvehaven/farvehaven.html",
   "spil/farvehaven/replikker.js",
