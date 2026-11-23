@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f5c6e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tamil-bogstaver">
+  <title>Tamil-bogstaver – konsonant + vokal</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div class="app">
+    <header class="head">
+      <div class="ban"><span class="hex">1</span><span class="ta">தமிழ்மொழி</span></div>
+      <div class="act"><span class="ta">செயல்</span><b>1</b></div>
+      <div class="track" id="track" aria-hidden="true"><i class="fill" id="fill"></i><span class="ball" id="ball"></span></div>
+      <div class="count" id="count">0/34</div>
+    </header>
+    <main class="sheet" id="sheet" aria-label="Konsonant plus vokal er lig med bogstav"></main>
+  </div>
+
+  <div class="overlay" id="picker" hidden>
+    <div class="card" role="dialog" aria-label="Vælg bogstavet">
+      <button class="x" id="pickX" type="button" aria-label="Luk">✕</button>
+      <div class="eqn" id="eqn">
+        <button class="cap ta" id="eqC" type="button"></button><span class="op">+</span><button class="cap ta" id="eqV" type="button"></button><span class="op">=</span><span class="cap ta a" id="eqA">?</span>
+      </div>
+      <button class="say" id="pickSay" type="button">🔊 Hør lyden</button>
+      <div class="opts" id="opts"></div>
+      <p class="toast" id="toast" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="overlay" id="done" hidden>
+    <div class="card done" role="dialog" aria-label="Færdig">
+      <div class="big">🎉🏆🎉</div>
+      <h2>Hurra!</h2>
+      <p>Du har lavet alle bogstaverne på siden!</p>
+      <button class="btn" id="again" type="button">Spil igen</button>
+      <button class="btn ghost" id="stay" type="button">Se siden</button>
+    </div>
+  </div>
+
+  <div id="settings" hidden>
+    <label>Antal bogstaver at vælge imellem
+      <select id="optChoices">
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+    </label>
+    <label>Næste række kommer af sig selv
+      <select id="optAuto">
+        <option value="1">Ja</option>
+        <option value="0">Nej, jeg trykker selv</option>
+      </select>
+    </label>
+    <button id="optReset" type="button">↺ Start siden forfra</button>
+    <p class="credit">Lyd af vokaler og rene konsonanter: optagelser af Booradleyp, Wikimedia Commons (CC BY-SA 3.0).</p>
+  </div>
+
+  <script src="../../shared/topbar.js"></script>
+  <script src="letters.js"></script>
+  <script src="durations.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

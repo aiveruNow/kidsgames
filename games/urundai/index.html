@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#145a2c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Urundai">
+  <title>Urundai – Tempelhaven</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div id="bg"></div>
+  <main class="app">
+    <section class="screen" id="home">
+      <div class="hero">
+        <button class="mascot" id="mascot" type="button" aria-label="Urundai"><span class="eye l"></span><span class="eye r"></span><span class="mouth"></span></button>
+        <div>
+          <h1>Urundai</h1>
+          <p class="sub ta">உருண்டை</p>
+        </div>
+      </div>
+      <div class="temple" id="temple"></div>
+      <p class="tagline">Spis gyldne blomster i tempelhaven, og lær tamilsk!</p>
+      <div class="homebtns">
+        <button class="btn green big" id="playBtn" type="button">▶ Spil</button>
+        <button class="btn ghost" id="dictBtn" type="button">Min ordbog <span id="dictCount"></span></button>
+      </div>
+    </section>
+
+    <section class="screen" id="dictScreen" hidden>
+      <div class="head">
+        <button class="back" id="dictBack" type="button" aria-label="Tilbage">←</button>
+        <div><h2>Min ordbog</h2><div class="tn" id="dictSub"></div></div>
+      </div>
+      <div class="dict" id="dictBody"></div>
+    </section>
+
+    <section class="screen" id="play" hidden>
+      <div class="hud">
+        <button class="back" id="playBack" type="button" aria-label="Tilbage">←</button>
+        <div class="title"><span id="playTitle"></span><span class="fruits" id="fruits" aria-hidden="true"></span></div>
+        <div class="pips" id="pips" aria-hidden="true"></div>
+        <div class="score"><span>POINT</span><b id="score">0</b></div>
+        <div class="score"><span>REKORD</span><b id="hi">0</b></div>
+      </div>
+      <div id="stage"><canvas id="cv"></canvas><div id="wordPop" hidden></div><div id="startHint" hidden>Swipe for at starte</div></div>
+    </section>
+  </main>
+
+  <div class="overlay" id="meet" hidden>
+    <div class="card">
+      <p class="eyebrow">Dagens ord</p>
+      <h3 id="meetTitle">Nye ord!</h3>
+      <div class="mcards" id="meetCards"></div>
+      <p class="mute-note" id="meetNote" hidden></p>
+      <p class="hintline">Tryk på et ord for at høre det igen.</p>
+      <button class="btn green" id="meetGo" type="button">Lad os spille! ▶</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="quiz" hidden>
+    <div class="card quiz">
+      <div class="left">
+        <div class="why"><span id="quizIcon"></span><span id="quizWhy"></span></div>
+        <p class="eyebrow">Hvilket billede passer til ordet?</p>
+        <button class="wordbtn" id="quizWord" type="button" aria-label="Hør ordet igen">
+          <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="tw" id="quizTa"></span>
+          <span class="rm" id="quizRom"></span>
+        </button>
+        <div class="banner" id="quizBanner"></div>
+        <p class="mute-note" id="quizNote" hidden></p>
+        <button class="btn" id="quizRetry" type="button" hidden>↻ Prøv banen igen</button>
+      </div>
+      <div class="choices" id="quizChoices"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="done" hidden>
+    <div class="card">
+      <div class="doorart" id="doneArt"></div>
+      <h3 id="doneTitle">Porten er åben!</h3>
+      <div class="stars3" id="doneStars"></div>
+      <div class="learned" id="doneWords"></div>
+      <div class="actions">
+        <button class="btn green" id="doneNext" type="button">Næste bane ▶</button>
+        <button class="btn ghost" id="doneHome" type="button">Hjem</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settings" hidden>
+    <label>Fart
+      <select id="optSpeed">
+        <option value="rolig">Rolig</option>
+        <option value="normal">Normal</option>
+        <option value="hurtig">Hurtig (som originalen)</option>
+      </select>
+    </label>
+    <label>Antal billeder i spørgsmål
+      <select id="optChoices">
+        <option value="auto">Automatisk (starter med 2)</option>
+        <option value="2">Altid 2</option>
+        <option value="3">Altid 3</option>
+        <option value="4">Altid 4</option>
+      </select>
+    </label>
+    <label>Udtale med latinske bogstaver
+      <select id="optRom">
+        <option value="1">Vis</option>
+        <option value="0">Skjul</option>
+      </select>
+    </label>
+    <button id="optReset" type="button">↺ Start forfra fra bane 1</button>
+  </div>
+
+  <script src="../../shared/topbar.js"></script>
+  <script src="../../shared/tamil-words/words.js"></script>
+  <script src="../../shared/tamil-words/durations.js"></script>
+  <script src="../../shared/tamil-words/pictures.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

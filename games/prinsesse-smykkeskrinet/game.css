@@ -1,0 +1,59 @@
+/* ---------- Smykkeskrinet ---------- */
+.chest { position: relative; width: min(100%, calc(var(--u) * 70)); margin-top: calc(var(--u) * 2.4); }
+.lid {
+  position: absolute; left: 0; right: 0; top: calc(var(--u) * -4.2); height: calc(var(--u) * 5); border-radius: 22px 22px 6px 6px;
+  background: linear-gradient(#ffe27a, #f4b400); border: 4px solid #ffd54f; box-shadow: 0 5px 0 #b97f00;
+  transform-origin: 50% 100%; transform: perspective(700px) rotateX(64deg); transition: transform .55s cubic-bezier(.3, 1.5, .5, 1);
+}
+.chest.done .lid { transform: perspective(700px) rotateX(0); }
+.box {
+  position: relative; z-index: 1; padding: calc(var(--u) * 2.4); border-radius: 12px 12px 30px 30px; border: 5px solid #ffd54f;
+  background: linear-gradient(#ff9ec4, #ec4899); box-shadow: 0 9px 0 #b0306f, 0 16px 26px #8a2f7d33;
+}
+.chest.done .box { animation: pop .6s; }
+.slots {
+  display: grid; grid-template-columns: repeat(var(--cols, 3), auto); justify-content: center; gap: calc(var(--u) * 1.4);
+  padding: calc(var(--u) * 1.8); border-radius: 22px; background: radial-gradient(#fff6fa, #ffd1e6); box-shadow: inset 0 4px 10px #b0306f44;
+}
+.slot {
+  display: grid; place-items: center; width: var(--slot, calc(var(--u) * 12)); height: var(--slot, calc(var(--u) * 12)); min-width: 2.6rem; min-height: 2.6rem; border-radius: 50%;
+  border: 4px dashed #f58abe; background: #ffffff99; font-size: calc(var(--slot, calc(var(--u) * 12)) * .75);
+}
+.slot.next { animation: slotPulse 1s ease-in-out infinite alternate; }
+.slot .it { width: 100%; height: 100%; font-size: calc(var(--slot, calc(var(--u) * 12)) * .75); }
+.tray {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * 1.2); width: min(100%, 700px); min-height: calc(var(--it) + 24px);
+  padding: calc(var(--u) * 1.4); border-radius: 28px; background: linear-gradient(#fff, #ffe4f1); box-shadow: 0 6px 14px #8a2f7d22;
+}
+.gem {
+  width: var(--it); height: var(--it); font-size: calc(var(--it) * .8); line-height: 1; touch-action: none; cursor: grab;
+  filter: drop-shadow(0 .3rem .3rem #8a2f7d33); animation: float 2.4s ease-in-out infinite alternate;
+}
+.gem:nth-child(even) { animation-delay: -1.2s; }
+.gem.fade { opacity: 0; transform: scale(.3); transition: all .4s; }
+.drag { position: fixed; z-index: 70; margin: 0; display: grid; place-items: center; font-size: calc(var(--it) * .8); line-height: 1; pointer-events: none; animation: none; filter: drop-shadow(0 .8rem .6rem #8a2f7d55); }
+.drag.snap { transition: left .35s cubic-bezier(.3, 1.4, .5, 1), top .35s cubic-bezier(.3, 1.4, .5, 1), width .35s, height .35s; }
+
+/* ---------- Tallet vises stort og skrives ---------- */
+.numpop {
+  position: fixed; inset: 0; z-index: 54; display: grid; place-items: center; width: 100%; padding: calc(var(--tb-h, 54px) + 8px) 12px 12px; margin: 0;
+  background: radial-gradient(circle at 50% 45%, #fffffff7 0, #ffd6ecf9 70%, #e9d5fffa 100%); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  cursor: pointer; animation: fade .25s;
+}
+.numcard { display: grid; justify-items: center; gap: calc(var(--u) * 1.4); animation: pop .5s; }
+.numsvg {
+  --h: clamp(6.5rem, min(calc(var(--u) * 46), 33vh), 24rem);
+  height: var(--h); width: calc(var(--h) * var(--vbw, 100) / 140); overflow: visible; filter: drop-shadow(0 .6rem .7rem #8a2f7d40);
+}
+.numsvg path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.numsvg .ghost { stroke: #f1d6ec; stroke-width: 17; }
+.numsvg .ink { stroke: var(--b); stroke-width: 14; }
+.numsvg .pen { fill: #ffd54f; stroke: #fff; stroke-width: 4; filter: drop-shadow(0 0 7px #ffd54f); }
+.numsvg.done { animation: pop .55s; }
+.numword { min-height: 1.2em; color: var(--b); font-size: clamp(2rem, calc(var(--u) * 8), 5rem); font-weight: 900; text-transform: capitalize; text-shadow: 0 3px 0 #fff; opacity: 0; transition: opacity .3s; }
+.numword.on { opacity: 1; }
+.numitems { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * .8); max-width: calc(var(--u) * 62); min-height: calc(var(--u) * 7); font-size: clamp(1.3rem, calc(var(--u) * 6), 3.6rem); line-height: 1; }
+.numitems span { animation: pop .45s backwards; animation-delay: calc(var(--k, 0) * 110ms); }
+.numtap { font-size: clamp(1rem, calc(var(--u) * 3), 1.8rem); font-weight: 800; color: #a3267f99; animation: nudge 1.4s ease-in-out infinite; }
+
+@keyframes slotPulse { from { background: #ffffff99; } to { background: #fff; border-color: #ec4899; } }

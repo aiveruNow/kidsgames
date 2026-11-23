@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd6ec">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Prinsesse Riyana">
+  <title>Prinsesse Riyana: Smykkeskrinet</title>
+  <link rel="stylesheet" href="../../shared/princess/common.css">
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div id="bg" aria-hidden="true"><div class="rainbow"></div></div>
+
+  <div class="app">
+    <main class="act" id="view"></main>
+  </div>
+
+  <div class="settings" id="settings" hidden>
+    <div class="parent" id="rangeBox">Tal: 1–<span id="maxN">3</span>
+      <button id="sMaxDown" type="button" aria-label="Færre tal">−</button>
+      <button id="sMaxUp" type="button" aria-label="Flere tal">+</button>
+    </div>
+  </div>
+
+  <button class="start" id="start" type="button" aria-label="Start legen">
+    <span class="start-card">
+      <span class="start-ico">💎</span>
+      <h1>Smykkeskrinet</h1>
+      <span class="play">▶</span>
+    </span>
+  </button>
+
+  <button class="numpop" id="numpop" type="button" hidden aria-label="Tallet. Tryk for at lege.">
+    <span class="numcard" id="numcard">
+      <svg class="numsvg" id="numsvg" aria-hidden="true"></svg>
+      <span class="numword" id="numword"></span>
+      <span class="numitems" id="numitems" aria-hidden="true"></span>
+      <span class="numtap">👆 Tryk for at lege</span>
+    </span>
+  </button>
+
+  <div id="pop" hidden></div>
+  <div id="fx" aria-hidden="true"></div>
+
+  <script src="../../shared/topbar.js"></script>
+  <script src="../../shared/princess/lines.js"></script>
+  <script src="../../shared/princess/common.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f8ff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Talbasket">
+  <title>Talbasket — plus og minus</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topline">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">🏀</div>
+        <div>
+          <h1>Talbasket: plus og minus</h1>
+          <p class="subtitle">Regn stykket ud, og vælg den rigtige bold</p>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="score" id="score" aria-live="polite">Rigtige: 0 / 0</div>
+      </div>
+    </header>
+
+    <div class="settings" id="settings" hidden>
+      <p class="menu-label">Regneart</p>
+      <div class="control-group" role="group" aria-label="Vælg regneart">
+        <button class="control operation" type="button" data-operation="add" aria-pressed="true">Plus +</button>
+        <button class="control operation" type="button" data-operation="subtract" aria-pressed="false">Minus −</button>
+      </div>
+      <p class="menu-label">Største tal</p>
+      <div class="control-group" role="group" aria-label="Vælg største svar">
+        <button class="control difficulty" type="button" data-max="auto" aria-pressed="true" title="Bliver sværere for hver stjerne">Automatisk ↑</button>
+        <button class="control difficulty" type="button" data-max="10" aria-pressed="false">Op til 10</button>
+        <button class="control difficulty" type="button" data-max="20" aria-pressed="false">Op til 20</button>
+        <button class="control difficulty" type="button" data-max="50" aria-pressed="false">Op til 50</button>
+        <button class="control difficulty" type="button" data-max="100" aria-pressed="false">Op til 100</button>
+      </div>
+      <div class="menu-footer">
+        <span class="round-label" id="round">Runde 1</span>
+      </div>
+    </div>
+
+    <section class="game-card" aria-label="Plus og minus-spil">
+      <div class="game-body">
+        <p class="prompt">Hvad giver regnestykket?</p>
+        <p class="hint" id="dragInstructions">Træk en bold tilbage som en slangebøsse, sigt mod kurven og slip. Rigtigt svar ryger i kurven, forkert i søen. Med tastatur: vælg en bold og tryk Enter.</p>
+        <div class="equation" aria-label="Regnestykke">
+          <span class="operand" id="first"></span>
+          <span class="operator" id="operator" aria-hidden="true">+</span>
+          <span class="operand" id="second"></span>
+          <span class="equals" aria-hidden="true">=</span>
+          <span class="question-mark" aria-hidden="true">?</span>
+        </div>
+        <div class="answer-tools">
+          <button class="hint-toggle" id="hintToggle" type="button" aria-expanded="false" aria-controls="mathHint">💡 Vis regnehjælp</button>
+          <div class="streak" id="streak" role="img" aria-label="0 rigtige i streg ud af 10">
+            <span>Rigtige i streg</span>
+            <span class="streak-dots" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="lake" id="lake" aria-hidden="true">
+          <svg viewBox="0 0 640 270" preserveAspectRatio="xMidYMid slice" focusable="false">
+            <defs>
+              <linearGradient id="backboard-shade" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#fff"/>
+                <stop offset="1" stop-color="#e3ebf4"/>
+              </linearGradient>
+              <radialGradient id="ball-shade" cx=".32" cy=".28" r=".75">
+                <stop offset="0" stop-color="#ffb35a"/>
+                <stop offset=".62" stop-color="#ed741f"/>
+                <stop offset="1" stop-color="#d85517"/>
+              </radialGradient>
+              <clipPath id="croc-clip"><rect id="crocClipRect" x="-400" y="-400" width="1440" height="800"/></clipPath>
+              <linearGradient id="water-shade" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#7fd0f7"/>
+                <stop offset="1" stop-color="#2f8fcb"/>
+              </linearGradient>
+            </defs>
+            <circle cx="566" cy="44" r="24" fill="#ffd86b"/>
+            <circle cx="566" cy="44" r="34" fill="#ffd86b" opacity=".25"/>
+            <path d="M92 52q10-17 28-12 8-14 26-8 16 2 18 16 14 1 14 13H80q-2-9 12-9z" fill="#fff" opacity=".9"/>
+            <path d="M430 36q8-12 22-9 7-10 20-6 12 2 14 12 11 1 11 10H420q-1-6 10-7z" fill="#fff" opacity=".8"/>
+            <path d="M0 128q70-40 150-8t170-12 170 12 150-12v60H0z" fill="#a5d98f"/>
+            <ellipse cx="320" cy="198" rx="316" ry="70" fill="#7cc46a"/>
+            <ellipse cx="320" cy="196" rx="300" ry="62" fill="#5fae52"/>
+            <g class="water-body">
+              <ellipse class="water-surface" cx="320" cy="198" rx="292" ry="58" fill="url(#water-shade)" stroke="#2a78b0" stroke-width="3"/>
+              <ellipse cx="250" cy="178" rx="140" ry="14" fill="#a6e1fb" opacity=".45"/>
+              <g class="waves" fill="none" stroke="#e8f7ff" stroke-width="3" stroke-linecap="round" opacity=".85">
+                <path d="M70 200q10-7 20 0t20 0M170 232q10-7 20 0t20 0M450 226q10-7 20 0t20 0M520 196q10-7 20 0t20 0M390 168q9-6 18 0t18 0M130 176q9-6 18 0t18 0"/>
+              </g>
+              <g fill="#3f9d4d" stroke="#2d7a3a" stroke-width="1.5">
+                <ellipse cx="236" cy="222" rx="16" ry="5"/>
+                <ellipse cx="258" cy="230" rx="11" ry="3.5"/>
+                <ellipse cx="560" cy="214" rx="14" ry="4.5"/>
+              </g>
+              <circle cx="236" cy="219" r="4" fill="#ffb3c7"/>
+            </g>
+            <g stroke="#4f8a3a" stroke-width="3.5" stroke-linecap="round" fill="none">
+              <path d="M28 190v-24M36 194v-32M44 192v-22M598 188v-26M606 194v-34M614 190v-22"/>
+            </g>
+            <g fill="#8a5a33">
+              <ellipse cx="28" cy="164" rx="3.5" ry="8"/>
+              <ellipse cx="36" cy="160" rx="3.5" ry="8"/>
+              <ellipse cx="606" cy="160" rx="3.5" ry="8"/>
+            </g>
+            <ellipse class="base-ripple" cx="320" cy="198" rx="40" ry="10" fill="none" stroke="#fff" stroke-width="2.5"/>
+            <ellipse class="base-ripple second" cx="320" cy="198" rx="40" ry="10" fill="none" stroke="#fff" stroke-width="2"/>
+            <ellipse cx="320" cy="200" rx="22" ry="7" fill="#26496b" opacity=".3"/>
+            <g id="hoop">
+              <g class="rig">
+                <path d="M320 70V198" stroke="#53647b" stroke-width="9" stroke-linecap="round"/>
+                <path d="M316 70V196" stroke="#8294ac" stroke-width="2.5" stroke-linecap="round"/>
+                <ellipse cx="320" cy="198" rx="14" ry="5" fill="#4a5a70"/>
+                <rect x="270" y="8" width="100" height="62" rx="4" fill="url(#backboard-shade)" stroke="#60728a" stroke-width="4"/>
+                <rect x="298" y="36" width="44" height="28" fill="none" stroke="#e36b35" stroke-width="3.5"/>
+                <path class="rim-back" d="M286 78a34 9 0 0 1 68 0" fill="none" stroke="#b9461c" stroke-width="5" stroke-linecap="round"/>
+                <g class="net-lines" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".95">
+                  <path d="M290 80 305 126M306 84 312 128M320 86V130M334 84 328 128M350 80 335 126"/>
+                  <path d="M294 94q26 11 52 0M298 106q22 10 44 0M304 118q16 8 32 0"/>
+                  <path d="M295 91 311 107 305 124M345 91 329 107 335 124M310 85 320 103 312 126M330 85 320 103 328 126"/>
+                </g>
+                <path d="M288 78q32 15 64 0" fill="none" stroke="#a5411d" stroke-width="7" stroke-linecap="round"/>
+                <path class="rim-front" d="M286 78a34 9 0 0 0 68 0" fill="none" stroke="#e0541f" stroke-width="6" stroke-linecap="round"/>
+                <ellipse class="rim-target" cx="320" cy="78" rx="34" ry="9" fill="none"/>
+              </g>
+            </g>
+            <ellipse class="water-target" cx="130" cy="214" rx="40" ry="10" fill="none"/>
+            <ellipse class="water-target" cx="510" cy="214" rx="40" ry="10" fill="none"/>
+            <ellipse class="ring" cx="130" cy="214" rx="26" ry="8" fill="none" stroke="#fff" stroke-width="3"/>
+            <ellipse class="ring second" cx="130" cy="214" rx="26" ry="8" fill="none" stroke="#fff" stroke-width="2.5"/>
+            <g id="effects"></g>
+          </svg>
+        </div>
+        <div class="math-hint" id="mathHint" hidden>
+          <p id="hintText"></p>
+          <svg id="numberLine" viewBox="0 0 640 140" role="img"></svg>
+          <button class="hint-toggle hint-replay" id="hintReplay" type="button">🔁 Tæl igen</button>
+        </div>
+        <p class="answers-title">Træk en bold tilbage og skyd mod kurven</p>
+        <div class="answers" id="answers" aria-label="Mulige svar"></div>
+        <p class="feedback" id="feedback" aria-live="polite"></p>
+        <div class="next-row">
+          <button class="next" id="next" type="button" hidden>Næste spørgsmål <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+    <p class="footer-note">Øv plus og minus med basketballsvar.</p>
+  </main>
+
+  <button class="problem-popup" id="problemPopup" type="button" hidden>
+    <span class="problem-card">
+      <span class="problem-label">Regn det ud!</span>
+      <span class="problem-eq" id="problemEq"></span>
+      <span class="problem-tap">Tryk for at starte</span>
+    </span>
+  </button>
+
+  <div class="star-popup" id="starPopup" role="alert" hidden>
+    <div class="star-popup-card">
+      <svg class="star-big" viewBox="0 0 100 96" aria-hidden="true">
+        <defs>
+          <linearGradient id="star-fill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#ffe66d"/>
+            <stop offset="1" stop-color="#ffb300"/>
+          </linearGradient>
+        </defs>
+        <path d="M50 4 62 35l33 3-25 22 8 33L50 76 22 93l8-33L5 38l33-3z" fill="url(#star-fill)" stroke="#e08a00" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M50 16 59 38M30 40 40 41" stroke="#fff8c9" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+      </svg>
+      <h2 id="starTitle">Du fik en stjerne!</h2>
+      <p>10 rigtige i streg 🏀</p>
+      <p class="level-up" id="levelUp" hidden></p>
+      <small>Tryk for at fortsætte</small>
+    </div>
+  </div>
+
+  <script src="../../shared/topbar.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

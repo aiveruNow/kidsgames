@@ -1,0 +1,1021 @@
+    const operationButtons = [...document.querySelectorAll(".operation")];
+    const difficultyButtons = [...document.querySelectorAll(".difficulty")];
+    const firstOperand = document.querySelector("#first");
+    const secondOperand = document.querySelector("#second");
+    const operatorDisplay = document.querySelector("#operator");
+    const answerContainer = document.querySelector("#answers");
+    const scoreDisplay = document.querySelector("#score");
+    const roundDisplay = document.querySelector("#round");
+    const settings = document.querySelector("#settings");
+    const feedback = document.querySelector("#feedback");
+    const nextButton = document.querySelector("#next");
+    const hintToggle = document.querySelector("#hintToggle");
+    const mathHint = document.querySelector("#mathHint");
+    const hintText = document.querySelector("#hintText");
+    const numberLine = document.querySelector("#numberLine");
+    const hoop = document.querySelector("#hoop");
+    const lake = document.querySelector("#lake");
+
+    // ---------- Lydeffekter (Web Audio, ingen lydfiler) ----------
+    let audioCtx = null;
+    let soundOn = Topbar.soundOn();
+    window.addEventListener("topbar:sound", event => { soundOn = event.detail.on; });
+
+    function audioReady() {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+        return audioCtx.state === "running";
+      } catch { return false; }
+    }
+
+    function tone(freq, dur = .2, type = "sine", vol = .15, delay = 0, slideTo = 0) {
+      if (!soundOn || !audioReady()) return;
+      try {
+        const t = audioCtx.currentTime + delay;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol, t + .01);
+        gain.gain.exponentialRampToValueAtTime(.001, t + dur);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + dur + .02);
+      } catch { /* ingen lyd */ }
+    }
+
+    // Støj gennem et filter: bruges til sus, plask og net
+    function noise(dur = .3, vol = .12, delay = 0, filterType = "bandpass", from = 1200, to = 0) {
+      if (!soundOn || !audioReady()) return;
+      try {
+        const t = audioCtx.currentTime + delay;
+        const buffer = audioCtx.createBuffer(1, Math.max(1, Math.floor(audioCtx.sampleRate * dur)), audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = filterType;
+        filter.frequency.setValueAtTime(from, t);
+        if (to) filter.frequency.exponentialRampToValueAtTime(to, t + dur);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol, t + .02);
+        gain.gain.exponentialRampToValueAtTime(.001, t + dur);
+        source.connect(filter).connect(gain).connect(audioCtx.destination);
+        source.start(t);
+      } catch { /* ingen lyd */ }
+    }
+
+    const sfx = {
+      click() { tone(760, .05, "triangle", .08); },
+      // Regnestykket springer frem
+      pop() { tone(420, .12, "triangle", .14, 0, 840); tone(1050, .1, "sine", .06, .09); },
+      // Bolden trækkes tilbage: højere tone, jo længere træk
+      stretch(p) { tone(170 + p * 380, .07, "triangle", .06); },
+      // Bolden skydes afsted
+      kick(p = .6) { noise(.22, .13, 0, "bandpass", 500 + p * 800, 2600); tone(150, .12, "sine", .16, 0, 70); },
+      // Bolden rammer ringen
+      clang() { tone(660, .35, "triangle", .13); tone(990, .28, "sine", .07, .02); noise(.08, .09, 0, "highpass", 3000); },
+      // Rigtigt svar: net og klokker
+      swish() {
+        noise(.5, .14, 0, "highpass", 2500, 900);
+        [523, 659, 784, 1047].forEach((f, i) => tone(f, .32, "triangle", .13, .1 + i * .08));
+      },
+      splash() { noise(.5, .2, 0, "lowpass", 1800, 250); tone(260, .22, "sine", .1, 0, 90); },
+      // Krokodillen æder bolden
+      chomp() {
+        [0, .16, .32].forEach(d => { tone(120, .1, "square", .1, d, 60); noise(.06, .08, d, "lowpass", 900); });
+        tone(300, .3, "sawtooth", .06, .5, 110);
+      },
+      streak(n) { tone(440 + (n % 10) * 55, .16, "triangle", .1); tone(880 + (n % 10) * 110, .12, "sine", .05, .06); },
+      fanfare() { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .5, "triangle", .15, i * .11)); tone(2093, .6, "sine", .06, .6); }
+    };
+
+    let operation = "add";
+    // Niveauet stiger automatisk med 10 for hver optjent stjerne (op til 100), men kan låses i menuen
+    const LEVEL_STEP = 10;
+    const LEVEL_CAP = 100;
+    let levelSteps = 0;
+    let autoLevel = true;
+    let maximum = LEVEL_STEP;
+    try { levelSteps = Number(localStorage.getItem("talbasket-trin")) || 0; } catch { levelSteps = 0; }
+    const autoMaximum = () => Math.min(LEVEL_CAP, LEVEL_STEP * (levelSteps + 1));
+    try {
+      const saved = Number(localStorage.getItem("talbasket-niveau"));
+      if ([10, 20, 50, 100].includes(saved)) { autoLevel = false; maximum = saved; }
+    } catch { /* ingen lagring */ }
+    if (autoLevel) maximum = autoMaximum();
+    let first = 0;
+    let second = 0;
+    let answer = 0;
+    let correctCount = 0;
+    let answeredCount = 0;
+    let streak = 0;
+    let stars = 0;
+    const STREAK_GOAL = 10;
+    const streakDisplay = document.querySelector("#streak");
+    const streakDots = streakDisplay.querySelector(".streak-dots");
+    const starPopup = document.querySelector("#starPopup");
+    const problemPopup = document.querySelector("#problemPopup");
+    const problemEq = document.querySelector("#problemEq");
+    let popupTimer = null;
+    let levelUpMessage = "";
+    let advanceTimer = null;
+    let advanceAfterPopup = false;
+
+    function goToNextQuestion() {
+      round++;
+      startRound();
+    }
+
+    try { stars = Number(localStorage.getItem("talbasket-stars")) || 0; } catch { stars = 0; }
+
+    for (let index = 0; index < STREAK_GOAL; index++) streakDots.append(document.createElement("i"));
+
+    function updateStreak() {
+      const filled = streak % STREAK_GOAL;
+      streakDots.querySelectorAll("i").forEach((dot, index) => dot.classList.toggle("on", index < filled));
+      streakDisplay.setAttribute("aria-label", `${filled} rigtige i streg ud af ${STREAK_GOAL}`);
+    }
+
+    function hideStarPopup() {
+      clearTimeout(popupTimer);
+      starPopup.hidden = true;
+      for (const sparkle of starPopup.querySelectorAll(".sparkle")) sparkle.remove();
+      if (advanceAfterPopup) goToNextQuestion();
+    }
+
+    function showStarPopup() {
+      const card = starPopup.querySelector(".star-popup-card");
+      for (const sparkle of card.querySelectorAll(".sparkle")) sparkle.remove();
+      for (let index = 0; index < 14; index++) {
+        const sparkle = document.createElement("span");
+        const angle = (index / 14) * Math.PI * 2;
+        const distance = 140 + Math.random() * 110;
+        sparkle.className = "sparkle";
+        sparkle.textContent = index % 2 ? "✨" : "⭐";
+        sparkle.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+        sparkle.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+        sparkle.style.animationDelay = `${Math.random() * .25}s`;
+        card.append(sparkle);
+      }
+      document.querySelector("#starTitle").textContent = stars > 1 ? `Stjerne nummer ${stars}!` : "Du fik en stjerne!";
+      const levelUpEl = document.querySelector("#levelUp");
+      levelUpEl.textContent = levelUpMessage;
+      levelUpEl.hidden = !levelUpMessage;
+      starPopup.hidden = false;
+      clearTimeout(popupTimer);
+      popupTimer = setTimeout(hideStarPopup, 4200);
+      sfx.fanfare();
+      Topbar.refreshStars(true);
+    }
+
+    function awardStar() {
+      stars++;
+      try { localStorage.setItem("talbasket-stars", String(stars)); } catch { /* ingen lagring */ }
+      levelUpMessage = "";
+      if (autoLevel) {
+        const before = maximum;
+        levelSteps++;
+        try { localStorage.setItem("talbasket-trin", String(levelSteps)); } catch { /* ingen lagring */ }
+        maximum = autoMaximum();
+        updateMenuLabel();
+        if (maximum > before) levelUpMessage = `Nu bliver det lidt sværere: tal op til ${maximum} 🚀`;
+      }
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      setTimeout(showStarPopup, reducedMotion ? 0 : 1600);
+    }
+
+    starPopup.addEventListener("click", hideStarPopup);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !starPopup.hidden) hideStarPopup();
+      if (event.key === "Escape" && !problemPopup.hidden) hideProblemPopup();
+    });
+    updateStreak();
+    let round = 1;
+    // Højst 10 at lægge til eller trække fra, så børn kan tælle på fingrene
+    const MAX_TERM = 10;
+
+    function randomInteger(max) {
+      return Math.floor(Math.random() * max) + 1;
+    }
+
+    function makeProblem() {
+      if (operation === "add") {
+        first = randomInteger(maximum - 1);
+        second = randomInteger(Math.min(MAX_TERM, maximum - first));
+        answer = first + second;
+      } else {
+        first = randomInteger(maximum);
+        second = randomInteger(Math.min(MAX_TERM, first));
+        answer = first - second;
+      }
+
+      firstOperand.textContent = first;
+      secondOperand.textContent = second;
+      operatorDisplay.textContent = operation === "add" ? "+" : "−";
+      operatorDisplay.setAttribute("aria-label", operation === "add" ? "plus" : "minus");
+    }
+
+    function makeChoices() {
+      const choices = new Set([answer]);
+      while (choices.size < 4) choices.add(Math.floor(Math.random() * (maximum + 1)));
+      return [...choices].sort(() => Math.random() - 0.5);
+    }
+
+    function updateHint() {
+      const isAddition = operation === "add";
+      // Største tal i hovedet, mindste tal på fingrene, og så tælles der op (plus) eller ned (minus)
+      const head = isAddition ? Math.max(first, second) : first;
+      const fingers = isAddition ? Math.min(first, second) : second;
+      const step = isAddition ? 1 : -1;
+      hintText.textContent = isAddition
+        ? `Tag det største tal, ${head}, i hovedet. Tag det mindste, ${fingers}, på fingrene, og tæl op: Hvad kommer efter ${head}?`
+        : `Tag ${head} i hovedet. Tag ${fingers} på fingrene, og tæl baglæns: Hvad kommer før ${head}?`;
+      numberLine.setAttribute("aria-label", `${head} i hovedet og ${fingers} fingre. Tæl ${isAddition ? "op" : "baglæns"} fra ${head}.`);
+
+      const slot = Math.min(52, 410 / fingers);
+      const fingerWidth = slot * .68;
+      const startX = 215 + (410 - slot * fingers) / 2;
+      let hand = "";
+      for (let i = 1; i <= fingers; i++) {
+        const number = head + step * i;
+        const centerX = startX + slot * (i - 0.5);
+        const delay = (0.6 + (i - 1) * 0.9).toFixed(1);
+        const isLast = i === fingers;
+        hand += `
+          <rect class="finger" x="${(centerX - fingerWidth / 2).toFixed(1)}" y="22" width="${fingerWidth.toFixed(1)}" height="74" rx="${(fingerWidth / 2).toFixed(1)}" fill="#ffcf9e" stroke="#e0a56b" stroke-width="2" style="animation-delay:${delay}s"/>
+          <text class="count-num" x="${centerX.toFixed(1)}" y="128" text-anchor="middle" font-size="${fingers > 7 ? 22 : 28}" font-weight="900" fill="${isLast ? "#13804f" : "#2879bd"}" font-family="Trebuchet MS, sans-serif" style="animation-delay:${delay}s">${number}</text>`;
+      }
+
+      numberLine.innerHTML = `
+        <title>Tæl videre fra ${head} med ${fingers} fingre</title>
+        <rect x="18" y="14" width="160" height="112" rx="22" fill="#fff" stroke="#9ab8e9" stroke-width="3"/>
+        <text x="98" y="56" text-anchor="middle" font-size="38">🧠</text>
+        <text x="98" y="108" text-anchor="middle" font-size="46" font-weight="900" fill="#2764c5" font-family="Trebuchet MS, sans-serif">${head}</text>
+        <rect x="${(startX - 6).toFixed(1)}" y="92" width="${(slot * fingers + 12).toFixed(1)}" height="14" rx="7" fill="#f4b57f"/>
+        ${hand}`;
+    }
+
+    function showProblemPopup() {
+      Topbar.closeMenu();
+      const sign = operation === "add" ? "+" : "−";
+      problemEq.innerHTML = `<span class="n">${first}</span><span class="op">${sign}</span><span class="n">${second}</span><span class="eqs">=</span><span class="n q">?</span>`;
+      problemPopup.setAttribute("aria-label", `Regnestykke: ${first} ${operation === "add" ? "plus" : "minus"} ${second}. Tryk for at starte.`);
+      problemPopup.hidden = false;
+      problemPopup.focus({ preventScroll: true });
+      sfx.pop();
+    }
+
+    function hideProblemPopup() {
+      if (problemPopup.hidden) return;
+      problemPopup.hidden = true;
+      sfx.click();
+    }
+
+    problemPopup.addEventListener("click", hideProblemPopup);
+
+    function startRound() {
+      clearTimeout(advanceTimer);
+      advanceAfterPopup = false;
+      clearShots();
+      roundDisplay.textContent = `Runde ${round}`;
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      nextButton.hidden = true;
+      mathHint.hidden = true;
+      hintToggle.setAttribute("aria-expanded", "false");
+      hintToggle.textContent = "💡 Vis regnehjælp";
+      hoop.classList.remove("scored");
+      makeProblem();
+      answerContainer.replaceChildren();
+
+      for (const choice of makeChoices()) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "answer";
+        button.setAttribute("aria-label", `Svar ${choice}. Træk bolden tilbage og skyd mod kurven, eller tryk Enter.`);
+        button.setAttribute("aria-describedby", "dragInstructions");
+        button.innerHTML = `<span class="ball" aria-hidden="true"><span class="answer-number">${choice}</span></span>`;
+        button.addEventListener("pointerdown", event => beginDrag(event, button, choice));
+        button.addEventListener("click", event => {
+          if (event.detail === 0) submitShot(button, choice);
+          else if (ignoreNextClick) {
+            ignoreNextClick = false;
+            event.preventDefault();
+          }
+        });
+        answerContainer.append(button);
+      }
+      showProblemPopup();
+    }
+
+    function clearShots() {
+      if (activeDrag) activeDrag.button.classList.remove("is-dragging");
+      activeDrag?.ball.remove();
+      activeDrag = null;
+      if (flight) cancelAnimationFrame(flight.frame);
+      flight = null;
+      clearAim();
+      clearEffects();
+      lake.classList.remove("splash");
+      for (const ball of document.querySelectorAll(".flying-ball, .dragged-ball")) {
+        for (const animation of ball.getAnimations()) animation.cancel();
+        ball.remove();
+      }
+    }
+
+    function animateShot(source, isCorrect) {
+      audioReady();
+      sfx.kick(.6);
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const ballSource = source.querySelector(".ball");
+      if (!ballSource) return;
+
+      const from = ballSource.getBoundingClientRect();
+      const startX = from.left + from.width / 2;
+      const startY = from.top + from.height / 2;
+      let targetElement = hoop.querySelector(".rim-target");
+      if (!isCorrect) {
+        // Vælg den side af søen som bolden kommer fra
+        const waterSpots = [...lake.querySelectorAll(".water-target")];
+        targetElement = waterSpots.reduce((best, spot) => {
+          const rect = spot.getBoundingClientRect();
+          const bestRect = best.getBoundingClientRect();
+          return Math.abs(rect.left + rect.width / 2 - startX) < Math.abs(bestRect.left + bestRect.width / 2 - startX) ? spot : best;
+        });
+      }
+      const target = targetElement.getBoundingClientRect();
+      const endX = target.left + target.width / 2;
+      const endY = target.top + target.height / 2;
+      const ball = document.createElement("span");
+      const size = 38;
+      ball.classList.add("flying-ball");
+      ball.setAttribute("aria-hidden", "true");
+      ball.style.width = `${size}px`;
+      ball.style.height = `${size}px`;
+      ball.style.left = `${startX - size / 2}px`;
+      ball.style.top = `${startY - size / 2}px`;
+      if (!ball.isConnected) document.body.append(ball);
+
+      if (reducedMotion || typeof ball.animate !== "function") {
+        ball.remove();
+        if (isCorrect) hoop.classList.add("scored");
+        return;
+      }
+
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const frames = isCorrect ? [
+        { transform: "translate(0, 0) scale(1) rotate(0deg)" },
+        { transform: `translate(${dx * .48}px, ${dy * .48 - 82}px) scale(.84) rotate(270deg)` },
+        { transform: `translate(${dx * .82}px, ${dy * .82 - 25}px) scale(.68) rotate(540deg)` },
+        { transform: `translate(${dx}px, ${dy}px) scale(.5) rotate(760deg)` }
+      ] : [
+        { transform: "translate(0, 0) scale(1) rotate(0deg)", opacity: 1 },
+        { transform: `translate(${dx * .5}px, ${dy * .5 - 70}px) scale(.82) rotate(270deg)`, opacity: 1 },
+        { transform: `translate(${dx}px, ${dy - 6}px) scale(.55) rotate(560deg)`, opacity: 1, offset: .72 },
+        { transform: `translate(${dx}px, ${dy + 10}px) scale(.3) rotate(640deg)`, opacity: 0 }
+      ];
+
+      const animation = ball.animate(frames, { duration: isCorrect ? 780 : 980, easing: "cubic-bezier(.2,.72,.28,1)" });
+
+      animation.onfinish = () => {
+        ball.remove();
+        const label = source.querySelector(".answer-number").textContent;
+        const radius = ballRadiusUnits(size);
+        if (isCorrect) playBasket(endX, endY, label, radius);
+        else playCroc(endX, endY, label, radius);
+      };
+      animation.oncancel = () => ball.remove();
+    }
+
+    let activeDrag = null;
+    let ignoreNextClick = false;
+    let flight = null;
+
+    const GRAVITY = 1600;
+    const POWER = 4.5;
+    const HOOP_MAGNET = 2.6;
+    const MAX_PULL = 120;
+    const MIN_PULL = 24;
+    const SIM_STEP = 1 / 120;
+    const aimCanvas = document.createElement("canvas");
+    aimCanvas.className = "aim-canvas";
+    aimCanvas.setAttribute("aria-hidden", "true");
+    document.body.append(aimCanvas);
+    const aimContext = aimCanvas.getContext("2d");
+
+    function hoopGeometry() {
+      const rim = hoop.querySelector(".rim-target").getBoundingClientRect();
+      const water = lake.querySelector(".water-surface").getBoundingClientRect();
+      const rimY = rim.top + rim.height / 2;
+      return {
+        rimX: rim.left + rim.width / 2,
+        rimY,
+        rimHalf: rim.width / 2,
+        netBottom: rimY + rim.width * .7,
+        water: { x: water.left + water.width / 2, y: water.top + water.height / 2, rx: water.width / 2 * .92, ry: water.height / 2 * .92 }
+      };
+    }
+
+    function inWater(geo, x, y) {
+      const { water } = geo;
+      return ((x - water.x) / water.rx) ** 2 + ((y - water.y) / water.ry) ** 2 <= 1;
+    }
+
+    function simulate(start, velocity, geo, { detectHoop = true, maxTime = 4, tolerance = geo.rimHalf * .85 } = {}) {
+      let { x, y } = start;
+      let { vx, vy } = velocity;
+      const points = [{ x, y }];
+      const result = { points, hit: false, water: false };
+
+      for (let time = SIM_STEP; time <= maxTime; time += SIM_STEP) {
+        const previousX = x;
+        const previousY = y;
+        vy += GRAVITY * SIM_STEP;
+        x += vx * SIM_STEP;
+        y += vy * SIM_STEP;
+
+        if (detectHoop && vy > 0 && previousY < geo.rimY && y >= geo.rimY) {
+          const crossX = previousX + (x - previousX) * (geo.rimY - previousY) / (y - previousY);
+          if (Math.abs(crossX - geo.rimX) <= tolerance) {
+            points.push({ x: crossX, y: geo.rimY });
+            result.hit = true;
+            result.crossX = crossX;
+            return result;
+          }
+        }
+
+        points.push({ x, y });
+        if (vy > 0 && inWater(geo, x, y)) {
+          result.water = true;
+          return result;
+        }
+        if (y > window.innerHeight + 80 || x < -200 || x > window.innerWidth + 200) return result;
+      }
+      return result;
+    }
+
+    function launchVelocity(drag, pull) {
+      const velocity = { vx: -pull.x * drag.speedPerPixel, vy: -pull.y * drag.speedPerPixel };
+      // Kurven trækker i kastet: er bolden tæt på, drejes den ind mod midten af ringen
+      const rough = simulate(drag.start, velocity, drag.geo, { tolerance: drag.geo.rimHalf * HOOP_MAGNET });
+      if (rough.hit) {
+        const flightTime = (rough.points.length - 1) * SIM_STEP;
+        velocity.vx += (drag.geo.rimX - rough.crossX) * .9 / flightTime;
+      }
+      return velocity;
+    }
+
+    function clearAim() {
+      aimContext.setTransform(1, 0, 0, 1, 0, 0);
+      aimContext.clearRect(0, 0, aimCanvas.width, aimCanvas.height);
+    }
+
+    function drawAim(drag) {
+      const ratio = window.devicePixelRatio || 1;
+      const width = Math.round(window.innerWidth * ratio);
+      const height = Math.round(window.innerHeight * ratio);
+      if (aimCanvas.width !== width || aimCanvas.height !== height) {
+        aimCanvas.width = width;
+        aimCanvas.height = height;
+      }
+      clearAim();
+      aimContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+      const ballCenter = { x: drag.start.x + drag.pull.x, y: drag.start.y + drag.pull.y };
+      aimContext.lineCap = "round";
+      aimContext.strokeStyle = "#8b4a1f";
+      aimContext.lineWidth = 5;
+      aimContext.beginPath();
+      aimContext.moveTo(drag.start.x, drag.start.y);
+      aimContext.lineTo(ballCenter.x, ballCenter.y);
+      aimContext.stroke();
+
+      if (Math.hypot(drag.pull.x, drag.pull.y) < MIN_PULL) return;
+
+      const preview = simulate(drag.start, launchVelocity(drag, drag.pull), drag.geo, { maxTime: 1.3 });
+      const stride = 5;
+      for (let index = stride; index < preview.points.length; index += stride) {
+        const point = preview.points[index];
+        const fade = 1 - index / preview.points.length * .6;
+        aimContext.beginPath();
+        aimContext.arc(point.x, point.y, 5.5 * fade, 0, Math.PI * 2);
+        aimContext.fillStyle = "#ed8a45";
+        aimContext.fill();
+        aimContext.lineWidth = 2;
+        aimContext.strokeStyle = "#fff";
+        aimContext.stroke();
+      }
+    }
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const lakeSvg = lake.querySelector("svg");
+    const effects = lakeSvg.querySelector("#effects");
+    const crocClipRect = lakeSvg.querySelector("#crocClipRect");
+    let effectTimers = [];
+
+    function prefersReducedMotion() {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    function clientToSvg(clientX, clientY) {
+      const point = lakeSvg.createSVGPoint();
+      point.x = clientX;
+      point.y = clientY;
+      return point.matrixTransform(lakeSvg.getScreenCTM().inverse());
+    }
+
+    function ballRadiusUnits(diameterPx) {
+      return diameterPx / 2 / lakeSvg.getScreenCTM().a;
+    }
+
+    function clearEffects() {
+      for (const timer of effectTimers) clearTimeout(timer);
+      effectTimers = [];
+      effects.replaceChildren();
+      for (const leftover of hoop.querySelectorAll(".net-ball")) leftover.remove();
+    }
+
+    function later(callback, delay) {
+      effectTimers.push(setTimeout(callback, delay));
+    }
+
+    function showScored() {
+      sfx.swish();
+      hoop.classList.remove("scored");
+      void hoop.getBoundingClientRect();
+      hoop.classList.add("scored");
+    }
+
+    function splashAtSvg(x, y) {
+      for (const ring of lake.querySelectorAll(".ring")) {
+        ring.setAttribute("cx", x);
+        ring.setAttribute("cy", y);
+      }
+      lake.classList.remove("splash");
+      void lake.getBoundingClientRect();
+      lake.classList.add("splash");
+    }
+
+    function showSplash(clientX, clientY) {
+      sfx.splash();
+      const local = clientToSvg(clientX, clientY);
+      splashAtSvg(local.x, local.y);
+    }
+
+    function ballMarkup(radius, label) {
+      const fontSize = radius * (String(label).length > 2 ? .85 : 1.1);
+      return `
+        <circle r="${radius}" fill="url(#ball-shade)" stroke="#9d421c" stroke-width="${radius * .12}"/>
+        <path d="M0 ${-radius}V${radius}M${-radius} 0H${radius}M${-radius * .72} ${-radius * .72}Q${-radius * .2} 0 ${-radius * .72} ${radius * .72}M${radius * .72} ${-radius * .72}Q${radius * .2} 0 ${radius * .72} ${radius * .72}" fill="none" stroke="#39251d" stroke-width="${radius * .1}"/>
+        <text y="${fontSize * .36}" text-anchor="middle" font-size="${fontSize}" font-weight="900" fill="#fff" stroke="#6e2c14" stroke-width="${radius * .14}" paint-order="stroke" font-family="Trebuchet MS, sans-serif">${label}</text>`;
+    }
+
+    function popText(x, y, text, fill) {
+      const label = document.createElementNS(SVG_NS, "text");
+      label.textContent = text;
+      label.setAttribute("x", x);
+      label.setAttribute("y", y);
+      label.setAttribute("text-anchor", "middle");
+      label.setAttribute("font-size", "30");
+      label.setAttribute("font-weight", "900");
+      label.setAttribute("fill", fill);
+      label.setAttribute("stroke", "#fff");
+      label.setAttribute("stroke-width", "7");
+      label.setAttribute("paint-order", "stroke");
+      label.setAttribute("font-family", "Trebuchet MS, sans-serif");
+      label.style.transformOrigin = `${x}px ${y}px`;
+      effects.append(label);
+      label.animate([
+        { transform: "translate(0px, 10px) scale(.3)", opacity: 0 },
+        { transform: "translate(0px, -6px) scale(1.25)", opacity: 1, offset: .3 },
+        { transform: "translate(0px, -18px) scale(1)", opacity: 1, offset: .75 },
+        { transform: "translate(0px, -32px) scale(1)", opacity: 0 }
+      ], { duration: 1200, easing: "ease-out" }).onfinish = () => label.remove();
+    }
+
+    function burstStars(x, y) {
+      for (let index = 0; index < 12; index++) {
+        const star = document.createElementNS(SVG_NS, "text");
+        star.textContent = "★";
+        star.setAttribute("x", x);
+        star.setAttribute("y", y);
+        star.setAttribute("text-anchor", "middle");
+        star.setAttribute("font-size", "18");
+        star.setAttribute("fill", index % 2 ? "#ffc400" : "#ff7a45");
+        star.setAttribute("stroke", "#fff");
+        star.setAttribute("stroke-width", "1.5");
+        star.setAttribute("paint-order", "stroke");
+        star.style.transformOrigin = `${x}px ${y}px`;
+        effects.append(star);
+
+        const angle = (index / 12) * Math.PI * 2 + Math.random() * .4;
+        const distance = 50 + Math.random() * 40;
+        star.animate([
+          { transform: "translate(0px, 0px) scale(.3)", opacity: 1 },
+          { transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance - 18}px) scale(1.3)`, opacity: 0 }
+        ], { duration: 800 + Math.random() * 300, easing: "cubic-bezier(.2,.8,.3,1)" }).onfinish = () => star.remove();
+      }
+    }
+
+    // Bolden falder gennem nettet, så man tydeligt ser at den er i kurven
+    function playBasket(clientX, clientY, label, radius) {
+      showScored();
+      if (prefersReducedMotion()) return;
+
+      const start = clientToSvg(clientX, clientY);
+      const startX = Math.max(298, Math.min(342, start.x));
+      const netBall = document.createElementNS(SVG_NS, "g");
+      netBall.setAttribute("class", "net-ball");
+      netBall.innerHTML = ballMarkup(radius, label);
+      hoop.querySelector(".net-lines").before(netBall);
+
+      burstStars(320, 78);
+      popText(320, 66, "KURV!", "#ff8a00");
+
+      const midX = (startX + 320) / 2;
+      netBall.animate([
+        { transform: `translate(${startX}px, 74px) scale(1, 1) rotate(0deg)` },
+        { transform: `translate(${midX}px, 98px) scale(.97, 1.05) rotate(45deg)`, offset: .28 },
+        { transform: `translate(320px, 122px) scale(.9, 1.14) rotate(95deg)`, offset: .55 },
+        { transform: `translate(320px, ${130 + radius}px) scale(1, 1) rotate(140deg)`, offset: .7 },
+        { transform: `translate(320px, 200px) scale(.9, .9) rotate(230deg)`, opacity: 1, offset: .94 },
+        { transform: `translate(320px, 206px) scale(.5, .5) rotate(250deg)`, opacity: 0 }
+      ], { duration: 1300, easing: "ease-in" }).onfinish = () => {
+        netBall.remove();
+        splashAtSvg(320, 206);
+      };
+    }
+
+    function crocMarkup(label, facing) {
+      return `
+        <g class="croc-rise">
+          <path d="M-4 6C-16 -6 -34 -8 -52 -2C-62 2 -72 2 -84 8L-4 14Z" fill="#3f9a4a"/>
+          <path d="M-16 -4l4 -8 4 8M-30 -5l4 -8 4 8M-44 -2l4 -8 4 8M-58 1l4 -8 4 8" fill="#2f7d3a"/>
+          <path d="M-4 2L82 2C84 12 74 17 58 18C32 21 6 19 -4 13Z" fill="#4aa356"/>
+          <path d="M12 2l4 -7 4 7M30 2l4 -7 4 7M48 2l4 -7 4 7M66 2l4 -7 4 7" fill="#fff" stroke="#cfd8dc" stroke-width=".6"/>
+          <g class="croc-ball" transform="translate(42 -12) scale(${facing} 1)">${ballMarkup(14, label)}</g>
+          <g class="croc-jaw">
+            <path d="M-6 -3C8 -22 56 -24 86 -9C90 -6 89 0 83 2L-6 2Z" fill="#58c062"/>
+            <path d="M18 2l4 7 4 -7M36 2l4 7 4 -7M54 2l4 7 4 -7M72 2l4 7 4 -7" fill="#fff" stroke="#cfd8dc" stroke-width=".6"/>
+            <circle cx="77" cy="-10" r="2.4" fill="#2d6a35"/>
+            <circle cx="16" cy="-18" r="10" fill="#58c062"/>
+            <circle cx="17" cy="-19" r="6" fill="#fff"/>
+            <ellipse cx="18.5" cy="-19" rx="2" ry="4.4" fill="#1b1b1b"/>
+            <path d="M7 -22q10 -8 20 0" fill="none" stroke="#2f7d3a" stroke-width="2.4" stroke-linecap="round"/>
+          </g>
+        </g>`;
+    }
+
+    // En krokodille dukker op af søen og æder bolden
+    function playCroc(clientX, clientY, label, radius) {
+      sfx.splash();
+      const spot = clientToSvg(clientX, clientY);
+      splashAtSvg(spot.x, spot.y);
+      if (prefersReducedMotion()) return;
+
+      effects.querySelector(".croc-layer")?.remove();
+      const scale = radius / 14;
+      // Krokodillen vender væk fra kurven, så kroppen ligger inde i billedet
+      const facing = spot.x > 320 ? 1 : -1;
+      const originX = spot.x - facing * 42 * scale;
+      const originY = spot.y + 12 * scale;
+      crocClipRect.setAttribute("height", String(originY + 12 * scale + 400));
+
+      const layer = document.createElementNS(SVG_NS, "g");
+      layer.setAttribute("class", "croc-layer");
+      layer.setAttribute("clip-path", "url(#croc-clip)");
+      const croc = document.createElementNS(SVG_NS, "g");
+      croc.setAttribute("transform", `translate(${originX} ${originY}) scale(${facing * scale} ${scale})`);
+      croc.innerHTML = crocMarkup(label, facing);
+      layer.append(croc);
+      effects.append(layer);
+
+      const total = 2500;
+      const sink = 70;
+      croc.querySelector(".croc-rise").animate([
+        { transform: `translate(0px, ${sink}px)` },
+        { transform: "translate(0px, 0px)", offset: .14, easing: "ease-out" },
+        { transform: "translate(0px, 0px)", offset: .35 },
+        { transform: "translate(0px, -6px)", offset: .39 },
+        { transform: "translate(0px, 0px)", offset: .47 },
+        { transform: "translate(0px, -3px)", offset: .55 },
+        { transform: "translate(0px, 0px)", offset: .63 },
+        { transform: "translate(0px, 0px)", offset: .72, easing: "ease-in" },
+        { transform: `translate(0px, ${sink}px)` }
+      ], { duration: total, easing: "ease-out" }).onfinish = () => layer.remove();
+
+      croc.querySelector(".croc-jaw").animate([
+        { transform: "rotate(-36deg)" },
+        { transform: "rotate(-36deg)", offset: .3 },
+        { transform: "rotate(0deg)", offset: .35, easing: "ease-in" },
+        { transform: "rotate(-10deg)", offset: .43 },
+        { transform: "rotate(0deg)", offset: .51 },
+        { transform: "rotate(-8deg)", offset: .59 },
+        { transform: "rotate(0deg)", offset: .67 },
+        { transform: "rotate(0deg)" }
+      ], { duration: total });
+
+      croc.querySelector(".croc-ball").animate([
+        { opacity: 1 },
+        { opacity: 1, offset: .35 },
+        { opacity: 0, offset: .36 },
+        { opacity: 0 }
+      ], { duration: total });
+
+      later(() => {
+        sfx.chomp();
+        splashAtSvg(spot.x, spot.y + 6);
+        popText(spot.x, spot.y - 54 * scale, "NAM!", "#2e9e44");
+      }, total * .35);
+    }
+
+    function buildShot(start, velocity, geo, isCorrect) {
+      const trajectory = simulate(start, velocity, geo);
+      const points = trajectory.points;
+      const shot = { points, kind: "miss", splash: null, hitIndex: -1 };
+
+      if (trajectory.hit) {
+        const hit = points[points.length - 1];
+        shot.hitIndex = points.length - 1;
+        if (isCorrect) {
+          shot.kind = "basket";
+        } else {
+          shot.kind = "bounce";
+          const direction = Math.abs(hit.x - geo.rimX) < 3 ? (Math.random() < .5 ? -1 : 1) : Math.sign(hit.x - geo.rimX);
+          const bounce = simulate(hit, { vx: direction * 170, vy: -220 }, geo, { detectHoop: false, maxTime: 3 });
+          points.push(...bounce.points.slice(1));
+          shot.splash = points[points.length - 1];
+        }
+      } else if (trajectory.water) {
+        shot.kind = "water";
+        shot.splash = points[points.length - 1];
+      }
+      return shot;
+    }
+
+    function finishFlight(drag, shot) {
+      drag.ball.remove();
+      flight = null;
+      drag.button.classList.remove("is-dragging");
+      const end = shot.points[shot.points.length - 1];
+      const radius = ballRadiusUnits(drag.size * drag.flightScale);
+      if (shot.kind === "basket") playBasket(end.x, end.y, drag.choice, radius);
+      else if (shot.kind === "bounce") playCroc(end.x, end.y, drag.choice, radius);
+      else if (shot.splash) showSplash(shot.splash.x, shot.splash.y);
+
+      if (shot.kind === "basket" || shot.kind === "bounce") {
+        scoreShot(drag.choice);
+      } else {
+        feedback.className = "feedback";
+        feedback.textContent = shot.kind === "water"
+          ? "Plask! Forbi kurven — prøv igen."
+          : "Forbi kurven — prøv igen.";
+      }
+    }
+
+    function playFlight(drag, shot) {
+      sfx.kick(Math.hypot(drag.pull.x, drag.pull.y) / drag.maxPull);
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reducedMotion) {
+        finishFlight(drag, shot);
+        return;
+      }
+
+      const { ball, size, flightScale } = drag;
+      ball.classList.remove("dragged-ball");
+      ball.classList.add("flying-ball");
+      const startTime = performance.now();
+      flight = { frame: 0 };
+
+      const step = now => {
+        const elapsed = (now - startTime) / 1000;
+        const index = Math.min(shot.points.length - 1, Math.floor(elapsed / SIM_STEP));
+        // Forkert bold: ringen klinger, når bolden rammer den (kun én gang)
+        if (shot.kind === "bounce" && !shot.clanged && index >= shot.hitIndex) {
+          shot.clanged = true;
+          sfx.clang();
+        }
+        const point = shot.points[index];
+        const shrinkIn = Math.min(1, elapsed / .15);
+        const scale = (1 - (1 - flightScale) * shrinkIn) * (point.shrink || 1);
+        ball.style.left = `${point.x - size / 2}px`;
+        ball.style.top = `${point.y - size / 2}px`;
+        ball.style.opacity = point.fade ?? 1;
+        ball.style.transform = `scale(${scale}) rotate(${elapsed * 540}deg)`;
+
+        if (index >= shot.points.length - 1) finishFlight(drag, shot);
+        else flight.frame = requestAnimationFrame(step);
+      };
+      flight.frame = requestAnimationFrame(step);
+    }
+
+    function beginDrag(event, button, choice) {
+      if (!event.isPrimary || event.button !== 0 || button.disabled || activeDrag || flight) return;
+
+      const ballSource = button.querySelector(".ball");
+      const bounds = ballSource.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right ||
+          event.clientY < bounds.top || event.clientY > bounds.bottom) return;
+
+      event.preventDefault();
+      audioReady();
+      button.focus();
+      const ball = ballSource.cloneNode(true);
+      ball.classList.add("dragged-ball");
+      ball.setAttribute("aria-hidden", "true");
+      ball.style.width = `${bounds.width}px`;
+      ball.style.height = `${bounds.height}px`;
+      ball.style.left = `${bounds.left}px`;
+      ball.style.top = `${bounds.top}px`;
+      document.body.append(ball);
+
+      const geo = hoopGeometry();
+      const start = { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+      // Hastigheden skaleres efter afstanden til kurven, så et fuldt træk altid kan nå den
+      const reach = Math.max(260, Math.hypot(geo.rimX - start.x, geo.rimY - start.y));
+      const maxSpeed = Math.sqrt(POWER * GRAVITY * reach);
+      // Bolden skal kunne trækkes helt tilbage uden at forlade skærmen nederst
+      const roomBelow = window.innerHeight - start.y - bounds.height / 2 - 8;
+      const maxPull = Math.max(MIN_PULL * 2.5, Math.min(MAX_PULL, roomBelow));
+
+      activeDrag = {
+        button,
+        choice,
+        pointerId: event.pointerId,
+        ball,
+        size: bounds.width,
+        flightScale: Math.min(.6, Math.max(.3, geo.rimHalf * 1.1 / bounds.width)),
+        start,
+        origin: { x: event.clientX, y: event.clientY },
+        pull: { x: 0, y: 0 },
+        geo,
+        maxPull,
+        speedPerPixel: maxSpeed / maxPull
+      };
+      button.classList.add("is-dragging");
+      button.setPointerCapture(event.pointerId);
+      feedback.className = "feedback";
+      feedback.textContent = "Træk bolden tilbage, sigt mod kurven og slip.";
+    }
+
+    document.addEventListener("pointermove", event => {
+      if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
+
+      const drag = activeDrag;
+      let pullX = event.clientX - drag.origin.x;
+      let pullY = event.clientY - drag.origin.y;
+      const length = Math.hypot(pullX, pullY);
+      if (length > drag.maxPull) {
+        pullX *= drag.maxPull / length;
+        pullY *= drag.maxPull / length;
+      }
+      drag.pull = { x: pullX, y: pullY };
+      const pullRatio = Math.min(1, Math.hypot(pullX, pullY) / drag.maxPull);
+      if (Math.abs(pullRatio - (drag.lastTick ?? 0)) > .12) {
+        drag.lastTick = pullRatio;
+        sfx.stretch(pullRatio);
+      }
+      drag.ball.style.left = `${drag.start.x + pullX - drag.size / 2}px`;
+      drag.ball.style.top = `${drag.start.y + pullY - drag.size / 2}px`;
+      drawAim(drag);
+    });
+
+    document.addEventListener("pointerup", event => {
+      if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
+
+      const drag = activeDrag;
+      activeDrag = null;
+      clearAim();
+      ignoreNextClick = true;
+      setTimeout(() => { ignoreNextClick = false; }, 0);
+
+      if (Math.hypot(drag.pull.x, drag.pull.y) < MIN_PULL) {
+        drag.ball.remove();
+        drag.button.classList.remove("is-dragging");
+        feedback.textContent = "Træk bolden længere tilbage for at skyde.";
+        return;
+      }
+
+      const start = { ...drag.start };
+      const shot = buildShot(start, launchVelocity(drag, drag.pull), drag.geo, drag.choice === answer);
+      playFlight(drag, shot);
+    });
+
+    document.addEventListener("pointercancel", event => {
+      if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
+      activeDrag.button.classList.remove("is-dragging");
+      activeDrag.ball.remove();
+      activeDrag = null;
+      clearAim();
+    });
+
+    function submitShot(selectedButton, choice) {
+      animateShot(selectedButton, choice === answer);
+      scoreShot(choice);
+    }
+
+    function scoreShot(choice) {
+      const isCorrect = choice === answer;
+      answeredCount++;
+      if (isCorrect) correctCount++;
+
+      feedback.className = "feedback";
+      const equation = `${first} ${operation === "add" ? "+" : "−"} ${second} = ${answer}`;
+      if (isCorrect) {
+        for (const button of answerContainer.querySelectorAll(".answer")) {
+          button.disabled = true;
+          if (Number(button.querySelector(".answer-number").textContent) === answer) {
+            button.classList.add("is-right");
+          }
+        }
+        feedback.textContent = `Basket! Rigtigt: ${equation}.`;
+        feedback.classList.add("good");
+      } else {
+        feedback.textContent = "Gnam! Krokodillen åd bolden — prøv en anden bold.";
+        feedback.classList.add("bad");
+      }
+
+      if (isCorrect) {
+        streak++;
+        if (streak % STREAK_GOAL === 0) {
+          awardStar();
+          advanceAfterPopup = true;
+        } else {
+          sfx.streak(streak);
+          advanceTimer = setTimeout(goToNextQuestion, 1700);
+        }
+      } else {
+        streak = 0;
+      }
+      updateStreak();
+
+      scoreDisplay.textContent = `Rigtige: ${correctCount} / ${answeredCount}`;
+      nextButton.hidden = !isCorrect;
+      if (isCorrect) nextButton.focus();
+    }
+
+    document.querySelector("#hintReplay").addEventListener("click", updateHint);
+    hintToggle.addEventListener("click", () => {
+      const isOpening = mathHint.hidden;
+      mathHint.hidden = !isOpening;
+      hintToggle.setAttribute("aria-expanded", String(isOpening));
+      hintToggle.textContent = isOpening ? "Skjul regnehjælp" : "💡 Vis regnehjælp";
+      if (isOpening) updateHint();
+    });
+
+    function updateMenuLabel() {
+      for (const option of difficultyButtons) {
+        const pressed = autoLevel ? option.dataset.max === "auto" : Number(option.dataset.max) === maximum;
+        option.setAttribute("aria-pressed", String(pressed));
+      }
+    }
+
+    Topbar.init({ kid: "ari", controls: [settings] });
+
+    function resetGame() {
+      correctCount = 0;
+      answeredCount = 0;
+      round = 1;
+      streak = 0;
+      updateStreak();
+      updateMenuLabel();
+      scoreDisplay.textContent = "Rigtige: 0 / 0";
+      startRound();
+    }
+
+    for (const button of operationButtons) {
+      button.addEventListener("click", () => {
+        operation = button.dataset.operation;
+        for (const option of operationButtons) {
+          option.setAttribute("aria-pressed", String(option === button));
+        }
+        resetGame();
+      });
+    }
+
+    for (const button of difficultyButtons) {
+      button.addEventListener("click", () => {
+        autoLevel = button.dataset.max === "auto";
+        maximum = autoLevel ? autoMaximum() : Number(button.dataset.max);
+        try {
+          if (autoLevel) localStorage.removeItem("talbasket-niveau");
+          else localStorage.setItem("talbasket-niveau", String(maximum));
+        } catch { /* ingen lagring */ }
+        resetGame();
+      });
+    }
+
+    nextButton.addEventListener("click", () => {
+      goToNextQuestion();
+      answerContainer.querySelector(".answer")?.focus();
+    });
+
+    updateMenuLabel();
+    startRound();

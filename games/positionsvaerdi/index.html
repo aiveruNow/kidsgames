@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f8ff">
+  <title>Talbasket — positionsværdi</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <main class="app">
+    <a class="back" href="../../menu.html" aria-label="Alle spil">🏠 Alle spil</a>
+    <header class="topline">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">🏀</div>
+        <div>
+          <h1>Talbasket</h1>
+          <p class="subtitle">Lær om enere, tiere og hundreder</p>
+        </div>
+      </div>
+      <div class="score" id="score" aria-live="polite">Rigtige: 0 / 0</div>
+    </header>
+
+    <section class="game-card" aria-label="Talbasket-spil">
+      <div class="controls">
+        <nav class="levels" aria-label="Vælg sværhedsgrad">
+          <button class="level" type="button" data-max="19" aria-pressed="true">Op til 19</button>
+          <button class="level" type="button" data-max="29" aria-pressed="false">Op til 29</button>
+          <button class="level" type="button" data-max="49" aria-pressed="false">Op til 49</button>
+          <button class="level" type="button" data-max="99" aria-pressed="false">Op til 99</button>
+          <button class="level" type="button" data-max="999" aria-pressed="false">Op til 999</button>
+        </nav>
+        <div class="round-label" id="round">Runde 1</div>
+      </div>
+
+      <div class="game-body">
+        <p class="prompt">Hvilket tal viser klodserne?</p>
+        <p class="hint">Tæl hundreder, tiere og enere — og vælg den rigtige bold.</p>
+        <div class="blocks-panel">
+          <svg id="blocks" viewBox="0 0 900 330" role="img" aria-labelledby="blocks-title blocks-desc">
+            <title id="blocks-title">Base-ti klodser</title>
+            <desc id="blocks-desc">Klodserne viser et tal.</desc>
+          </svg>
+        </div>
+        <p class="answers-title">Vælg et svar</p>
+        <div class="answers" id="answers" aria-label="Mulige svar"></div>
+        <p class="feedback" id="feedback" aria-live="polite"></p>
+        <div class="next-row">
+          <button class="next" id="next" type="button" hidden>Næste spørgsmål <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+    <p class="footer-note">Et lille matematikspil til at øve positionsværdi.</p>
+    <a class="game-link" href="../plus-minus/index.html">Prøv også plus og minus →</a>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>

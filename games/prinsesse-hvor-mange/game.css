@@ -1,0 +1,17 @@
+/* ---------- Hvor mange? ---------- */
+.field {
+  position: relative; display: flex; flex: 1; align-items: center; justify-content: center; width: min(100%, 720px); min-height: 0; padding: calc(var(--u) * 2);
+  border-radius: 30px; background: linear-gradient(#e6f5ff 0 58%, #bdf0b4 58% 100%); box-shadow: inset 0 0 0 5px #fff, 0 10px 22px #8a2f7d22;
+}
+.field .items { position: relative; z-index: 1; }
+.answers { display: flex; flex: none; justify-content: center; gap: calc(var(--u) * 2.4); width: 100%; }
+.ans {
+  display: grid; place-items: center; width: calc(var(--u) * 21); height: calc(var(--u) * 21); min-width: 4.4rem; min-height: 4.4rem; border-radius: 50%; color: #fff;
+  font-weight: 900; font-size: calc(var(--u) * 11); line-height: 1; text-shadow: 0 4px 0 #0003;
+  background: radial-gradient(circle at 35% 30%, var(--a), var(--b)); box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000), 0 0 0 5px #fff, 0 14px 22px #8a2f7d22; transition: transform .12s;
+}
+.ans:active { transform: translateY(5px); }
+.ans.shake { animation: shake .45s; }
+.ans.hint, .ans.win { animation: glow .8s ease-in-out infinite alternate; }
+.ans.win { transform: scale(1.1); }
+.ans:disabled { cursor: default; }

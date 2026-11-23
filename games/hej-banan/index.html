@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b3d2a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hej Banan">
+  <title>Hej Banan – Junglen</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div id="bg"></div>
+  <main class="app">
+    <section class="screen" id="home">
+      <div class="hero">
+        <canvas id="mascot" width="360" height="324" aria-label="Din abe"></canvas>
+        <div>
+          <h1>Hej <span>Banan</span></h1>
+          <p class="sub">Sving fra træ til træ!</p>
+        </div>
+      </div>
+      <p class="tagline">Spis bananer, mød junglens dyr, og lær tamilsk!</p>
+      <div class="homebtns">
+        <button class="btn green big" id="playBtn" type="button">▶ Spil</button>
+        <button class="btn ghost" id="jungleBtn" type="button">🌴 Vælg jungle</button>
+        <button class="btn ghost" id="apeBtn" type="button">🐒 Vælg abe <span id="apeCount"></span></button>
+        <button class="btn ghost" id="faunaBtn" type="button">📖 Junglens dyr <span id="faunaCount"></span></button>
+        <button class="btn ghost" id="dictBtn" type="button">Min ordbog <span id="dictCount"></span></button>
+      </div>
+    </section>
+
+    <section class="screen" id="jungleScreen" hidden>
+      <div class="head">
+        <button class="back" id="jungleBack" type="button" aria-label="Tilbage">←</button>
+        <div><h2>Junglerne</h2><div class="tn" id="jungleSub"></div></div>
+      </div>
+      <div class="jg-grid" id="jungleBody"></div>
+    </section>
+
+    <section class="screen" id="dictScreen" hidden>
+      <div class="head">
+        <button class="back" id="dictBack" type="button" aria-label="Tilbage">←</button>
+        <div><h2>Min ordbog</h2><div class="tn" id="dictSub"></div></div>
+      </div>
+      <div class="dict" id="dictBody"></div>
+    </section>
+
+    <section class="screen" id="play" hidden>
+      <div class="hud">
+        <button class="back" id="playBack" type="button" aria-label="Tilbage">←</button>
+        <div class="title"><span id="playTitle"></span></div>
+        <div class="prog" id="prog" aria-hidden="true"><i id="progFill"></i><span id="progText"></span></div>
+      </div>
+      <div id="stage"><canvas id="cv"></canvas><div id="toast" hidden></div><div id="wordPop" hidden></div><div id="startHint" hidden>Tryk for at slippe lianen!</div></div>
+    </section>
+  </main>
+
+  <div class="overlay" id="meet" hidden>
+    <div class="card">
+      <p class="eyebrow">Dagens ord</p>
+      <h3 id="meetTitle">Nye ord!</h3>
+      <div class="mcards" id="meetCards"></div>
+      <p class="mute-note" id="meetNote" hidden></p>
+      <p class="hintline">Tryk på et ord for at høre det igen</p>
+      <button class="btn green" id="meetGo" type="button">Lad os svinge</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="fauna" hidden>
+    <div class="card fauna" role="dialog" aria-modal="true" aria-labelledby="fnTitle">
+      <header class="fn-head">
+        <div class="fn-top"><p class="eyebrow" id="fnEyebrow">Junglens dyr</p><div class="fn-dots" id="fnDots" aria-hidden="true"></div></div>
+        <h2 id="fnTitle">Junglens dyr</h2>
+        <p class="fn-sub" id="fnSub"></p>
+        <div class="fn-row">
+          <button class="fn-pill" id="fnIntro" type="button"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Hør om junglen</span></button>
+          <div class="fn-prog" aria-live="polite"><i id="fnProgFill"></i><span id="fnProgText"></span></div>
+        </div>
+      </header>
+      <div class="fn-body" id="fnBody">
+        <div id="fnGrid"></div>
+        <p class="fn-hint" id="fnHint">Tryk på et dyr for at se det stort og høre fakta om det</p>
+        <section class="fn-detail" id="fnDetail" hidden>
+          <div class="fn-hero" id="fnHero">
+            <canvas id="fnCv"></canvas>
+            <button class="fn-hbtn" id="fnBack" type="button">← <span>Alle dyr</span></button>
+            <span class="fn-hbtn" id="fnRole"><i></i><span id="fnRoleTxt"></span></span>
+            <button class="fn-nav" id="fnPrev" type="button" aria-label="Forrige dyr">‹</button>
+            <button class="fn-nav" id="fnNext" type="button" aria-label="Næste dyr">›</button>
+            <span class="fn-hbtn" id="fnCount"></span>
+          </div>
+          <div class="fn-info">
+            <div class="fn-name"><h3 id="fnName"></h3><p class="fn-latin" id="fnLatin"></p></div>
+            <button class="fn-play" id="fnPlay" type="button">
+              <span class="ico"><svg class="pl" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="pa" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></span>
+              <span class="lbl"><span id="fnPlayTxt">Hør fakta</span><small id="fnPlaySub">Lyt og lær</small></span>
+              <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="bar" id="fnBar"></span>
+            </button>
+            <p class="fn-text" id="fnText"></p>
+            <div class="fn-stats" id="fnStats"></div>
+            <p class="fn-sec">Sådan kender du den</p>
+            <ul class="fn-tegn" id="fnTegn"></ul>
+            <p class="fn-tip" id="fnTip"></p>
+            <button class="btn green" id="fnPick" type="button" hidden>Vælg denne abe</button>
+          </div>
+        </section>
+      </div>
+      <footer class="fn-foot">
+        <button class="btn green" id="faunaGo" type="button">Videre →</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="overlay" id="unlock" hidden>
+    <div class="card unlock">
+      <p class="eyebrow">Ny abe!</p>
+      <h3 id="unName"></h3>
+      <canvas id="unCv" width="480" height="480"></canvas>
+      <p id="unText"></p>
+      <div class="row">
+        <button class="btn green" id="unPick" type="button">Spil som denne abe</button>
+        <button class="btn ghost" id="unGo" type="button">Videre →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="quiz" hidden>
+    <div class="card quiz">
+      <div class="left">
+        <div class="why"><span class="whyicon" id="quizIcon"></span><span id="quizWhy"></span></div>
+        <p class="eyebrow">Hvilket billede passer til ordet?</p>
+        <button class="wordbtn" id="quizWord" type="button" aria-label="Hør ordet igen">
+          <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="tw" id="quizTa"></span>
+          <span class="rm" id="quizRom"></span>
+        </button>
+        <div class="banner" id="quizBanner"></div>
+        <p class="mute-note" id="quizNote" hidden></p>
+        <button class="btn" id="quizRetry" type="button" hidden>↻ Start forfra i junglen</button>
+      </div>
+      <div class="choices" id="quizChoices"></div>
+    </div>
+  </div>
+
+  <div id="settings" hidden>
+    <label>Styring
+      <select id="optControl">
+        <option value="let">Let: aben griber selv næste liane</option>
+        <option value="normal">Normal: tryk for at gribe</option>
+      </select>
+    </label>
+    <label>Fart
+      <select id="optSpeed">
+        <option value="rolig">Rolig</option>
+        <option value="normal">Normal</option>
+        <option value="hurtig">Hurtig</option>
+      </select>
+    </label>
+    <label>Antal billeder i spørgsmål
+      <select id="optChoices">
+        <option value="auto">Automatisk (starter med 2)</option>
+        <option value="2">Altid 2</option>
+        <option value="3">Altid 3</option>
+        <option value="4">Altid 4</option>
+      </select>
+    </label>
+    <label>Junglens dyr i starten af hver runde
+      <select id="optFauna">
+        <option value="1">Vis dyrebogen</option>
+        <option value="0">Spring over</option>
+      </select>
+    </label>
+    <label>Udtale med latinske bogstaver
+      <select id="optRom">
+        <option value="1">Vis</option>
+        <option value="0">Skjul</option>
+      </select>
+    </label>
+    <button id="optDebug" type="button">🛠 Vis skærmmål (fejlsøgning)</button>
+  </div>
+
+  <div id="dbg" hidden></div>
+  <div id="probe" aria-hidden="true"></div>
+
+  <script src="../../shared/topbar.js"></script>
+  <script src="../../shared/tamil-words/words.js"></script>
+  <script src="../../shared/tamil-words/durations.js"></script>
+  <script src="../../shared/tamil-words/pictures.js"></script>
+  <script src="drawing.js"></script>
+  <script src="animals-apes.js"></script>
+  <script src="animals-birds.js"></script>
+  <script src="animals-reptiles.js"></script>
+  <script src="animals-mammals.js"></script>
+  <script src="animals-small.js"></script>
+  <script src="species.js"></script>
+  <script src="facts.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

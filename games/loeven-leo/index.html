@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#bfeaff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Løven Ari">
+  <title>Løven Ari lærer at læse</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <main class="app">
+    <div class="topline">
+      <div class="stats">
+        <button class="chip" id="bookBtn" type="button" aria-label="Åbn junglebogen">📖 <span id="friendCount">0</span></button>
+      </div>
+    </div>
+
+    <div class="sizes" role="group" aria-label="Ordniveau">
+      <span>Ord:</span>
+      <button class="size" type="button" data-size="2">Start<small>2 · lydrette ord</small></button>
+      <button class="size" type="button" data-size="3">Let<small>3 · lydrette ord</small></button>
+      <button class="size" type="button" data-size="4">Mellem<small>4 · blandede ord</small></button>
+      <button class="size" type="button" data-size="5">Svær<small>5 · blandede ord</small></button>
+    </div>
+
+    <div class="play">
+    <div class="col">
+    <section class="scene-card" id="sceneCard">
+      <svg id="scene" viewBox="0 0 640 320" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#8fd9ff"/>
+            <stop offset=".6" stop-color="#d9f5ff"/>
+            <stop offset="1" stop-color="#eaffd6"/>
+          </linearGradient>
+          <linearGradient id="ground" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#86d96f"/>
+            <stop offset="1" stop-color="#4aa84f"/>
+          </linearGradient>
+          <g id="leaf">
+            <path d="M0 0C28-34 84-46 128-18C98 10 40 22 0 0Z"/>
+            <path d="M6 0C40-12 80-18 118-17" fill="none" stroke="#ffffff55" stroke-width="3" stroke-linecap="round"/>
+          </g>
+        </defs>
+
+        <rect width="640" height="320" fill="url(#sky)"/>
+
+        <g>
+          <circle cx="548" cy="58" r="44" fill="#ffe27a" opacity=".3"/>
+          <g class="sun-rays" stroke="#ffe27a" stroke-width="5" stroke-linecap="round" opacity=".75">
+            <path d="M548 4v14M548 98v14M494 58h14M588 58h14M510 20l10 10M576 86l10 10M510 96l10-10M576 30l10-10"/>
+          </g>
+          <circle cx="548" cy="58" r="27" fill="#ffd54f"/>
+        </g>
+
+        <g class="cloud" fill="#fff" opacity=".92"><path d="M80 70q10-20 32-14 10-16 32-8 20 4 22 20 16 1 16 14H64q-2-10 16-12z"/></g>
+        <g class="cloud" fill="#fff" opacity=".8" style="animation-delay:-8s; animation-duration: 22s"><path d="M300 40q8-14 24-10 8-12 24-6 14 3 16 14 12 1 12 10H288q-2-7 12-8z"/></g>
+
+        <path d="M0 210Q90 150 190 200T380 188T640 176V320H0Z" fill="#a9e08f"/>
+        <path d="M0 242Q120 190 240 235T470 224T640 214V320H0Z" fill="#86cf72"/>
+
+        <g transform="translate(-8 14)"><g class="sway"><use href="#leaf" transform="rotate(30) scale(1.5)" fill="#2c9b57"/></g></g>
+        <g transform="translate(-8 14)"><g class="sway" style="animation-delay:-2s"><use href="#leaf" transform="rotate(62) scale(1.25)" fill="#3dbb6d"/></g></g>
+        <g transform="translate(640 6) scale(-1 1)"><g class="sway" style="animation-delay:-1s"><use href="#leaf" transform="rotate(34) scale(1.4)" fill="#2c9b57"/></g></g>
+        <g transform="translate(640 6) scale(-1 1)"><g class="sway" style="animation-delay:-3s"><use href="#leaf" transform="rotate(70) scale(1.15)" fill="#3dbb6d"/></g></g>
+
+        <path d="M0 262Q160 244 320 258T640 250V320H0Z" fill="url(#ground)"/>
+        <g>
+          <circle cx="246" cy="302" r="5" fill="#ff8fb1"/><circle cx="246" cy="302" r="2" fill="#ffe27a"/>
+          <circle cx="430" cy="300" r="5" fill="#fff"/><circle cx="430" cy="300" r="2" fill="#ffb300"/>
+          <circle cx="598" cy="304" r="5" fill="#ff8fb1"/><circle cx="598" cy="304" r="2" fill="#ffe27a"/>
+          <circle cx="180" cy="308" r="4" fill="#fff"/><circle cx="180" cy="308" r="1.6" fill="#ffb300"/>
+        </g>
+
+        <g id="friends" font-size="40" text-anchor="middle"></g>
+
+        <g id="sceneTrail" aria-hidden="true"></g>
+        <g class="trail-goal" id="trailGoal" transform="translate(500 220)">
+          <ellipse cx="0" cy="55" rx="78" ry="16" fill="#426d35" opacity=".35"/>
+          <circle class="trail-glow" id="trailGlow" cx="0" cy="2" r="58" fill="#fff2a3" filter="blur(8px)"/>
+          <text class="trail-friend" id="trailFriend" x="0" y="30" font-size="70" text-anchor="middle">🐘</text>
+          <g class="trail-leaves">
+            <path d="M-68 38Q-92 4-64-20q28 4 30 35 13-54 44-50 24 32-8 67 45-42 68-15 0 36-49 49h-96Z" fill="#28794b" stroke="#1b6039" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M-38 49q-18-38 8-65 19 26 6 62M10 48q-7-48 21-69 15 34-7 69M-66 37q-8-37-41-42 1 36 41 52" fill="#51ae62" stroke="#28794b" stroke-width="3" stroke-linejoin="round"/>
+            <circle cx="-32" cy="8" r="5" fill="#9bde71"/><circle cx="42" cy="22" r="5" fill="#9bde71"/>
+          </g>
+          <text x="0" y="-62" font-size="28" text-anchor="middle" opacity=".8">✨</text>
+        </g>
+
+        <g id="leoSpot" transform="translate(26 92) scale(.96)">
+          <g class="leo" id="leo">
+            <ellipse cx="100" cy="206" rx="64" ry="9" fill="#17233c" opacity=".16"/>
+            <g class="tail"><path d="M150 180Q186 176 182 140" stroke="#d9a038" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="182" cy="136" r="11" fill="#b8651b"/></g>
+            <ellipse cx="100" cy="176" rx="50" ry="40" fill="#f0b84a" stroke="#a8641a" stroke-width="3"/>
+            <ellipse cx="100" cy="184" rx="26" ry="24" fill="#fff1c9"/>
+            <ellipse cx="76" cy="204" rx="20" ry="11" fill="#f6c453" stroke="#a8641a" stroke-width="3"/>
+            <ellipse cx="124" cy="204" rx="20" ry="11" fill="#f6c453" stroke="#a8641a" stroke-width="3"/>
+            <g class="mane-scale" id="maneScale"><g class="mane-sway" id="mane"></g></g>
+            <circle cx="58" cy="66" r="16" fill="#e9a43c" stroke="#a8641a" stroke-width="3"/>
+            <circle cx="142" cy="66" r="16" fill="#e9a43c" stroke="#a8641a" stroke-width="3"/>
+            <circle cx="58" cy="67" r="8" fill="#f2a08c"/>
+            <circle cx="142" cy="67" r="8" fill="#f2a08c"/>
+            <circle cx="100" cy="108" r="47" fill="#f6c453" stroke="#a8641a" stroke-width="3"/>
+            <ellipse cx="100" cy="128" rx="26" ry="19" fill="#fff1c9"/>
+            <circle cx="76" cy="122" r="6" fill="#ff9fb8" opacity=".6"/>
+            <circle cx="124" cy="122" r="6" fill="#ff9fb8" opacity=".6"/>
+            <g class="eyes-look" id="eyes">
+              <g class="blink"><circle cx="81" cy="100" r="8.5" fill="#27344d"/><circle cx="119" cy="100" r="8.5" fill="#27344d"/></g>
+              <circle cx="84" cy="97" r="3" fill="#fff"/>
+              <circle cx="122" cy="97" r="3" fill="#fff"/>
+            </g>
+            <path d="M92 116h16l-8 9z" fill="#7a3b1c" stroke="#7a3b1c" stroke-width="3" stroke-linejoin="round"/>
+            <path class="mouth-closed" d="M100 125v6M100 131q-9 8-18 0M100 131q9 8 18 0" fill="none" stroke="#7a3b1c" stroke-width="3" stroke-linecap="round"/>
+            <g class="mouth-open">
+              <path d="M80 129q20-7 40 0q-2 28-20 28t-20-28z" fill="#7a2b2b" stroke="#7a3b1c" stroke-width="3" stroke-linejoin="round"/>
+              <path d="M87 130l4 8 4-8M105 130l4 8 4-8" fill="#fff"/>
+              <ellipse cx="100" cy="150" rx="10" ry="5.5" fill="#f2808c"/>
+            </g>
+            <g class="crown">
+              <path d="M68 52l6-30 16 18 10-26 10 26 16-18 6 30z" fill="#ffd54f" stroke="#b8860b" stroke-width="3.5" stroke-linejoin="round"/>
+              <circle cx="74" cy="22" r="5" fill="#ff6b6b"/><circle cx="100" cy="14" r="5" fill="#4f9dff"/><circle cx="126" cy="22" r="5" fill="#5be39a"/>
+            </g>
+            <circle id="mouthPt" cx="100" cy="136" r="1" fill="none"/>
+            <rect id="leoZone" x="-22" y="-14" width="244" height="236" fill="none"/>
+            <ellipse class="leo-ring" cx="100" cy="116" rx="124" ry="112" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="12 10" stroke-linecap="round"/>
+          </g>
+        </g>
+
+        <g fill="#5fbf5a">
+          <path class="blade" d="M20 320q4-26 14-34-2 20 6 34z"/><path class="blade" d="M52 320q2-18 12-26 0 14 4 26z" style="animation-delay:-1s"/>
+          <path class="blade" d="M210 320q4-22 14-30-2 18 6 30z" style="animation-delay:-2s"/><path class="blade" d="M392 320q2-20 12-28 0 16 4 28z" style="animation-delay:-.5s"/>
+          <path class="blade" d="M590 320q4-26 14-34-2 20 6 34z" style="animation-delay:-1.5s"/><path class="blade" d="M616 320q2-18 12-26 0 14 4 26z" style="animation-delay:-2.5s"/>
+          <path class="blade" d="M300 320q3-18 12-24-1 14 3 24z" style="animation-delay:-3s"/>
+        </g>
+        <g fill="#fff7a0">
+          <circle class="firefly" cx="150" cy="120" r="3" style="--dx:30px;--dy:-18px"/>
+          <circle class="firefly" cx="330" cy="150" r="2.5" style="--dx:-24px;--dy:20px;animation-delay:-2s"/>
+          <circle class="firefly" cx="420" cy="100" r="3" style="--dx:20px;--dy:24px;animation-delay:-4s"/>
+          <circle class="firefly" cx="600" cy="190" r="2.5" style="--dx:-30px;--dy:-14px;animation-delay:-1s"/>
+          <circle class="firefly" cx="260" cy="60" r="2.5" style="--dx:26px;--dy:16px;animation-delay:-5s"/>
+        </g>
+      </svg>
+      <div class="bubble" id="bubble" aria-live="polite">Læs et ord, og følg sporene med Ari!</div>
+    </section>
+
+    <div class="path" id="path" aria-label="Fremskridt"></div>
+    </div>
+
+    <div class="col">
+    <section class="wordcard" id="wordcard">
+      <span class="gold-tag">✨ Guldord!</span>
+      <div class="letters" id="letters" aria-live="polite"></div>
+      <button class="read" id="readBtn" type="button">📣 Læs ordet</button>
+    </section>
+
+    <div class="choices-wrap">
+      <section class="choices" id="choices" aria-label="Vælg det rigtige billede"></section>
+      <div class="ghost" id="ghost" aria-hidden="true">👆</div>
+    </div>
+    <p class="drag-note">Læs ordet, og træk det rigtige billede hen til Ari!</p>
+    </div>
+    </div>
+  </main>
+
+  <div class="overlay" id="discovery" hidden>
+    <div class="friend-card" role="dialog" aria-labelledby="discoveryRibbon">
+      <div class="ribbon" id="discoveryRibbon">Ny ven!</div>
+      <div class="friend-emoji" id="discoveryEmoji"></div>
+      <div class="letters mini" id="discoveryName"></div>
+      <p id="discoveryInfo"></p>
+      <p class="king" id="kingNote" hidden>👑 Ari er blevet Junglens Konge!</p>
+      <p>+3 ⭐ · I fulgte alle fodsporene!</p>
+      <div class="btn-row">
+        <button class="next" id="discoveryBook" type="button">📖 Junglebogen</button>
+        <button class="next primary" id="discoveryNext" type="button">Følg et nyt spor ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="book" hidden>
+    <div class="book-card" role="dialog" aria-labelledby="bookTitle">
+      <h2 id="bookTitle">📖 Junglebogen <span id="bookCount"></span></h2>
+      <div class="book-grid" id="bookGrid"></div>
+      <button class="next primary" id="bookClose" type="button">Luk</button>
+    </div>
+  </div>
+
+  <script src="../../shared/topbar.js"></script>
+  <script src="words.js"></script>
+  <script src="pictures.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

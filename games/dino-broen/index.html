@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2a8f5a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Dino-broen">
+  <title>Dino-broen</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="scene" id="sceneBox">
+      <canvas id="scene"></canvas>
+      <div class="hud">
+        <span class="pill" id="hudBridge">Bro 1</span>
+        <button class="round blue" id="bagBtn" type="button" aria-label="Samling" title="Samling">🎒</button>
+      </div>
+      <div class="toast" id="toast"></div>
+    </div>
+    <div class="pad" id="padBox">
+      <canvas id="padCv"></canvas>
+      <div class="chip" id="chip"><canvas id="chipCv" width="96" height="96"></canvas><span class="em" id="chipEm"></span></div>
+      <div class="hearts" id="hearts"><span>❤️</span><span>❤️</span><span>❤️</span></div>
+      <button class="round blue" id="hintBtn" type="button" aria-label="Vis mig igen" title="Vis mig igen">💡</button>
+      <button class="round blue" id="hearBtn" type="button" aria-label="Hør bogstavet" title="Hør bogstavet">🔊</button>
+      <div class="cap" id="cap"></div>
+    </div>
+  </div>
+  <canvas id="fx"></canvas>
+  <div id="wipe"></div>
+
+  <div class="opts" id="opts" hidden>
+    <div><div class="lab">Bogstaver</div>
+      <div class="seg" id="segCase"><button type="button" data-v="l">abc små</button><button type="button" data-v="u">ABC store</button></div></div>
+    <div><div class="lab">Rækkefølge</div>
+      <div class="seg" id="segOrder"><button type="button" data-v="abc">A til Å</button><button type="button" data-v="easy">Lettest først</button><button type="button" data-v="mix">Blandet</button></div></div>
+    <button type="button" class="wide" id="ovBtn">📊 Overblik over bogstaverne</button>
+  </div>
+
+  <div class="modal" id="celebrate" hidden>
+    <div class="card">
+      <div id="celStars"></div>
+      <canvas class="babycv" id="celCv" width="300" height="300"></canvas>
+      <h2 id="celTitle"></h2>
+      <p id="celText"></p>
+      <button class="big-btn" id="celBtn" type="button">Videre ▶</button>
+    </div>
+  </div>
+  <div class="modal" id="bag" hidden>
+    <div class="card">
+      <h2>🎒 Min samling</h2>
+      <div class="sub">Dino-unger jeg har reddet</div>
+      <div class="grid" id="babyGrid"></div>
+      <div class="sub">Hatte (tryk for at tage på)</div>
+      <div class="grid" id="hatGrid"></div>
+      <button class="big-btn" id="bagClose" type="button">Luk</button>
+    </div>
+  </div>
+  <div class="modal" id="overview" hidden>
+    <div class="card">
+      <h2>📊 Overblik</h2>
+      <p>Grå: ikke øvet endnu · Gul: øver · Grøn: klarer det uden hjælp · Rød: svært</p>
+      <div class="sub" id="ovTitle"></div>
+      <div class="grid" id="ovGrid"></div>
+      <button class="big-btn" id="ovClose" type="button">Luk</button>
+    </div>
+  </div>
+
+  <div id="start">
+    <div class="box">
+      <h1>🦕 Dino-broen</h1>
+      <p>Skriv bogstaver og byg broen, så dino-mor kan redde ungerne!</p>
+      <button class="big-btn" id="startBtn" type="button">▶ Start</button>
+    </div>
+  </div>
+
+  <script src="../../shared/topbar.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

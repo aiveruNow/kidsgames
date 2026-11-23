@@ -1,0 +1,28 @@
+/* ---------- Lær tallene ---------- */
+.strip { display: grid; grid-template-columns: repeat(var(--cols, 5), 1fr); gap: calc(var(--u) * 1.2); width: min(100%, 640px); }
+.nb {
+  position: relative; aspect-ratio: 1.1; max-height: var(--nh, calc(var(--u) * 19)); border-radius: 20px; color: #fff; font-weight: 900; font-size: var(--nf, clamp(2.4rem, calc(var(--u) * 9), 5.5rem));
+  text-shadow: 0 3px 0 #0003; background: linear-gradient(160deg, var(--a), var(--b));
+  box-shadow: 0 7px 0 color-mix(in srgb, var(--b) 70%, #000), 0 12px 20px #8a2f7d22; transition: transform .12s;
+}
+.nb:active { transform: translateY(5px); box-shadow: 0 2px 0 color-mix(in srgb, var(--b) 70%, #000); }
+.nb.on { outline: 5px solid #fff; transform: scale(1.07); }
+.nb.hint { animation: glow .8s ease-in-out infinite alternate; }
+.nb.hint::after { content: "👆"; position: absolute; left: 50%; bottom: -34%; font-size: .55em; animation: tapHint .8s ease-in-out infinite alternate; }
+/* Visningen af det valgte tal: størrelsen følger antallet, så alt passer på skærmen */
+.show { --it: clamp(2.6rem, calc(var(--u) * 13), 8rem); --bn: calc(var(--u) * 16); display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * 1.4); width: 100%; min-height: 0; }
+.show.six { --it: clamp(2.2rem, calc(var(--u) * 8.5), 5.5rem); --bn: calc(var(--u) * 12); }
+.show.many { --it: clamp(1.5rem, calc(var(--u) * 6.5), 4.2rem); --bn: calc(var(--u) * 10); }
+.showtop { display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 2.4); }
+.bignum {
+  display: grid; place-items: center; flex: none; width: var(--bn); height: var(--bn); min-width: 3.4rem; min-height: 3.4rem; border-radius: 50%; color: #fff; font-weight: 900;
+  font-size: calc(var(--bn) * .68); line-height: 1; text-shadow: 0 4px 0 #0003; animation: pop .55s;
+  background: radial-gradient(circle at 35% 30%, var(--a), var(--b)); box-shadow: 0 8px 0 color-mix(in srgb, var(--b) 70%, #000), 0 0 0 6px #fff, 0 14px 26px #8a2f7d33;
+}
+.word { font-size: clamp(1.6rem, calc(var(--bn) * .42), 4.4rem); font-weight: 900; color: var(--b); text-transform: capitalize; text-shadow: 0 3px 0 #fff; }
+.hand { font-size: clamp(3rem, calc(var(--u) * 10), 6rem); animation: float 1.2s ease-in-out infinite alternate; }
+
+@media (max-height: 500px) {
+  .show.six { --it: 2rem; --bn: calc(var(--u) * 9); }
+  .show.many { --it: 1.4rem; --bn: calc(var(--u) * 8); }
+}

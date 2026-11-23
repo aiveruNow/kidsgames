@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#dff5ff">
+  <meta name="referrer" content="no-referrer">
+  <meta name="apple-mobile-web-app-title" content="Kaninens Farvehave">
+  <title>Kaninens Farvehave</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <main class="app">
+    <header class="hud">
+      <span id="roundLabel">Runde 1 af 5</span>
+      <div class="progress" id="progress" aria-label="Fremskridt"></div>
+    </header>
+
+    <section class="field" id="field" aria-label="Budhas farvehave">
+      <div class="scene" id="scene" aria-hidden="true">
+        <svg class="rainbow" id="rainbow" data-toy="rainbow" viewBox="0 0 300 150" focusable="false" hidden>
+          <path pathLength="1" style="--i: 0" stroke="#ff6b6b" d="M10 150A140 140 0 0 1 290 150"/>
+          <path pathLength="1" style="--i: 1" stroke="#ffa94d" d="M19 150A131 131 0 0 1 281 150"/>
+          <path pathLength="1" style="--i: 2" stroke="#ffe066" d="M28 150A122 122 0 0 1 272 150"/>
+          <path pathLength="1" style="--i: 3" stroke="#8ce99a" d="M37 150A113 113 0 0 1 263 150"/>
+          <path pathLength="1" style="--i: 4" stroke="#74c0fc" d="M46 150A104 104 0 0 1 254 150"/>
+          <path pathLength="1" style="--i: 5" stroke="#b197fc" d="M55 150A95 95 0 0 1 245 150"/>
+        </svg>
+
+        <div class="sun" id="sun" data-toy="sun">
+          <svg viewBox="-50 -50 100 100" focusable="false">
+            <defs>
+              <radialGradient id="sunBody" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fffbd2"/><stop offset="1" stop-color="#ffc63d"/></radialGradient>
+              <linearGradient id="cloudFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#e4f3ff"/></linearGradient>
+              <linearGradient id="hillFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a9e085"/><stop offset="1" stop-color="#74c36a"/></linearGradient>
+            </defs>
+            <g class="sun-rays" id="sunRays"></g>
+            <circle r="27" fill="url(#sunBody)"/>
+            <g class="sun-face">
+              <ellipse class="eye" cx="-9" cy="-3" rx="2.7" ry="3.5"/><ellipse class="eye" cx="9" cy="-3" rx="2.7" ry="3.5"/>
+              <circle cx="-16" cy="6" r="4" fill="#ff9f6e" opacity=".55"/><circle cx="16" cy="6" r="4" fill="#ff9f6e" opacity=".55"/>
+              <path class="smile" d="M-8 6q8 8 16 0"/>
+              <path class="grin" d="M-9 5q9 15 18 0z"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="cloud c1" data-toy="cloud"><svg viewBox="0 0 120 50" focusable="false"><path d="M22 46C7 46 3 29 18 26 18 12 36 6 47 17 53 4 75 6 79 21 93 13 110 23 103 35 114 37 113 46 100 46Z" fill="url(#cloudFill)"/></svg></div>
+        <div class="cloud c2" data-toy="cloud"><svg viewBox="0 0 120 50" focusable="false"><path d="M22 46C7 46 3 29 18 26 18 12 36 6 47 17 53 4 75 6 79 21 93 13 110 23 103 35 114 37 113 46 100 46Z" fill="url(#cloudFill)"/></svg></div>
+        <div class="cloud c3" data-toy="cloud"><svg viewBox="0 0 120 50" focusable="false"><path d="M22 46C7 46 3 29 18 26 18 12 36 6 47 17 53 4 75 6 79 21 93 13 110 23 103 35 114 37 113 46 100 46Z" fill="url(#cloudFill)"/></svg></div>
+
+        <svg class="mountains" viewBox="0 0 400 100" preserveAspectRatio="none" focusable="false">
+          <path d="M0 100V60L48 28 80 52 130 16 190 58 240 26 300 60 350 32 400 56V100Z" fill="#c8def2"/>
+          <path d="M40 34L48 28 57 35 52 33 48 37 44 33ZM122 22L130 16 139 24 134 22 130 26 126 22ZM232 32L240 26 249 33 244 31 240 35 236 31ZM342 38L350 32 358 39 354 37 350 41 346 37Z" fill="#fff" opacity=".9"/>
+          <path d="M0 100V76Q60 48 120 72T240 66T360 70L400 62V100Z" fill="#a9d8c2"/>
+        </svg>
+        <svg class="land" viewBox="0 0 400 220" preserveAspectRatio="none" focusable="false">
+          <path d="M0 34C50 14 110 20 170 32S300 38 340 22 390 12 400 18V220H0Z" fill="#bfe8a0"/>
+          <path d="M0 60C70 40 150 38 230 54S350 68 400 42V220H0Z" fill="url(#hillFill)"/>
+          <ellipse cx="90" cy="118" rx="80" ry="9" fill="#fff" opacity=".08"/>
+          <ellipse cx="300" cy="100" rx="90" ry="8" fill="#fff" opacity=".07"/>
+          <ellipse cx="200" cy="150" rx="120" ry="10" fill="#2d5a3a" opacity=".05"/>
+        </svg>
+
+        <div id="wilds"></div>
+
+        <div class="prop windmill" data-toy="windmill" data-perch="50,22">
+          <svg viewBox="0 0 100 120" focusable="false">
+            <ellipse cx="50" cy="114" rx="30" ry="4.5" fill="#2d5a3a" opacity=".22"/>
+            <path d="M30 112L38 52H62L70 112Z" fill="#f6e7c8" stroke="#d6bf94" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M36 54L50 28 64 54Z" fill="#d9605a" stroke="#b34a45" stroke-width="2" stroke-linejoin="round"/>
+            <rect x="44" y="90" width="12" height="22" rx="6" fill="#9a6a3e"/>
+            <rect x="45.5" y="68" width="9" height="12" rx="4.5" fill="#8fd0ee" stroke="#d6bf94" stroke-width="1.5"/>
+            <g class="blades" id="blades">
+              <path d="M50 44V4M50 44H96M50 44V84M50 44H4" stroke="#b99764" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <g fill="#fff8e8" stroke="#d6bf94" stroke-width="1.5" stroke-linejoin="round">
+                <rect x="51.5" y="6" width="11" height="30" rx="2"/>
+                <rect x="64" y="45.5" width="30" height="11" rx="2"/>
+                <rect x="37.5" y="52" width="11" height="30" rx="2"/>
+                <rect x="6" y="31.5" width="30" height="11" rx="2"/>
+              </g>
+              <circle cx="50" cy="44" r="5.2" fill="#c9534f" stroke="#fff" stroke-width="1.5"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="prop tree apple" data-toy="tree" data-bits="🍃,🍃,🍎" data-perch="48,14">
+          <svg viewBox="0 0 80 100" focusable="false">
+            <ellipse cx="40" cy="96" rx="24" ry="4" fill="#2d5a3a" opacity=".22"/>
+            <path d="M35 96L36 58H44L45 96Z" fill="#9a6a3e"/>
+            <circle cx="22" cy="46" r="18" fill="#4fae5e"/><circle cx="58" cy="46" r="18" fill="#4fae5e"/>
+            <circle cx="40" cy="34" r="27" fill="#58b865"/>
+            <circle cx="33" cy="25" r="13" fill="#7fd47d" opacity=".7"/>
+            <circle cx="32" cy="42" r="4.4" fill="#ef5350"/><circle cx="55" cy="36" r="4.4" fill="#ef5350"/><circle cx="46" cy="53" r="4.4" fill="#ef5350"/>
+            <circle cx="30.6" cy="40.6" r="1.3" fill="#fff" opacity=".75"/><circle cx="53.6" cy="34.6" r="1.3" fill="#fff" opacity=".75"/><circle cx="44.6" cy="51.6" r="1.3" fill="#fff" opacity=".75"/>
+          </svg>
+        </div>
+        <div class="prop tree blossom" data-toy="tree" data-bits="🌸,🌸,🌸,🍃" data-perch="50,14">
+          <svg viewBox="0 0 80 100" focusable="false">
+            <ellipse cx="40" cy="96" rx="24" ry="4" fill="#2d5a3a" opacity=".22"/>
+            <path d="M35 96L36 58H44L45 96Z" fill="#8c5f3a"/>
+            <circle cx="22" cy="46" r="18" fill="#f59bbd"/><circle cx="58" cy="46" r="18" fill="#f59bbd"/>
+            <circle cx="40" cy="34" r="27" fill="#ffadc9"/>
+            <circle cx="33" cy="25" r="13" fill="#ffd3e2" opacity=".85"/>
+            <circle cx="28" cy="40" r="2.4" fill="#fff" opacity=".8"/><circle cx="50" cy="30" r="2.4" fill="#fff" opacity=".8"/><circle cx="52" cy="50" r="2.4" fill="#fff" opacity=".8"/><circle cx="38" cy="50" r="2" fill="#fff" opacity=".8"/>
+          </svg>
+        </div>
+        <div class="prop tree pine" data-toy="tree" data-bits="🌰,🍃,✨" data-perch="50,10">
+          <svg viewBox="0 0 60 100" focusable="false">
+            <ellipse cx="30" cy="96" rx="18" ry="3.6" fill="#2d5a3a" opacity=".22"/>
+            <path d="M27 96L28 78H32L33 96Z" fill="#8c5f3a"/>
+            <path d="M30 40L56 82H4Z" fill="#3f9a5a"/>
+            <path d="M30 22L52 60H8Z" fill="#48a862"/>
+            <path d="M30 4L47 38H13Z" fill="#54b56c"/>
+            <path d="M30 4L39 20 30 17 21 20Z" fill="#fff" opacity=".28"/>
+          </svg>
+        </div>
+        <div class="prop bush b1" data-toy="bush" data-bits="🍓,🍃" data-perch="50,25">
+          <svg viewBox="0 0 80 44" focusable="false">
+            <ellipse cx="40" cy="41" rx="31" ry="3.4" fill="#2d5a3a" opacity=".22"/>
+            <circle cx="22" cy="28" r="16" fill="#4fae5e"/><circle cx="60" cy="30" r="15" fill="#4fae5e"/><circle cx="42" cy="22" r="19" fill="#58b865"/>
+            <circle cx="36" cy="15" r="8" fill="#7fd47d" opacity=".65"/>
+            <circle cx="28" cy="30" r="2.8" fill="#e8506a"/><circle cx="48" cy="28" r="2.8" fill="#e8506a"/><circle cx="58" cy="34" r="2.8" fill="#e8506a"/>
+          </svg>
+        </div>
+        <div class="prop bush b2" data-toy="bush" data-bits="🍓,🍃" data-perch="50,25">
+          <svg viewBox="0 0 80 44" focusable="false">
+            <ellipse cx="40" cy="41" rx="31" ry="3.4" fill="#2d5a3a" opacity=".22"/>
+            <circle cx="22" cy="28" r="16" fill="#4fae5e"/><circle cx="60" cy="30" r="15" fill="#4fae5e"/><circle cx="42" cy="22" r="19" fill="#58b865"/>
+            <circle cx="36" cy="15" r="8" fill="#7fd47d" opacity=".65"/>
+            <circle cx="30" cy="26" r="2.8" fill="#ffd34d"/><circle cx="50" cy="30" r="2.8" fill="#ffd34d"/><circle cx="40" cy="20" r="2.8" fill="#ffd34d"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="speech">
+        <div class="message" id="message" aria-live="polite">Tryk start, så finder vi farver!</div>
+        <button class="repeat" id="repeat" type="button" aria-label="Hør spørgsmålet igen" title="Hør igen">🔊</button>
+      </div>
+
+      <div class="bunny-shadow" id="bunnyShadow" aria-hidden="true"></div>
+      <svg class="bunny" id="bunny" viewBox="0 0 180 190" aria-hidden="true" focusable="false">
+        <defs>
+          <radialGradient id="bunnyFur" cx=".38" cy=".3" r=".85">
+            <stop offset="0" stop-color="#fff"/>
+            <stop offset=".7" stop-color="#fcfaf6"/>
+            <stop offset="1" stop-color="#eee7dc"/>
+          </radialGradient>
+        </defs>
+        <g class="tail part">
+          <circle cx="139" cy="148" r="14" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+          <circle cx="135" cy="144" r="5" fill="#fff" opacity=".85"/>
+        </g>
+        <g class="torso part">
+          <ellipse cx="88" cy="135" rx="49" ry="43" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+          <ellipse cx="88" cy="146" rx="26" ry="24" fill="#fff7ee" opacity=".9"/>
+        </g>
+        <g class="arm left part">
+          <path d="M56 124q-22 12-10 34 9 10 24-1z" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M52 154q4 3 8 0" fill="none" stroke="#e0d8cc" stroke-width="1.6" stroke-linecap="round"/>
+        </g>
+        <g class="arm right part">
+          <path d="M120 124q22 12 10 34-9 10-24-1z" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M116 154q4 3 8 0" fill="none" stroke="#e0d8cc" stroke-width="1.6" stroke-linecap="round"/>
+        </g>
+        <ellipse cx="66" cy="167" rx="20" ry="11" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+        <ellipse cx="111" cy="167" rx="20" ry="11" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+        <g class="head-look part">
+          <g class="head part">
+            <g class="ear left part">
+              <path d="M56 77C35 52 28 8 44 5c20-4 30 43 29 69z" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+              <path d="M52 56C42 37 40 17 46 14c7 0 15 24 17 39z" fill="#f3a5b4"/>
+            </g>
+            <g class="ear right part">
+              <path d="M112 75c-8-33 0-73 16-70 20 4 14 49 1 74z" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+              <path d="M119 55c-2-22 4-40 10-40 7 3 2 28-4 44z" fill="#f3a5b4"/>
+              <path d="M119 54q10-12 21 0-11 12-21 0zm21 0q11-12 21 0-10 12-21 0z" fill="#f26f8b"/>
+              <circle cx="140" cy="54" r="4" fill="#ffcf51"/>
+            </g>
+            <ellipse cx="88" cy="83" rx="48" ry="42" fill="url(#bunnyFur)" stroke="#d7d2c8" stroke-width="3"/>
+            <ellipse cx="58" cy="101" rx="10" ry="6" fill="#f7c4c6" opacity=".8"/>
+            <ellipse cx="120" cy="101" rx="10" ry="6" fill="#f7c4c6" opacity=".8"/>
+            <g class="eyes part">
+              <g class="blink l part">
+                <ellipse cx="70" cy="87" rx="5" ry="7" fill="#513b3d"/>
+                <circle cx="68.4" cy="84.6" r="1.9" fill="#fff"/>
+              </g>
+              <g class="blink r part">
+                <ellipse cx="108" cy="87" rx="5" ry="7" fill="#513b3d"/>
+                <circle cx="106.4" cy="84.6" r="1.9" fill="#fff"/>
+              </g>
+            </g>
+            <g class="whiskers l part" fill="none" stroke="#cbbfb2" stroke-width="1.6" stroke-linecap="round">
+              <path d="M64 103L34 96M64 107L32 108M66 111L38 120"/>
+            </g>
+            <g class="whiskers r part" fill="none" stroke="#cbbfb2" stroke-width="1.6" stroke-linecap="round">
+              <path d="M114 103l30-7M114 107l32 1M112 111l28 9"/>
+            </g>
+            <path class="mouth-smile" d="M89 106q-4 8-11 5m11-5q4 8 11 5" fill="none" stroke="#735153" stroke-width="2.5" stroke-linecap="round"/>
+            <g class="mouth-open">
+              <path d="M77 107q12 18 24 0q-12-4-24 0z" fill="#b8475f" stroke="#735153" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M83 114q6 5 12 0q-6-3-12 0z" fill="#f28ba0"/>
+            </g>
+            <g class="nose part">
+              <ellipse cx="89" cy="101" rx="7" ry="5" fill="#e98c9d"/>
+              <ellipse cx="87" cy="99.6" rx="2.2" ry="1.2" fill="#fff" opacity=".55"/>
+            </g>
+          </g>
+        </g>
+        <g class="can part">
+          <path d="M96 118q10-12 22 0" fill="none" stroke="#4b9eaa" stroke-width="3" stroke-linecap="round"/>
+          <path d="M120 128q13 0 11 12-1 6-11 6" fill="none" stroke="#4b9eaa" stroke-width="3" stroke-linecap="round"/>
+          <path d="M94 130l-20 12" fill="none" stroke="#4b9eaa" stroke-width="4.5" stroke-linecap="round"/>
+          <ellipse cx="72" cy="143" rx="3.2" ry="5.2" transform="rotate(35 72 143)" fill="#7fd0da" stroke="#4b9eaa" stroke-width="1.5"/>
+          <rect x="92" y="120" width="28" height="26" rx="6" fill="#61b8c5" stroke="#fff" stroke-width="2"/>
+          <path d="M97 128h18" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+        </g>
+        <g class="drops" fill="#68c7f0">
+          <circle cx="70" cy="153" r="2.4" style="--i: 0"/>
+          <circle cx="66" cy="153" r="2" style="--i: 1"/>
+          <circle cx="73" cy="153" r="1.8" style="--i: 2"/>
+        </g>
+        <g class="dirt" fill="#8d6039">
+          <circle cx="62" cy="176" r="4" style="--i: 0; --dx: -34px"/>
+          <circle cx="76" cy="178" r="3.2" style="--i: 1; --dx: -16px"/>
+          <circle cx="100" cy="178" r="3.4" style="--i: 2; --dx: 16px"/>
+          <circle cx="114" cy="176" r="4" style="--i: 3; --dx: 34px"/>
+          <circle cx="88" cy="180" r="3" style="--i: 4; --dx: 6px"/>
+        </g>
+      </svg>
+
+      <div class="flower-bed" id="flowerBed" role="img" aria-label="Budhas blomsterbed: 0 af 5 blomster plantet"></div>
+      <div class="fliers" id="fliers"></div>
+      <div class="choices" id="choices" role="group" aria-label="Vælg en blomst"></div>
+      <div class="fx" id="fx" aria-hidden="true"></div>
+      <p class="voice-note" id="voiceNote" aria-live="polite" hidden>Oplæsningen virker ikke lige nu. Tryk på 🔊 for at prøve igen.</p>
+      <p class="storage-note" id="storageNote" hidden></p>
+    </section>
+  </main>
+
+  <div class="start-screen" id="startScreen">
+    <div class="welcome">
+      <span class="welcome-bunny" aria-hidden="true">🐰</span>
+      <h1>Kaninens Farvehave</h1>
+      <p>Budha vil plante blomster. Kan du finde farverne, hun spørger efter?</p>
+      <button class="big-btn" id="startBtn" type="button">▶ Start legen</button>
+    </div>
+  </div>
+
+  <div class="finish-screen" id="finishScreen" role="dialog" aria-modal="true" aria-labelledby="finishTitle" hidden>
+    <div class="finish-card">
+      <span class="finish-emoji" aria-hidden="true">🐰🌷</span>
+      <h2 id="finishTitle">Hvor er du dygtig!</h2>
+      <p id="finishText">Budha har fået nye blomster i haven.</p>
+      <div class="finish-stars" id="finishStars" aria-label="Fem stjerner"></div>
+      <button class="big-btn" id="againBtn" type="button">🌼 Leg igen</button>
+    </div>
+  </div>
+
+  <div class="reward" id="reward" role="status" hidden><span id="rewardIcon">🦋</span><strong id="rewardText">En ny ven til haven!</strong></div>
+  <div class="settings-control" id="settings" hidden>
+    <label for="colorCount">Farver at øve</label>
+    <select id="colorCount">
+      <option value="4">4 farver</option>
+      <option value="6">6 farver</option>
+      <option value="8">8 farver</option>
+    </select>
+  </div>
+
+  <script src="../../shared/topbar.js"></script>
+  <script src="lines.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
