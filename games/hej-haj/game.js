@@ -20,6 +20,7 @@
     let stars = Number(read("stars", "0")) || 0;
     let curWorld = Math.max(0, Number(read("hav", "0")) || 0) % WORLDS.length; // hvilket af de 7 have man er nået til (0-6)
     let muted = !Topbar.soundOn();
+    const { audio, tone, buzz } = KidsSynth.create(() => muted);
     window.addEventListener("topbar:sound", (e) => { muted = !e.detail.on; if (muted) stopSpeech(); });
 
     const ws = (id) => wordState[id] || (wordState[id] = { box: 0, seen: false, ok: 0, bad: 0, t: 0 });
@@ -190,29 +191,6 @@
       }, true);
     }
     window.addEventListener("topbar:sound", refreshNote);
-    let ac = null;
-    function audio() {
-      if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch { ac = null; } }
-      if (ac && ac.state === "suspended") ac.resume();
-      return ac;
-    }
-    function tone(freq, dur = .15, type = "sine", vol = .12, delay = 0, slide = 0) {
-      if (muted) return;
-      const a = audio();
-      if (!a) return;
-      const t = a.currentTime + delay;
-      const o = a.createOscillator();
-      const g = a.createGain();
-      o.type = type;
-      o.frequency.setValueAtTime(freq, t);
-      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
-      g.gain.setValueAtTime(.0001, t);
-      g.gain.exponentialRampToValueAtTime(vol, t + .012);
-      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-      o.connect(g).connect(a.destination);
-      o.start(t);
-      o.stop(t + dur + .03);
-    }
     const sfx = {
       eat: () => { tone(420, .09, "square", .06, 0, 500); tone(760, .08, "square", .05, .06); },
       caught: () => { [440, 370, 311, 262, 196, 147].forEach((f, i) => tone(f, .16, "sawtooth", .08, i * .12)); },
@@ -223,7 +201,6 @@
       pop: () => { tone(480, .1, "triangle", .12, 0, 380); tone(760, .12, "triangle", .08, .08); },
       levelup: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .2, "triangle", .12, i * .07))
     };
-    const buzz = (ms) => { if (!muted && navigator.vibrate) navigator.vibrate(ms); };
 
     // ---------- Skærme ----------
     const SCREENS = ["home", "dictScreen", "play"];

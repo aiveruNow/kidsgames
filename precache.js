@@ -1007,6 +1007,7 @@ self.PRECACHE = [
   "shared/princess/common.css",
   "shared/princess/common.js",
   "shared/princess/lines.js",
+  "shared/synth.js",
   "shared/tamil-words/audio/aamai.mp3",
   "shared/tamil-words/audio/aappil.mp3",
   "shared/tamil-words/audio/amma.mp3",
