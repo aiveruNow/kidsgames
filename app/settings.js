@@ -130,7 +130,7 @@
     }
 
     // Nulstil stjerner og fremskridt. Nye spil skal bruge et præfiks herfra til deres nøgler i localStorage.
-    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-", "dino-", "farvehave-", "urundai-", "haj-", "banan-", "tamil-"];
+    const GAME_KEY_PREFIXES = ["talbasket-", "maal-", "leo-", "prinsesse-", "tabbi-", "dino-", "farvehave-", "urundai-", "haj-", "banan-", "tamil-", "klods-"];
     const resetDialog = document.getElementById("reset-dialog");
     document.getElementById("reset").addEventListener("click", () => resetDialog.showModal());
     document.getElementById("reset-cancel").addEventListener("click", () => resetDialog.close());
