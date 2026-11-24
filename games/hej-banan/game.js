@@ -67,6 +67,7 @@
     const FACT = { rolig: .65, normal: .85, hurtig: 1.05 };
     let speedKey = FACT[read("fart", "")] ? read("fart", "") : "normal";
     let easy = read("styring", "let") !== "normal"; // let: aben griber selv
+    let backOn = read("tilbage", "1") !== "0"; // et tryk i venstre side hopper tilbage til forrige liane
     const hintText = () => (easy ? "Tryk for at slippe lianen – aben griber selv den næste!" : "Tryk for at slippe – tryk igen for at gribe!");
 
     // ---------- Billeder til ordene ----------
@@ -421,6 +422,7 @@
     function attach(m, v, L, th, w) {
       m.vine = v;
       m.vineT = 0;
+      m.back = false;
       m.mode = "vine";
       m.onGround = false;
       m.L = L;
@@ -623,16 +625,17 @@
       } else {
         m.flightT += dt;
         m.vy += GRAV * FLYG * dt;
-        if (m.vx < 26) m.vx += 10 * dt; // lidt medvind
+        if (!m.back && m.vx < 26) m.vx += 10 * dt; // lidt medvind
         m.x += m.vx * dt;
         m.y += m.vy * dt;
-        if (m.x < camX + 3) { m.x = camX + 3; if (m.vx < 0) m.vx = 2; }
+        if (!m.back && m.x < camX + 3) { m.x = camX + 3; if (m.vx < 0) m.vx = 2; }
         if (m.y < MR) { m.y = MR; if (m.vy < 0) m.vy *= -.2; }
         if (m.y >= FL - MR && m.vy > 0) landRun(); else tryGrab();
       }
       if (Math.abs(m.vx) > 2) m.face = m.vx > 0 ? 1 : -1;
       const target = m.x - WV * .32;
-      if (target > camX) camX += (target - camX) * Math.min(1, dt * 3.5);
+      if (m.back) camX = Math.max(0, camX + (m.x - WV * .45 - camX) * Math.min(1, dt * 5));
+      else if (target > camX) camX += (target - camX) * Math.min(1, dt * 3.5);
     }
 
     // Støv ved fødderne
@@ -645,6 +648,7 @@
     function landRun(first = true) {
       const m = mk;
       m.mode = "run";
+      m.back = false;
       m.onGround = true;
       m.y = FL - MR;
       m.vy = 0;
@@ -718,6 +722,7 @@
       let bd = 1e9;
       for (const v of vines) {
         if (v === m.last && m.lastT > 0) continue;
+        if (m.back && m.backTo && v !== m.backTo) continue; // et hop bagud griber kun den liane, det sigter efter
         if (hy < v.ay + 4 || hy > v.ay + v.len + low) continue;
         const dx = Math.abs(hx - v.x);
         if (dx < gx && dx < bd) { bd = dx; best = v; }
@@ -751,7 +756,8 @@
     }
 
     // Et tryk: slip lianen. I luften griber man den næste liane, og på jorden hopper man.
-    function onTap() {
+    // left = trykket er i venstre del af skærmen: hænger aben i en liane, hopper den tilbage til forrige liane (hvis valget er slået til).
+    function onTap(left = false) {
       if (state === "ready") {
         state = "play";
         G.grace = 1.4;
@@ -761,11 +767,33 @@
       }
       if (state !== "play") return;
       const m = mk;
+      if (left && backOn && m.vine && backJump()) return;
       if (m.vine) release();
       else if (m.mode === "run") {
         if (m.onGround || m.coy > 0) jumpUp();
         else { m.grabReq = .4; m.jb = .12; } // et tryk lidt før landing tæller som hop
       } else m.grabReq = .4;
+    }
+
+    // Et hop bagud: beregner farten, så aben ender midt på forrige liane efter ca. 0,85 sek. Kameraet følger med (se movePhys).
+    function backJump() {
+      const m = mk;
+      const prev = vines.filter((v) => v.x < m.vine.x - 8).sort((a, b) => b.x - a.x)[0];
+      if (!prev) return false;
+      const T = .85;
+      const g = GRAV * FLYG;
+      m.vx = (prev.x + 1 - m.x) / T;
+      m.vy = (prev.ay + prev.len * .45 - m.y - .5 * g * T * T) / T;
+      m.last = m.vine;
+      m.lastT = T; // aben flyver lige forbi lianen, den slap, og må ikke gribe den igen
+      m.vine = null;
+      m.mode = "fly";
+      m.flightT = 0;
+      m.back = true;
+      m.backTo = prev;
+      m.grabReq = 1.2;
+      sfx.swoosh();
+      return true;
     }
 
     // ---------- Dyr i junglen ----------
@@ -1516,8 +1544,16 @@
       const dt = Math.min(.05, (now - last) / 1000);
       last = now;
       if (screen === "play" && !SW) resize();
-      if (screen === "play" && SW > 0) { update(dt); draw(); }
+      if (screen === "play" && SW > 0) { update(dt); draw(); updateBackHint(); }
       requestAnimationFrame(frame);
+    }
+    // Svag pil i venstre side, når et tryk dér hopper tilbage
+    let backHintOn = null;
+    function updateBackHint() {
+      const on = backOn && state === "play" && !!mk && !!mk.vine && vines.some((v) => v.x < mk.vine.x - 8);
+      if (on === backHintOn) return;
+      backHintOn = on;
+      $("backHint").classList.toggle("on", on);
     }
 
     // ---------- Styring: et tryk slipper lianen, griber den næste eller hopper (hold nede for at hoppe højere) ----------
@@ -1526,15 +1562,16 @@
       if (!G) return;
       e.preventDefault();
       setHold(true);
-      onTap();
+      const r = stage.getBoundingClientRect();
+      onTap(e.clientX - r.left < r.width * .28);
     });
     for (const ev of ["pointerup", "pointercancel", "pointerleave"]) stage.addEventListener(ev, () => setHold(false));
     document.addEventListener("keydown", (e) => {
-      if (screen !== "play" || (e.key !== " " && e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+      if (screen !== "play" || (e.key !== " " && e.key !== "ArrowUp" && e.key !== "ArrowDown" && e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
       if (e.repeat) return;
       e.preventDefault();
       setHold(true);
-      onTap();
+      onTap(e.key === "ArrowLeft");
     });
     document.addEventListener("keyup", () => setHold(false));
 
@@ -2156,6 +2193,8 @@
     $("optSpeed").value = speedKey;
     $("optControl").value = easy ? "let" : "normal";
     $("optControl").addEventListener("change", (e) => { easy = e.target.value !== "normal"; write("styring", easy ? "let" : "normal"); $("startHint").textContent = hintText(); });
+    $("optBack").value = backOn ? "1" : "0";
+    $("optBack").addEventListener("change", (e) => { backOn = e.target.value !== "0"; write("tilbage", backOn ? "1" : "0"); });
     $("optChoices").value = read("valg", "auto");
     $("optRom").value = read("rom", "1");
     $("optSpeed").addEventListener("change", (e) => { write("fart", e.target.value); speedKey = e.target.value; });
