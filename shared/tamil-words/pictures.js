@@ -244,6 +244,32 @@
   }).join(" ");
   const SKIN = "#e0a070";
   const SKIN_D = "#b8774a";
+
+  // Barn set forfra med en orange ring om næsen eller øret, så man straks kan se hvad der menes.
+  function kidPoint(part) {
+    const nose = part === "nose";
+    const hair = "#2b1a10";
+    const ring = (cx, cy, r) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#ff9800" stroke-width="5.5"/>`;
+    const eye = (x) => `<ellipse cx="${x}" cy="40" rx="6" ry="6.8" fill="#fff" stroke="#3b2a1e" stroke-width="1.8"/><circle cx="${x}" cy="41" r="3.4" fill="#1b1b1b"/><circle cx="${x + 1.3}" cy="39.4" r="1.2" fill="#fff"/>`;
+    const earShape = (x, s) => `<ellipse cx="${x}" cy="50" rx="9.5" ry="13" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2.8"/>` +
+      `<path d="M${x - s} 43C${x + s * 4} 44 ${x + s * 4} 54 ${x - s} 57" fill="none" stroke="${SKIN_D}" stroke-width="2.6" stroke-linecap="round"/>`;
+    return svg(
+      `<path d="M10 100C10 87 28 83 50 83C72 83 90 87 90 100Z" fill="#1e88e5" stroke="#14598f" stroke-width="2.5" stroke-linejoin="round"/>` +
+      `<path d="M42 74H58V85Q50 91 42 85Z" fill="${SKIN_D}"/>` +
+      `<ellipse cx="50" cy="38" rx="34" ry="31" fill="${hair}"/>` +
+      earShape(19, -1) + earShape(81, 1) +
+      `<ellipse cx="50" cy="48" rx="32" ry="34" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2.5"/>` +
+      `<path d="M18 42C14 14 36 8 52 10C72 8 88 20 82 42C78 30 68 22 50 22C34 22 24 30 18 42Z" fill="${hair}"/>` +
+      eye(37) + eye(63) +
+      `<path d="M29 30Q37 25 44 29M56 29Q63 25 71 30" fill="none" stroke="${hair}" stroke-width="3" stroke-linecap="round"/>` +
+      `<circle cx="27" cy="60" r="5.5" fill="#f08a6a" opacity=".35"/><circle cx="73" cy="60" r="5.5" fill="#f08a6a" opacity=".35"/>` +
+      `<path d="M50 48V55" stroke="${SKIN_D}" stroke-width="2" stroke-linecap="round" opacity=".6"/>` +
+      `<path d="M44 58Q44 53 50 53Q56 53 56 58Q56 61 52 60.5Q50 59.5 48 60.5Q44 61 44 58Z" fill="#e8a888" stroke="${SKIN_D}" stroke-width="2.2" stroke-linejoin="round"/>` +
+      `<circle cx="47.6" cy="58.4" r="1.3" fill="#7a3b22"/><circle cx="52.4" cy="58.4" r="1.3" fill="#7a3b22"/>` +
+      `<path d="M39 69Q50 78 61 69" fill="none" stroke="#9b2c2c" stroke-width="3.4" stroke-linecap="round"/>` +
+      (nose ? ring(50, 57, 14) : ring(81, 50, 17))
+    );
+  }
   const numeral = (n) => svg(
     `<circle cx="50" cy="50" r="43" fill="#fde68a" stroke="#f59e0b" stroke-width="5"/><circle cx="50" cy="50" r="35" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3 5"/>` +
     `<text x="50" y="66" font-size="${n >= 10 ? 44 : 52}" font-weight="900" text-anchor="middle" fill="#7c2d12" font-family="Trebuchet MS, Segoe UI, sans-serif">${n}</text>`
@@ -277,8 +303,8 @@
     thenkaai: () => fruit("kokos"),
     // Krop
     kan: () => svg(`<path d="M5 52Q50 6 95 52Q50 98 5 52Z" fill="#fff" stroke="#374151" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="52" r="20" fill="#8b5a2b"/><circle cx="50" cy="52" r="10" fill="#1b1b1b"/><circle cx="44" cy="45" r="4" fill="#fff"/><path d="M14 40L8 30M30 26L26 14M50 20V8M70 26L74 14M86 40L92 30" stroke="#374151" stroke-width="4" stroke-linecap="round"/>`),
-    kaathu: () => svg(`<path d="M42 10C76 6 90 38 76 64C70 78 68 92 50 92C36 92 32 80 38 72C28 66 28 42 42 10Z" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="4" stroke-linejoin="round"/><path d="M50 28C68 28 72 50 60 62C56 68 58 78 52 80" fill="none" stroke="${SKIN_D}" stroke-width="5" stroke-linecap="round"/><path d="M40 40C44 34 52 34 54 40" fill="none" stroke="${SKIN_D}" stroke-width="4" stroke-linecap="round"/>`),
-    mookku: () => svg(`<circle cx="50" cy="50" r="44" fill="#f6d3b0"/><circle cx="32" cy="30" r="4" fill="#1b1b1b"/><circle cx="68" cy="30" r="4" fill="#1b1b1b"/><path d="M50 22C46 42 34 54 34 64C34 74 42 77 50 74C58 77 66 74 66 64C66 54 54 42 50 22Z" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="3" stroke-linejoin="round"/><ellipse cx="43" cy="66" rx="3.4" ry="4.4" fill="#7c3f1c"/><ellipse cx="57" cy="66" rx="3.4" ry="4.4" fill="#7c3f1c"/>`),
+    kaathu: () => kidPoint("ear"),
+    mookku: () => kidPoint("nose"),
     vaai: () => svg(`<path d="M8 50Q30 26 50 38Q70 26 92 50Q70 84 50 84Q30 84 8 50Z" fill="#e11d48"/><path d="M20 50Q50 70 80 50Q66 74 50 74Q34 74 20 50Z" fill="#7f1d1d"/><path d="M27 52Q50 64 73 52L70 58Q50 68 30 58Z" fill="#fff"/><path d="M30 44Q40 38 50 42" stroke="#fda4af" stroke-width="3" fill="none" stroke-linecap="round"/>`),
     kai: () => svg(`<g fill="${SKIN}" stroke="${SKIN_D}" stroke-width="3.4" stroke-linejoin="round"><rect x="30" y="12" width="11" height="48" rx="5.5"/><rect x="42.5" y="6" width="11" height="54" rx="5.5"/><rect x="55" y="10" width="11" height="50" rx="5.5"/><rect x="67" y="22" width="10" height="42" rx="5"/><path d="M30 54L16 38Q10 32 16 28Q22 24 28 30L36 40Z"/><rect x="28" y="46" width="50" height="42" rx="16"/></g><path d="M40 70Q52 78 66 68" fill="none" stroke="${SKIN_D}" stroke-width="3" stroke-linecap="round" opacity=".6"/>`),
     kaal: () => svg(`<path d="M34 28C28 40 38 54 36 68C34 84 44 94 56 92C68 90 70 76 66 64C62 52 68 40 62 28C56 18 40 18 34 28Z" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="3.4" stroke-linejoin="round"/><g fill="${SKIN}" stroke="${SKIN_D}" stroke-width="3"><circle cx="68" cy="20" r="6.5"/><circle cx="57" cy="12" r="5.6"/><circle cx="46" cy="10" r="5"/><circle cx="36" cy="13" r="4.6"/><circle cx="28" cy="20" r="4.2"/></g>`),
@@ -291,7 +317,7 @@
     aamai: () => svg(`<ellipse cx="46" cy="84" rx="34" ry="5" fill="#000" opacity=".12"/><circle cx="86" cy="58" r="11" fill="#9bbb3a" stroke="#6b8a1e" stroke-width="3"/><circle cx="89" cy="55" r="2.6" fill="#1b1b1b"/><ellipse cx="28" cy="80" rx="9" ry="7" fill="#9bbb3a" stroke="#6b8a1e" stroke-width="3"/><ellipse cx="64" cy="80" rx="9" ry="7" fill="#9bbb3a" stroke="#6b8a1e" stroke-width="3"/><path d="M10 74Q10 24 46 24Q82 24 82 74Z" fill="#4d7c0f" stroke="#365a0a" stroke-width="3"/><path d="M46 28V74M24 50H68M28 36L40 50L28 66M64 36L52 50L64 66" fill="none" stroke="#a3c43c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`),
     // Ting
     veedu: () => svg(`<rect x="20" y="46" width="60" height="44" fill="#fde68a" stroke="#d6a93a" stroke-width="3"/><path d="M8 52L50 12L92 52Z" fill="#dc2626" stroke="#991b1b" stroke-width="3" stroke-linejoin="round"/><rect x="42" y="62" width="16" height="28" rx="3" fill="#7c4a1e"/><rect x="26" y="56" width="12" height="12" fill="#7dd3fc" stroke="#d6a93a" stroke-width="2"/><rect x="62" y="56" width="12" height="12" fill="#7dd3fc" stroke="#d6a93a" stroke-width="2"/><rect x="66" y="20" width="9" height="16" fill="#92400e"/>`),
-    puththakam: () => svg(`<rect x="16" y="12" width="68" height="78" rx="5" fill="#2563eb" stroke="#1e3a8a" stroke-width="3"/><rect x="22" y="18" width="58" height="66" rx="3" fill="#fff" stroke="#cbd5e1" stroke-width="2"/><path d="M30 34H70M30 46H70M30 58H62" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/><path d="M62 12V34L67 29L72 34V12Z" fill="#f43f5e"/><rect x="16" y="12" width="9" height="78" rx="4" fill="#1d4ed8"/>`),
+    puththakam: () => svg(`<path d="M3 26V84C20 76 38 76 50 87C62 76 80 76 97 84V26Z" fill="#2563eb" stroke="#1e3a8a" stroke-width="3" stroke-linejoin="round"/><path d="M7 28C22 22 38 22 50 31V80C38 71 22 71 7 77Z" fill="#fff" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round"/><path d="M93 28C78 22 62 22 50 31V80C62 71 78 71 93 77Z" fill="#f4f4f5" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round"/><path d="M15 40C24 37 34 37 43 42M15 50C24 47 34 47 43 52M15 60C24 57 34 57 43 62M57 42C66 37 76 37 85 40M57 52C66 47 76 47 85 50M57 62C66 57 76 57 85 60" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/><path d="M50 31V80" stroke="#cbd5e1" stroke-width="2.5"/><path d="M46 80H54V96L50 91L46 96Z" fill="#f43f5e" stroke="#be123c" stroke-width="1.5" stroke-linejoin="round"/>`),
     panthu: () => svg(`<circle cx="50" cy="50" r="42" fill="#fff" stroke="#374151" stroke-width="3"/><path d="M50 50L50 8A42 42 0 0 1 86.4 29Z" fill="#ef4444"/><path d="M50 50L86.4 29A42 42 0 0 1 86.4 71Z" fill="#fde047"/><path d="M50 50L86.4 71A42 42 0 0 1 50 92Z" fill="#3b82f6"/><path d="M50 50L50 92A42 42 0 0 1 13.6 71Z" fill="#22c55e"/><path d="M50 50L13.6 71A42 42 0 0 1 13.6 29Z" fill="#ef4444"/><path d="M50 50L13.6 29A42 42 0 0 1 50 8Z" fill="#fde047"/><circle cx="50" cy="50" r="42" fill="none" stroke="#374151" stroke-width="3"/><ellipse cx="34" cy="30" rx="9" ry="14" fill="#fff" opacity=".4" transform="rotate(40 34 30)"/>`),
     kaar: () => svg(`<path d="M6 66L12 50Q18 38 32 36L40 24Q44 20 52 20H64Q72 20 78 30L84 38Q96 42 96 54V68H6Z" fill="#ef4444" stroke="#991b1b" stroke-width="3" stroke-linejoin="round"/><path d="M44 28H54V38H38Z" fill="#bae6fd"/><path d="M58 28H64Q68 28 72 38H58Z" fill="#bae6fd"/><circle cx="28" cy="70" r="13" fill="#1f2937"/><circle cx="28" cy="70" r="5.5" fill="#9ca3af"/><circle cx="76" cy="70" r="13" fill="#1f2937"/><circle cx="76" cy="70" r="5.5" fill="#9ca3af"/><rect x="88" y="52" width="8" height="6" rx="2" fill="#fde047"/>`),
     padagu: () => svg(`<path d="M50 10V62" stroke="#7c4a1e" stroke-width="4" stroke-linecap="round"/><path d="M54 14L88 58H54Z" fill="#fff" stroke="#cbd5e1" stroke-width="2.4" stroke-linejoin="round"/><path d="M46 22L18 58H46Z" fill="#ef4444" stroke="#991b1b" stroke-width="2.4" stroke-linejoin="round"/><path d="M8 62H92L78 84H22Z" fill="#92400e" stroke="#5b2c0a" stroke-width="3" stroke-linejoin="round"/><path d="M0 88Q12 80 24 88T48 88T72 88T96 88" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>`),
@@ -359,7 +385,7 @@
   function fruit(kind) {
     const f = {
       mango: `<path d="M52 18C60 8 74 12 72 24" stroke="#2e7d32" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M62 14C72 6 84 12 80 22C72 24 66 20 62 14Z" fill="#43a047"/><path d="M50 22C74 20 90 44 80 68C72 86 44 90 28 76C12 62 22 26 50 22Z" fill="#f5a623"/><path d="M62 28C82 36 86 58 74 74C80 56 74 38 62 28Z" fill="#e8590c" opacity=".55"/><ellipse cx="38" cy="42" rx="7" ry="12" fill="#fff" opacity=".3" transform="rotate(25 38 42)"/>`,
-      banan: `<path d="M18 30C22 66 54 86 86 70C82 62 76 62 70 64C46 70 34 54 30 28Z" fill="#fde047" stroke="#ca8a04" stroke-width="3" stroke-linejoin="round"/><path d="M18 30L30 28L28 20L20 22Z" fill="#7c5a1a"/><path d="M86 70L80 62L90 64Z" fill="#7c5a1a"/>`,
+      banan: `<g transform="translate(14 -4)"><path d="M22 22C16 62 50 90 88 68C90 62 85 58 80 60C54 72 40 52 40 22Z" fill="#f2c80f" stroke="#a8761a" stroke-width="3" stroke-linejoin="round"/><path d="M22 22L25 10H39L40 22Z" fill="#8a6b2a" stroke="#5c4519" stroke-width="3" stroke-linejoin="round"/></g><path d="M16 26C8 68 44 96 84 74C86 68 81 63 76 65C50 77 34 58 34 26Z" fill="#fde047" stroke="#b7791f" stroke-width="3.5" stroke-linejoin="round"/><path d="M22 36C24 56 36 72 54 80" fill="none" stroke="#fff7b0" stroke-width="3.5" stroke-linecap="round" opacity=".9"/><path d="M16 26L19 12H33L34 26Z" fill="#8a6b2a" stroke="#5c4519" stroke-width="3" stroke-linejoin="round"/><path d="M84 74C86 68 81 63 76 65L78 74Z" fill="#4a3515"/>`,
       kokos: `<circle cx="50" cy="52" r="34" fill="#7b4a22"/><circle cx="50" cy="52" r="34" fill="none" stroke="#5a3416" stroke-width="3"/><circle cx="40" cy="44" r="5" fill="#2b1608"/><circle cx="60" cy="44" r="5" fill="#2b1608"/><ellipse cx="50" cy="60" rx="5" ry="6" fill="#2b1608"/><ellipse cx="36" cy="34" rx="8" ry="5" fill="#fff" opacity=".25" transform="rotate(-30 36 34)"/>`,
       jakfrugt: `<ellipse cx="50" cy="54" rx="32" ry="38" fill="#9bbb3a" stroke="#6b8a1e" stroke-width="3"/><g fill="#6b8a1e"><circle cx="36" cy="36" r="3.4"/><circle cx="52" cy="30" r="3.4"/><circle cx="66" cy="40" r="3.4"/><circle cx="42" cy="52" r="3.4"/><circle cx="60" cy="56" r="3.4"/><circle cx="34" cy="68" r="3.4"/><circle cx="50" cy="74" r="3.4"/><circle cx="66" cy="72" r="3.4"/></g><path d="M50 16V8" stroke="#6b8a1e" stroke-width="5" stroke-linecap="round"/>`
     };
