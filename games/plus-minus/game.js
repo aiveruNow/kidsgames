@@ -77,6 +77,7 @@
 
     const sfx = {
       click() { tone(760, .05, "triangle", .08); },
+      wrong() { tone(300, .22, "triangle", .1, 0, 160); },
       // Regnestykket springer frem
       pop() { tone(420, .12, "triangle", .14, 0, 840); tone(1050, .1, "sine", .06, .09); },
       // Bolden trækkes tilbage: højere tone, jo længere træk
@@ -113,27 +114,42 @@
       }
     } catch { /* ingen lagring */ }
 
-    // Baner: hvert kontinent kræver CONTINENT_GOAL rigtige svar, før man rejser videre
-    const CONTINENT_GOAL = 30;
+    // Baner: hvert land kræver PER_COUNTRY rigtige svar. Når et kontinents lande er fundet, rejser man videre.
+    const PER_COUNTRY = 6;
+    const Geo = window.TalbasketGeo;
+    const World = window.TalbasketWorld;
     const CONTINENTS = [
-      { key: "europa", name: "Europa", emoji: "🗼", landmarks: ["🏰", "🗼", "🌷"], theme: {} },
-      { key: "afrika", name: "Afrika", emoji: "🐘", landmarks: ["🐘", "🌴", "🦒"], theme: { "sky-top": "#ffe2a8", "sky-bottom": "#fff3d6", "sky-ground": "#f6dca0", sun: "#ff9f1c", hills: "#e6c76f", "ground-a": "#d9a74e", "ground-b": "#c28d3a", "water-top": "#8fd6d0", "water-bottom": "#3a9aa3" } },
-      { key: "asien", name: "Asien", emoji: "🏯", landmarks: ["🎋", "🏯", "🐼"], theme: { "sky-top": "#ffd0dc", "sky-bottom": "#fff0f4", "sky-ground": "#e3f2c4", sun: "#ff6b6b", hills: "#b9d98a", "ground-a": "#8cc16a", "ground-b": "#6aa650", "water-top": "#8fd9d6", "water-bottom": "#2f9a9a" } },
-      { key: "nordamerika", name: "Nordamerika", emoji: "🗽", landmarks: ["🌲", "🗽", "🦅"], theme: { "sky-top": "#cfe3ff", "sky-bottom": "#f0f6ff", "sky-ground": "#d5ecd0", hills: "#8fc78a", "ground-a": "#6fae6a", "ground-b": "#539a52", "water-top": "#7fc3f0", "water-bottom": "#2f7fc0" } },
-      { key: "sydamerika", name: "Sydamerika", emoji: "🦜", landmarks: ["🌴", "🦜", "🐆"], theme: { "sky-top": "#c8f0c0", "sky-bottom": "#eaffe0", "sky-ground": "#bfe8b0", hills: "#6fc46a", "ground-a": "#3fa85a", "ground-b": "#2f8f48", "water-top": "#6fd6b0", "water-bottom": "#2a9a78" } },
-      { key: "australien", name: "Australien", emoji: "🦘", landmarks: ["🦘", "🏝️", "🐨"], theme: { "sky-top": "#ffd9b0", "sky-bottom": "#fff0dc", "sky-ground": "#f4d2a8", sun: "#ff8c42", hills: "#e0a86a", "ground-a": "#d98c4a", "ground-b": "#c0733a", "water-top": "#6fd2f0", "water-bottom": "#2a95c8" } },
-      { key: "antarktis", name: "Antarktis", emoji: "🐧", landmarks: ["🧊", "🐧", "❄️"], theme: { "sky-top": "#d6ecff", "sky-bottom": "#f6fbff", "sky-ground": "#ffffff", sun: "#fff3b0", hills: "#eef6fb", "ground-a": "#ffffff", "ground-b": "#dcecf7", "water-top": "#9fdcf5", "water-bottom": "#4aa3d6" } }
+      { key: "europa", flyers: ["🕊️", "🎈"], theme: {} },
+      { key: "afrika", flyers: ["🦅", "🦜"], theme: { "sky-top": "#ffd08a", "sky-bottom": "#fff0c9", "sky-ground": "#f6dca0", sun: "#ff9f1c", hills: "#e6c76f", "ground-a": "#d9a74e", "ground-b": "#c28d3a", "water-top": "#8fd6d0", "water-bottom": "#3a9aa3" } },
+      { key: "asien", flyers: ["🪁", "🕊️"], theme: { "sky-top": "#ffc2d4", "sky-bottom": "#fff0f4", "sky-ground": "#e3f2c4", sun: "#ff6b6b", hills: "#b9d98a", "ground-a": "#8cc16a", "ground-b": "#6aa650", "water-top": "#8fd9d6", "water-bottom": "#2f9a9a" } },
+      { key: "nordamerika", flyers: ["🦅", "🎈"], theme: { "sky-top": "#bcd8ff", "sky-bottom": "#eef5ff", "sky-ground": "#d5ecd0", hills: "#8fc78a", "ground-a": "#6fae6a", "ground-b": "#539a52", "water-top": "#7fc3f0", "water-bottom": "#2f7fc0" } },
+      { key: "sydamerika", flyers: ["🦜", "🦋"], theme: { "sky-top": "#b9ecb0", "sky-bottom": "#eaffe0", "sky-ground": "#bfe8b0", hills: "#6fc46a", "ground-a": "#3fa85a", "ground-b": "#2f8f48", "water-top": "#6fd6b0", "water-bottom": "#2a9a78" } },
+      { key: "australien", flyers: ["🦜", "🦋"], theme: { "sky-top": "#ffd0a0", "sky-bottom": "#fff0dc", "sky-ground": "#f4d2a8", sun: "#ff8c42", hills: "#e0a86a", "ground-a": "#d98c4a", "ground-b": "#c0733a", "water-top": "#6fd2f0", "water-bottom": "#2a95c8" } },
+      { key: "antarktis", flyers: ["❄️", "❄️"], theme: { "sky-top": "#c4e2ff", "sky-bottom": "#f6fbff", "sky-ground": "#ffffff", sun: "#fff3b0", hills: "#eef6fb", "ground-a": "#ffffff", "ground-b": "#dcecf7", "water-top": "#9fdcf5", "water-bottom": "#4aa3d6" } }
     ];
     const LAST_CONTINENT = CONTINENTS.length - 1;
+    const goalOf = (index) => Geo.countriesOf(CONTINENTS[index].key).length * PER_COUNTRY;
     let unlockedContinent = 0;
     let continentProgress = 0;
     let currentContinent = 0;
-    let pendingTravel = false;
+    let journeyDone = false;
     try {
       unlockedContinent = Math.min(LAST_CONTINENT, Math.max(0, Math.floor(Number(localStorage.getItem("talbasket-kontinent")) || 0)));
-      continentProgress = Math.max(0, Math.floor(Number(localStorage.getItem("talbasket-kontinent-point")) || 0)) % CONTINENT_GOAL;
+      continentProgress = Math.max(0, Math.floor(Number(localStorage.getItem("talbasket-kontinent-point")) || 0));
+      journeyDone = localStorage.getItem("talbasket-faerdig") === "1";
     } catch { /* ingen lagring */ }
+    continentProgress = Math.min(continentProgress, goalOf(unlockedContinent) - 1);
+    if (journeyDone) { unlockedContinent = LAST_CONTINENT; continentProgress = goalOf(LAST_CONTINENT); }
     currentContinent = unlockedContinent;
+    // Antal fundne lande i et kontinent
+    const foundIn = (index) => {
+      const total = Geo.countriesOf(CONTINENTS[index].key).length;
+      if (index < unlockedContinent) return total;
+      if (index > unlockedContinent) return 0;
+      return Math.min(total, Math.floor(continentProgress / PER_COUNTRY));
+    };
+    const foundCountries = () => CONTINENTS.flatMap((continent, index) => Geo.countriesOf(continent.key).slice(0, foundIn(index)));
+    const toNextCountry = () => PER_COUNTRY - (continentProgress % PER_COUNTRY);
 
     // Niveauet stiger automatisk med 10 for hver optjent stjerne (op til 100), men kan låses i menuen
     const LEVEL_STEP = 10;
@@ -182,15 +198,11 @@
     }
 
     function hideStarPopup() {
+      if (starPopup.hidden) return;
       clearTimeout(popupTimer);
       starPopup.hidden = true;
       for (const sparkle of starPopup.querySelectorAll(".sparkle")) sparkle.remove();
-      if (pendingTravel) {
-        pendingTravel = false;
-        showTravelPopup();
-        return;
-      }
-      if (advanceAfterPopup) goToNextQuestion();
+      runNextPopup();
     }
 
     function showStarPopup() {
@@ -223,37 +235,50 @@
       try { localStorage.setItem("talbasket-stars", String(stars)); } catch { /* ingen lagring */ }
       levelUpMessage = "";
       if (autoLevel && operation !== "multiply") {
+        const before = maximum;
         levelSteps++;
         try { localStorage.setItem("talbasket-trin", String(levelSteps)); } catch { /* ingen lagring */ }
         maximum = autoMaximum();
         updateMenuLabel();
         if (maximum > before) levelUpMessage = `Nu bliver det lidt sværere: tal op til ${maximum} 🚀`;
       }
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      setTimeout(showStarPopup, reducedMotion ? 0 : 1600);
     }
 
     const popupDelay = () => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1600);
     const travelPopup = document.querySelector("#travelPopup");
+    const foundPopup = document.querySelector("#foundPopup");
     const continentBadge = document.querySelector("#continentBadge");
-    const continentGroup = document.querySelector("#continentGroup");
-    const landmarkLayer = document.querySelector("#landmarks");
-    const LANDMARK_SPOTS = [[170, 138, 32], [470, 138, 32], [235, 112, 22]];
+    const spotLayer = document.querySelector("#spots");
+    const skyLayer = document.querySelector("#sky");
+    const SVG = "http://www.w3.org/2000/svg";
     let travelTimer = null;
+    let popupQueue = [];
 
-    for (const [index, continent] of CONTINENTS.entries()) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "control continent-pick";
-      button.textContent = `${continent.emoji} ${continent.name}`;
-      button.addEventListener("click", () => {
-        if (index > unlockedContinent) return;
-        currentContinent = index;
-        applyScenery();
-        resetGame();
-      });
-      continentGroup.append(button);
+    // Popups efter et rigtigt svar står i kø: stjerne, nyt land, rejse. Først bagefter kommer næste spørgsmål.
+    function runNextPopup() {
+      const next = popupQueue.shift();
+      if (next) { next(); return; }
+      if (advanceAfterPopup) {
+        advanceAfterPopup = false;
+        goToNextQuestion();
+      }
     }
+
+    function queuePopups(list) {
+      popupQueue = list;
+      advanceAfterPopup = true;
+      setTimeout(runNextPopup, popupDelay());
+    }
+
+    // ---------- Banen: farver, dyr og steder, flyvere ----------
+    const SPOT_SLOTS = [
+      { x: 120, y: 146, s: 30, type: "animal" }, { x: 190, y: 138, s: 30, type: "animal" },
+      { x: 452, y: 138, s: 30, type: "animal" }, { x: 524, y: 146, s: 30, type: "animal" },
+      { x: 238, y: 114, s: 34, type: "landmark" }, { x: 408, y: 112, s: 34, type: "landmark" }
+    ];
+    let metSpots = [];
+    try { metSpots = JSON.parse(localStorage.getItem("talbasket-dyr")) || []; } catch { metSpots = []; }
+    const shuffled = (list) => [...list].sort(() => Math.random() - 0.5);
 
     function applyScenery() {
       const continent = CONTINENTS[currentContinent];
@@ -262,72 +287,196 @@
         else lake.style.removeProperty(`--${key}`);
       }
       lake.dataset.continent = continent.key;
-      landmarkLayer.replaceChildren(...continent.landmarks.map((emoji, index) => {
-        const [x, y, size] = LANDMARK_SPOTS[index];
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", x);
-        text.setAttribute("y", y);
-        text.setAttribute("font-size", size);
-        text.textContent = emoji;
-        return text;
+      document.body.dataset.continent = continent.key;
+      if (World) World.closeSpot();
+
+      const geo = Geo.continent(continent.key);
+      const animals = shuffled(geo.animals);
+      const places = shuffled(geo.landmarks);
+      const counters = { animal: 0, landmark: 0 };
+      spotLayer.replaceChildren(...SPOT_SLOTS.map((slot, index) => {
+        const item = (slot.type === "animal" ? animals : places)[counters[slot.type]++];
+        const group = document.createElementNS(SVG, "g");
+        group.setAttribute("class", `spot ${slot.type}${metSpots.includes(item.id) ? "" : " fresh"}`);
+        group.setAttribute("transform", `translate(${slot.x} ${slot.y})`);
+        group.setAttribute("role", "button");
+        group.setAttribute("tabindex", "0");
+        group.setAttribute("aria-label", item.name);
+        group.style.setProperty("--d", `${(index * .37).toFixed(2)}s`);
+        const hit = document.createElementNS(SVG, "circle");
+        hit.setAttribute("r", "24");
+        hit.setAttribute("cy", "-10");
+        hit.setAttribute("fill", "transparent");
+        const glow = document.createElementNS(SVG, "circle");
+        glow.setAttribute("class", "spot-glow");
+        glow.setAttribute("r", "17");
+        glow.setAttribute("cy", "-9");
+        const text = document.createElementNS(SVG, "text");
+        text.setAttribute("class", "spot-emo");
+        text.setAttribute("font-size", String(slot.s));
+        text.setAttribute("text-anchor", "middle");
+        text.textContent = item.emoji;
+        // Dyr i højre side vender mod kurven; vendingen ligger på en indpakning, så CSS-animationen ikke fjerner den
+        const holder = document.createElementNS(SVG, "g");
+        if (slot.x > 320 && slot.type === "animal") holder.setAttribute("transform", "scale(-1 1)");
+        holder.append(text);
+        group.append(glow, hit, holder);
+        const open = (event) => {
+          event.stopPropagation();
+          group.classList.remove("hop");
+          void group.getBBox();
+          group.classList.add("hop");
+          group.classList.remove("fresh");
+          if (!metSpots.includes(item.id)) {
+            metSpots.push(item.id);
+            try { localStorage.setItem("talbasket-dyr", JSON.stringify(metSpots)); } catch { /* ingen lagring */ }
+          }
+          sfx.pop();
+          World.openSpot(item);
+        };
+        group.addEventListener("click", open);
+        group.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(event); } });
+        return group;
       }));
+      skyLayer.replaceChildren();
     }
 
+    // Små flyvere krydser himlen engang imellem
+    function launchFlyer() {
+      if (document.body.dataset.screen !== "play" || document.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const flyers = CONTINENTS[currentContinent].flyers;
+      const text = document.createElementNS(SVG, "text");
+      const fromLeft = Math.random() < .5;
+      const y = 34 + Math.random() * 40;
+      text.textContent = flyers[Math.floor(Math.random() * flyers.length)];
+      text.setAttribute("y", String(y));
+      text.setAttribute("font-size", "22");
+      skyLayer.append(text);
+      const from = fromLeft ? -40 : 700;
+      const to = fromLeft ? 700 : -40;
+      text.animate([
+        { transform: `translate(${from}px, 0px)` },
+        { transform: `translate(${(from + to) / 2}px, -14px)`, offset: .5 },
+        { transform: `translate(${to}px, 4px)` }
+      ], { duration: 9000 + Math.random() * 4000, easing: "linear" }).onfinish = () => text.remove();
+    }
+    setInterval(launchFlyer, 9000);
+
+    // Opdaterer kontinent-chippen øverst i banen: navn, fundne lande og vej til næste land
     function updateContinentUI() {
       const continent = CONTINENTS[currentContinent];
-      const counting = currentContinent === unlockedContinent && unlockedContinent < LAST_CONTINENT;
-      continentBadge.innerHTML = counting
-        ? `${continent.emoji} ${continent.name} ${continentProgress}/${CONTINENT_GOAL}<span class="bar"><i style="width:${continentProgress / CONTINENT_GOAL * 100}%"></i></span>`
-        : `${continent.emoji} ${continent.name}`;
+      const geo = Geo.continent(continent.key);
+      const list = Geo.countriesOf(continent.key);
+      const found = foundIn(currentContinent);
+      const counting = currentContinent === unlockedContinent && !journeyDone;
+      const flags = list.map((country, index) => {
+        if (index < found) return `<i class="got">${World.flagSvg(country.id, "mini")}${country.kind === "place" ? `<b>${country.emoji}</b>` : ""}</i>`;
+        return `<i class="${index === found && counting ? "nx" : ""}">?</i>`;
+      }).join("");
+      const left = counting ? toNextCountry() : 0;
+      continentBadge.innerHTML = `<span class="hc-emoji" aria-hidden="true">${geo.emoji}</span><span class="hc-main"><span class="hc-name">${geo.name.replace(" og Oceanien", "")}</span><span class="hc-flags">${flags}</span></span>${counting ? `<span class="hc-bar" aria-hidden="true"><i style="width:${(continentProgress % PER_COUNTRY) / PER_COUNTRY * 100}%"></i></span>` : ""}`;
       continentBadge.setAttribute("aria-label", counting
-        ? `${continent.name}: ${continentProgress} af ${CONTINENT_GOAL} rigtige til næste kontinent`
-        : continent.name);
-      [...continentGroup.children].forEach((button, index) => {
-        const locked = index > unlockedContinent;
-        button.disabled = locked;
-        button.setAttribute("aria-pressed", String(index === currentContinent));
-        button.textContent = `${locked ? "🔒" : CONTINENTS[index].emoji} ${CONTINENTS[index].name}`;
-      });
+        ? `${geo.name}: ${found} af ${list.length} fundet. Skyd ${left} rigtige mere for at finde næste land. Tryk for at åbne bogen.`
+        : `${geo.name}: ${found} af ${list.length} fundet. Tryk for at åbne bogen.`);
     }
 
-    // Returnerer true, når et rigtigt svar åbner det næste kontinent
+    // Et rigtigt svar tæller mod næste land. Returnerer, hvad der skete: nyt land, rejse eller færdig tur
     function addContinentProgress() {
-      if (currentContinent !== unlockedContinent || unlockedContinent >= LAST_CONTINENT) return false;
+      if (journeyDone || currentContinent !== unlockedContinent) return null;
       continentProgress++;
-      let traveled = false;
-      if (continentProgress >= CONTINENT_GOAL) {
-        unlockedContinent++;
-        currentContinent = unlockedContinent;
-        continentProgress = 0;
-        traveled = true;
+      const result = { country: null, travel: false, done: false };
+      const key = CONTINENTS[unlockedContinent].key;
+      if (continentProgress % PER_COUNTRY === 0) result.country = Geo.countriesOf(key)[continentProgress / PER_COUNTRY - 1];
+      if (continentProgress >= goalOf(unlockedContinent)) {
+        if (unlockedContinent >= LAST_CONTINENT) {
+          journeyDone = true;
+          result.done = true;
+        } else {
+          unlockedContinent++;
+          currentContinent = unlockedContinent;
+          continentProgress = 0;
+          result.travel = true;
+        }
       }
       try {
         localStorage.setItem("talbasket-kontinent", String(unlockedContinent));
         localStorage.setItem("talbasket-kontinent-point", String(continentProgress));
+        if (journeyDone) localStorage.setItem("talbasket-faerdig", "1");
       } catch { /* ingen lagring */ }
-      return traveled;
+      if (result.travel || result.done) {
+        stars++;
+        try { localStorage.setItem("talbasket-stars", String(stars)); } catch { /* ingen lagring */ }
+      }
+      return result;
     }
+
+    function showFoundPopup(country) {
+      const geo = Geo.continent(country.cont);
+      document.querySelector("#foundFlag").innerHTML = country.kind === "place" ? `<span class="place-emoji big">${country.emoji}</span>` : World.flagSvg(country.id, "big");
+      document.querySelector("#foundName").textContent = country.name;
+      document.querySelector("#foundText").textContent = country.kind === "place"
+        ? `Nyt sted i ${geo.name.replace(" og Oceanien", "")}. Tryk for at høre mere.`
+        : `${country.name} ligger i ${geo.name.replace(" og Oceanien", "")}. Hovedstaden hedder ${country.capital}.`;
+      foundPopup.dataset.id = country.id;
+      foundPopup.dataset.cont = country.cont;
+      const card = foundPopup.querySelector(".star-popup-card");
+      for (const sparkle of card.querySelectorAll(".sparkle")) sparkle.remove();
+      for (let index = 0; index < 12; index++) {
+        const sparkle = document.createElement("span");
+        const angle = (index / 12) * Math.PI * 2;
+        const distance = 130 + Math.random() * 90;
+        sparkle.className = "sparkle";
+        sparkle.textContent = index % 2 ? "✨" : "🌟";
+        sparkle.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+        sparkle.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+        sparkle.style.animationDelay = `${Math.random() * .25}s`;
+        card.append(sparkle);
+      }
+      foundPopup.hidden = false;
+      updateContinentUI();
+      sfx.fanfare();
+    }
+
+    function hideFoundPopup(then) {
+      if (foundPopup.hidden) return;
+      foundPopup.hidden = true;
+      then();
+    }
+
+    document.querySelector("#foundGo").addEventListener("click", () => hideFoundPopup(() => {
+      sfx.click();
+      // Det nye land får et geografi-skud med det samme
+      if (qMode !== "math") geoFocus = foundPopup.dataset.id;
+      runNextPopup();
+    }));
+    document.querySelector("#foundSee").addEventListener("click", () => hideFoundPopup(() => {
+      sfx.click();
+      if (qMode !== "math") geoFocus = foundPopup.dataset.id;
+      World.openBook(foundPopup.dataset.cont, foundPopup.dataset.id, { onClose: runNextPopup });
+    }));
 
     function showTravelPopup() {
       const continent = CONTINENTS[currentContinent];
+      const geo = Geo.continent(continent.key);
       applyScenery();
       updateContinentUI();
-      document.querySelector("#travelEmoji").textContent = continent.emoji;
-      document.querySelector("#travelTitle").textContent = `Du rejser til ${continent.name}!`;
-      document.querySelector("#travelText").textContent = currentContinent === LAST_CONTINENT
-        ? `Sidste stop på jorden rundt-turen! 🌍`
-        : `${CONTINENT_GOAL} rigtige – en ny bane er låst op 🏀`;
+      document.querySelector("#travelEmoji").textContent = journeyDone ? "🏆" : geo.emoji;
+      document.querySelector("#travelTitle").textContent = journeyDone ? "Du har rejst jorden rundt!" : `Du rejser til ${geo.name.replace(" og Oceanien", "")}!`;
+      document.querySelector("#travelText").textContent = journeyDone
+        ? "Alle lande og steder er fundet. +1 ⭐"
+        : `Alle landene er fundet. Ny bane låst op. +1 ⭐`;
       travelPopup.hidden = false;
       clearTimeout(travelTimer);
-      travelTimer = setTimeout(hideTravelPopup, 5000);
+      travelTimer = setTimeout(hideTravelPopup, 6000);
       sfx.fanfare();
+      Topbar.refreshStars(true);
     }
 
     function hideTravelPopup() {
       if (travelPopup.hidden) return;
       clearTimeout(travelTimer);
       travelPopup.hidden = true;
-      if (advanceAfterPopup) goToNextQuestion();
+      runNextPopup();
     }
 
     travelPopup.addEventListener("click", hideTravelPopup);
@@ -347,7 +496,82 @@
       return Math.floor(Math.random() * max) + 1;
     }
 
+    // ---------- Geografi-skud: flag som svar ----------
+    let qMode = "mix";
+    try {
+      const savedMode = localStorage.getItem("talbasket-spoergsmaal");
+      if (["mix", "math", "geo"].includes(savedMode)) qMode = savedMode;
+    } catch { /* ingen lagring */ }
+    const GEO_EVERY = 4;
+    let geoCountdown = 3;
+    let geoFocus = null;
+    let isGeo = false;
+    let geoQ = null;
+    let lastGeoId = null;
+    const geoQuestion = document.querySelector("#geoQ");
+    const promptEl = document.querySelector("#prompt");
+    const pick = (list) => list[Math.floor(Math.random() * list.length)];
+
+    // Lande, man kan blive spurgt om: dem man har fundet (med flag). I "kun geografi" uden fundne lande bruges banens egne lande.
+    function geoPool() {
+      let pool = foundCountries().filter((country) => country.kind === "country");
+      if (!pool.length && qMode === "geo") pool = Geo.countriesOf(CONTINENTS[currentContinent].key).filter((country) => country.kind === "country");
+      if (!pool.length) pool = Geo.countries.filter((country) => country.kind === "country").slice(0, 5);
+      return pool;
+    }
+
+    function wantGeo() {
+      if (qMode === "math") return false;
+      if (qMode === "geo" || geoFocus) return true;
+      return foundCountries().some((country) => country.kind === "country") && geoCountdown <= 0;
+    }
+
+    function makeGeoProblem() {
+      const pool = geoPool();
+      let target = geoFocus ? Geo.country(geoFocus) : null;
+      geoFocus = null;
+      if (!target || target.kind !== "country") {
+        const candidates = pool.filter((country) => country.id !== lastGeoId);
+        target = pick(candidates.length ? candidates : pool);
+      }
+      lastGeoId = target.id;
+      const type = pick(["flag", "capital", "currency"]);
+      geoQ = { type, country: target };
+      isGeo = true;
+      answer = target.id;
+      const name = target.name;
+      geoQuestion.innerHTML = type === "flag"
+        ? `<span class="gq-ico" aria-hidden="true">🏳️</span><span class="gq-lbl">Hvilket flag har</span><span class="gq-name">${name}?</span>`
+        : type === "capital"
+          ? `<span class="gq-ico" aria-hidden="true">🏙️</span><span class="gq-name">${target.capital}</span><span class="gq-lbl">er hovedstaden i …</span>`
+          : `<span class="gq-ico" aria-hidden="true">💰</span><span class="gq-name">${target.currency}</span><span class="gq-lbl">bruger man i …</span>`;
+    }
+
+    // Tre andre lande som svarmuligheder: helst lande, man har mødt
+    function geoChoices() {
+      const target = geoQ.country;
+      // To lande med samme valuta (fx euro) må ikke begge være svarmuligheder
+      const clash = (country) => geoQ.type === "currency" && country.currency === target.currency;
+      const others = (list) => shuffled(list.filter((country) => country.kind === "country" && country.id !== target.id && !clash(country)));
+      const picked = [];
+      for (const list of [foundCountries(), Geo.countriesOf(target.cont), Geo.countries]) {
+        for (const country of others(list)) {
+          if (picked.length >= 3) break;
+          if (!picked.includes(country.id)) picked.push(country.id);
+        }
+      }
+      return shuffled([target.id, ...picked]);
+    }
+
     function makeProblem() {
+      isGeo = false;
+      geoQ = null;
+      if (wantGeo()) {
+        geoCountdown = GEO_EVERY;
+        makeGeoProblem();
+        return;
+      }
+      geoCountdown--;
       if (operation === "multiply") {
         // Undgå at få præcis samme stykke to gange i træk
         let table, factor;
@@ -375,6 +599,7 @@
     }
 
     function makeChoices() {
+      if (isGeo) return geoChoices();
       const choices = new Set([answer]);
       if (operation === "multiply") {
         // Lokkende fejlsvar: nabo-produkter i samme tabel og med byttede tal
@@ -446,8 +671,17 @@
 
     function showProblemPopup() {
       Topbar.closeMenu();
-      problemEq.innerHTML = `<span class="n">${first}</span><span class="op">${opSign()}</span><span class="n">${second}</span><span class="eqs">=</span><span class="n q">?</span>`;
-      problemPopup.setAttribute("aria-label", `Regnestykke: ${first} ${opName()} ${second}. Tryk for at starte.`);
+      if (isGeo) {
+        const target = geoQ.country;
+        problemEq.innerHTML = `<span class="geo-pop">${geoQuestion.innerHTML}</span>`;
+        problemPopup.querySelector(".problem-label").textContent = "Find landet!";
+        problemPopup.setAttribute("aria-label", `Geografi: ${geoQuestion.textContent}. Tryk for at starte.`);
+        void target;
+      } else {
+        problemEq.innerHTML = `<span class="n">${first}</span><span class="op">${opSign()}</span><span class="n">${second}</span><span class="eqs">=</span><span class="n q">?</span>`;
+        problemPopup.querySelector(".problem-label").textContent = "Regn det ud!";
+        problemPopup.setAttribute("aria-label", `Regnestykke: ${first} ${opName()} ${second}. Tryk for at starte.`);
+      }
       problemPopup.hidden = false;
       problemPopup.focus({ preventScroll: true });
       sfx.pop();
@@ -457,6 +691,11 @@
       if (problemPopup.hidden) return;
       problemPopup.hidden = true;
       sfx.click();
+      // Geografi-spørgsmålet læses højt, når man trykker for at starte
+      if (isGeo && geoQ) {
+        const line = geoQ.country.q[geoQ.type];
+        World.speak(line.file, line.text);
+      }
     }
 
     problemPopup.addEventListener("click", hideProblemPopup);
@@ -464,25 +703,33 @@
     function startRound() {
       clearTimeout(advanceTimer);
       advanceAfterPopup = false;
+      if (World) World.stopSpeech();
       clearShots();
       roundDisplay.textContent = `Runde ${round}`;
       feedback.textContent = "";
       feedback.className = "feedback";
       nextButton.hidden = true;
       mathHint.hidden = true;
-      hintToggle.setAttribute("aria-expanded", "false");
-      hintToggle.textContent = "💡 Vis regnehjælp";
       hoop.classList.remove("scored");
       makeProblem();
+      document.body.classList.toggle("geo-round", isGeo);
+      geoQuestion.hidden = !isGeo;
+      promptEl.textContent = isGeo ? "Skyd flaget, der passer" : "Hvad giver regnestykket?";
+      hintToggle.setAttribute("aria-expanded", "false");
+      hintToggle.textContent = isGeo ? "📖 Slå op i bogen" : "💡 Vis regnehjælp";
       answerContainer.replaceChildren();
 
       for (const choice of makeChoices()) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "answer";
-        button.setAttribute("aria-label", `Svar ${choice}. Træk bolden tilbage og skyd mod kurven, eller tryk Enter.`);
+        button.dataset.choice = String(choice);
+        const country = isGeo ? Geo.country(choice) : null;
+        button.setAttribute("aria-label", `Svar ${country ? country.name : choice}. Træk bolden tilbage og skyd mod kurven, eller tryk Enter.`);
         button.setAttribute("aria-describedby", "dragInstructions");
-        button.innerHTML = `<span class="ball" aria-hidden="true"><span class="answer-number">${choice}</span></span>`;
+        button.innerHTML = isGeo
+          ? `<span class="ball flag-ball" aria-hidden="true">${World.flagSvg(choice, "ball-flag")}</span>`
+          : `<span class="ball" aria-hidden="true"><span class="answer-number">${choice}</span></span>`;
         button.addEventListener("pointerdown", event => beginDrag(event, button, choice));
         button.addEventListener("click", event => {
           if (event.detail === 0) submitShot(button, choice);
@@ -568,7 +815,7 @@
 
       animation.onfinish = () => {
         ball.remove();
-        const label = source.querySelector(".answer-number").textContent;
+        const label = isGeo ? source.dataset.choice : source.querySelector(".answer-number").textContent;
         const radius = ballRadiusUnits(size);
         if (isCorrect) playBasket(endX, endY, label, radius);
         else playCroc(endX, endY, label, radius);
@@ -759,7 +1006,18 @@
       splashAtSvg(local.x, local.y);
     }
 
+    let flagClipCount = 0;
     function ballMarkup(radius, label) {
+      // Flag-bold (geografi-skud): flaget klippes rundt og får bolden sømme oven på
+      const flagInner = window.TalbasketFlag ? window.TalbasketFlag.inner(String(label)) : "";
+      if (flagInner) {
+        const clipId = `fbc${++flagClipCount}`;
+        return `
+        <clipPath id="${clipId}"><circle r="${radius}"/></clipPath>
+        <g clip-path="url(#${clipId})"><svg x="${-radius}" y="${-radius}" width="${radius * 2}" height="${radius * 2}" viewBox="0 0 60 40" preserveAspectRatio="xMidYMid slice">${flagInner}</svg></g>
+        <path d="M0 ${-radius}V${radius}M${-radius} 0H${radius}" fill="none" stroke="#39251d" stroke-opacity=".55" stroke-width="${radius * .08}"/>
+        <circle r="${radius}" fill="none" stroke="#9d421c" stroke-width="${radius * .12}"/>`;
+      }
       const fontSize = radius * (String(label).length > 2 ? .85 : 1.1);
       return `
         <circle r="${radius}" fill="url(#ball-shade)" stroke="#9d421c" stroke-width="${radius * .12}"/>
@@ -1216,37 +1474,46 @@
       if (isCorrect) correctCount++;
 
       feedback.className = "feedback";
-      const equation = `${first} ${opSign()} ${second} = ${answer}`;
       if (isCorrect) {
         for (const button of answerContainer.querySelectorAll(".answer")) {
           button.disabled = true;
-          if (Number(button.querySelector(".answer-number").textContent) === answer) {
-            button.classList.add("is-right");
-          }
+          if (button.dataset.choice === String(answer)) button.classList.add("is-right");
         }
-        feedback.textContent = `Basket! Rigtigt: ${equation}.`;
+        if (isGeo) {
+          const country = geoQ.country;
+          const tile = country.tiles.find((entry) => entry.key === (geoQ.type === "currency" ? "currency" : "capital"));
+          feedback.textContent = geoQ.type === "capital"
+            ? `Basket! ${country.capital} er hovedstaden i ${country.name}.`
+            : geoQ.type === "currency"
+              ? `Basket! I ${country.name} bruger man ${country.currency.toLowerCase()}.`
+              : `Basket! Det er flaget fra ${country.name}.`;
+          if (tile) World.speak(tile.file, tile.say);
+        } else {
+          feedback.textContent = `Basket! Rigtigt: ${first} ${opSign()} ${second} = ${answer}.`;
+        }
         feedback.classList.add("good");
       } else {
-        feedback.textContent = "Gnam! Krokodillen åd bolden — prøv en anden bold.";
+        feedback.textContent = isGeo ? "Gnam! Krokodillen åd bolden — prøv et andet flag." : "Gnam! Krokodillen åd bolden — prøv en anden bold.";
         feedback.classList.add("bad");
       }
 
       if (isCorrect) {
         streak++;
         const starEarned = streak % STREAK_GOAL === 0;
-        const traveled = addContinentProgress();
-        if (starEarned) awardStar();
-        if (traveled) {
-          if (starEarned) pendingTravel = true;
-          else setTimeout(showTravelPopup, popupDelay());
-        } else {
-          updateContinentUI();
+        const progress = addContinentProgress();
+        const popups = [];
+        if (starEarned) {
+          awardStar();
+          popups.push(showStarPopup);
         }
-        if (starEarned || traveled) {
-          advanceAfterPopup = true;
+        if (progress && progress.country) popups.push(() => showFoundPopup(progress.country));
+        if (progress && (progress.travel || progress.done)) popups.push(showTravelPopup);
+        if (!(progress && (progress.travel || progress.done))) updateContinentUI();
+        if (popups.length) {
+          queuePopups(popups);
         } else {
           sfx.streak(streak);
-          advanceTimer = setTimeout(goToNextQuestion, 1700);
+          advanceTimer = setTimeout(goToNextQuestion, isGeo ? 3800 : 1700);
         }
       } else {
         streak = 0;
@@ -1260,6 +1527,11 @@
 
     document.querySelector("#hintReplay").addEventListener("click", updateHint);
     hintToggle.addEventListener("click", () => {
+      // Geografi: slå landet op i bogen i stedet for en regnehjælp
+      if (isGeo) {
+        World.openBook(geoQ.country.cont, geoQ.country.id);
+        return;
+      }
       const isOpening = mathHint.hidden;
       mathHint.hidden = !isOpening;
       hintToggle.setAttribute("aria-expanded", String(isOpening));
@@ -1275,6 +1547,9 @@
       for (const option of tableButtons) {
         option.setAttribute("aria-pressed", String(selectedTables.includes(Number(option.dataset.table))));
       }
+      for (const option of document.querySelectorAll(".qmode")) {
+        option.setAttribute("aria-pressed", String(option.dataset.qmode === qMode));
+      }
       const multiply = operation === "multiply";
       tablesGroup.hidden = !multiply;
       tablesLabel.hidden = !multiply;
@@ -1289,11 +1564,21 @@
       answeredCount = 0;
       round = 1;
       streak = 0;
+      geoCountdown = 3;
       updateStreak();
       updateMenuLabel();
       updateContinentUI();
       scoreDisplay.textContent = "Rigtige: 0 / 0";
       startRound();
+    }
+
+    for (const button of document.querySelectorAll(".qmode")) {
+      button.addEventListener("click", () => {
+        qMode = button.dataset.qmode;
+        try { localStorage.setItem("talbasket-spoergsmaal", qMode); } catch { /* ingen lagring */ }
+        if (document.body.dataset.screen === "play") resetGame();
+        else updateMenuLabel();
+      });
     }
 
     for (const button of operationButtons) {
@@ -1302,7 +1587,8 @@
         for (const option of operationButtons) {
           option.setAttribute("aria-pressed", String(option === button));
         }
-        resetGame();
+        if (document.body.dataset.screen === "play") resetGame();
+        else updateMenuLabel();
       });
     }
 
@@ -1317,7 +1603,8 @@
           selectedTables = [...selectedTables, table].sort((a, b) => a - b);
         }
         try { localStorage.setItem("talbasket-tabeller", JSON.stringify(selectedTables)); } catch { /* ingen lagring */ }
-        resetGame();
+        if (document.body.dataset.screen === "play") resetGame();
+        else updateMenuLabel();
       });
     }
 
@@ -1353,7 +1640,8 @@
           if (autoLevel) localStorage.removeItem("talbasket-niveau");
           else localStorage.setItem("talbasket-niveau", String(maximum));
         } catch { /* ingen lagring */ }
-        resetGame();
+        if (document.body.dataset.screen === "play") resetGame();
+        else updateMenuLabel();
       });
     }
 
@@ -1366,4 +1654,61 @@
     applyHoop();
     applyScenery();
     updateContinentUI();
-    startRound();
+
+    // ---------- Skærme: verdenskort og bane ----------
+    function leavePlay() {
+      clearTimeout(advanceTimer);
+      clearTimeout(popupTimer);
+      clearTimeout(travelTimer);
+      popupQueue = [];
+      advanceAfterPopup = false;
+      starPopup.hidden = true;
+      travelPopup.hidden = true;
+      foundPopup.hidden = true;
+      problemPopup.hidden = true;
+      cancelDrag();
+      clearShots();
+      World.closeSpot();
+      World.stopSpeech();
+    }
+
+    function showScreen(name) {
+      if (name === "home") leavePlay();
+      document.body.dataset.screen = name;
+      document.querySelector("#home").hidden = name !== "home";
+      document.querySelector("#play").hidden = name !== "play";
+      if (name === "home") World.renderHome();
+    }
+
+    function playContinent(index) {
+      currentContinent = index;
+      applyScenery();
+      showScreen("play");
+      resetGame();
+    }
+
+    document.querySelector("#toMap").addEventListener("click", () => { sfx.click(); showScreen("home"); });
+    continentBadge.addEventListener("click", () => { sfx.click(); World.openBook(CONTINENTS[currentContinent].key); });
+
+    World.init({
+      state: () => ({ unlocked: unlockedContinent, current: currentContinent, progress: continentProgress, complete: journeyDone }),
+      found: foundIn,
+      toNext: toNextCountry,
+      play: playContinent,
+      sfx: (name) => { if (sfx[name]) sfx[name](); }
+    });
+
+    // Til test: ?k=<0-6>&p=<antal rigtige i kontinentet>&spil=1 og window.__tb
+    const params = new URLSearchParams(location.search);
+    function setProgress(unlocked, progress) {
+      unlockedContinent = Math.max(0, Math.min(LAST_CONTINENT, unlocked));
+      continentProgress = Math.max(0, Math.min(goalOf(unlockedContinent) - 1, progress));
+      journeyDone = false;
+      currentContinent = unlockedContinent;
+      applyScenery();
+      updateContinentUI();
+      World.renderHome();
+    }
+    if (params.has("k")) setProgress(Number(params.get("k")) || 0, Number(params.get("p")) || 0);
+    window.__tb = { setProgress, playContinent, showScreen, makeProblem, startRound, scoreShot, get answer() { return answer; }, get isGeo() { return isGeo; }, get geoQ() { return geoQ; }, state: () => ({ unlockedContinent, continentProgress, currentContinent, journeyDone, qMode }), setMode: (mode) => { qMode = mode; }, focusGeo: (id) => { geoFocus = id; } };
+    if (params.has("spil")) playContinent(currentContinent);

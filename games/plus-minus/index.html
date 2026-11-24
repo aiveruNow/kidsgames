@@ -3,33 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#f4f8ff">
+  <meta name="theme-color" content="#0b1f3a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Talbasket">
-  <title>Talbasket — plus og minus</title>
+  <title>Talbasket — Jorden rundt</title>
   <link rel="stylesheet" href="game.css">
 </head>
-<body>
+<body data-screen="home">
+  <div id="bg" aria-hidden="true"></div>
   <main class="app">
-    <header class="topline">
-      <div class="brand">
-        <div class="brand-icon" aria-hidden="true">🏀</div>
-        <div>
-          <h1>Talbasket: plus og minus</h1>
-          <p class="subtitle">Regn stykket ud, og vælg den rigtige bold</p>
+    <section class="screen" id="home">
+      <header class="home-head">
+        <div class="home-title">
+          <span class="home-ball" aria-hidden="true">🏀</span>
+          <div>
+            <h1>Talbasket</h1>
+            <p class="sub">Skyd kurve, find lande og lær om verden</p>
+          </div>
+        </div>
+        <button class="pass" id="passBtn" type="button" aria-label="Mit rejsepas">
+          <span class="pass-ico" aria-hidden="true">🛂</span>
+          <span class="pass-txt"><b id="passCount">0</b><small id="passOf">af 0 lande</small></span>
+        </button>
+      </header>
+      <div class="map-wrap" id="mapWrap">
+        <svg id="worldMap" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Verdenskort. Tryk på et kontinent."></svg>
+      </div>
+      <div class="cont-chips" id="contChips"></div>
+      <div class="home-bottom">
+        <p class="map-hint" id="mapHint">Tryk på et kontinent for at høre og lære mere</p>
+        <div class="home-btns">
+          <button class="btn go big" id="playBtn" type="button"><span class="go-ico" aria-hidden="true"></span><span id="playBtnTxt">Spil basket</span></button>
+          <button class="btn ghost" id="bookBtn" type="button"><span id="bookBtnTxt">📖 Åbn bogen</span></button>
         </div>
       </div>
-      <div class="stats">
-        <div class="continent" id="continentBadge" aria-live="polite"></div>
+    </section>
+
+    <section class="screen" id="play" hidden>
+    <header class="hud">
+      <button class="hud-btn" id="toMap" type="button" aria-label="Tilbage til verdenskortet"><span aria-hidden="true">🗺️</span></button>
+      <button class="hud-cont" id="continentBadge" type="button" aria-live="polite"></button>
+      <div class="hud-score">
         <div class="score" id="score" aria-live="polite">Rigtige: 0 / 0</div>
       </div>
     </header>
 
     <div class="settings" id="settings" hidden>
-      <p class="menu-label">Kontinent (bane)</p>
-      <div class="control-group" id="continentGroup" role="group" aria-label="Vælg kontinent"></div>
+      <p class="menu-label">Spørgsmål</p>
+      <div class="control-group" role="group" aria-label="Vælg spørgsmål">
+        <button class="control qmode" type="button" data-qmode="mix" aria-pressed="true">Regning + geografi</button>
+        <button class="control qmode" type="button" data-qmode="math" aria-pressed="false">Kun regning</button>
+        <button class="control qmode" type="button" data-qmode="geo" aria-pressed="false">Kun geografi</button>
+      </div>
       <p class="menu-label">Regneart</p>
       <div class="control-group" role="group" aria-label="Vælg regneart">
         <button class="control operation" type="button" data-operation="add" aria-pressed="true">Plus +</button>
@@ -80,25 +107,25 @@
       </div>
     </div>
 
-    <section class="game-card" aria-label="Plus og minus-spil">
+    <section class="game-card" aria-label="Talbasket">
       <div class="game-body">
-        <p class="prompt">Hvad giver regnestykket?</p>
+        <p class="prompt" id="prompt">Hvad giver regnestykket?</p>
         <p class="hint" id="dragInstructions">Træk en bold tilbage som en slangebøsse, sigt mod kurven og slip. Rigtigt svar ryger i kurven, forkert i søen. Med tastatur: vælg en bold og tryk Enter.</p>
-        <div class="equation" aria-label="Regnestykke">
+        <div class="equation" id="equation" aria-label="Spørgsmål">
           <span class="operand" id="first"></span>
           <span class="operator" id="operator" aria-hidden="true">+</span>
           <span class="operand" id="second"></span>
           <span class="equals" aria-hidden="true">=</span>
           <span class="question-mark" aria-hidden="true">?</span>
+          <div class="geo-q" id="geoQ" hidden></div>
         </div>
         <div class="answer-tools">
           <button class="hint-toggle" id="hintToggle" type="button" aria-expanded="false" aria-controls="mathHint">💡 Vis regnehjælp</button>
           <div class="streak" id="streak" role="img" aria-label="0 rigtige i streg ud af 10">
-            <span>Rigtige i streg</span>
             <span class="streak-dots" aria-hidden="true"></span>
           </div>
         </div>
-        <div class="lake" id="lake" aria-hidden="true">
+        <div class="lake" id="lake">
           <svg viewBox="0 -12 640 282" preserveAspectRatio="xMidYMid slice" focusable="false">
             <defs>
               <linearGradient id="backboard-shade" x1="0" x2="1" y1="0" y2="1">
@@ -118,24 +145,24 @@
             </defs>
             <circle class="sun" cx="566" cy="44" r="24" fill="#ffd86b"/>
             <circle class="sun" cx="566" cy="44" r="34" fill="#ffd86b" opacity=".25"/>
-            <path d="M92 52q10-17 28-12 8-14 26-8 16 2 18 16 14 1 14 13H80q-2-9 12-9z" fill="#fff" opacity=".9"/>
-            <path d="M430 36q8-12 22-9 7-10 20-6 12 2 14 12 11 1 11 10H420q-1-6 10-7z" fill="#fff" opacity=".8"/>
+            <path class="cloud c1" d="M92 52q10-17 28-12 8-14 26-8 16 2 18 16 14 1 14 13H80q-2-9 12-9z" fill="#fff" opacity=".9"/>
+            <path class="cloud c2" d="M430 36q8-12 22-9 7-10 20-6 12 2 14 12 11 1 11 10H420q-1-6 10-7z" fill="#fff" opacity=".8"/>
+            <g id="sky" font-size="22" text-anchor="middle"></g>
             <path class="hills" d="M0 128q70-40 150-8t170-12 170 12 150-12v60H0z" fill="#a5d98f"/>
             <ellipse class="ground-a" cx="320" cy="198" rx="316" ry="70" fill="#7cc46a"/>
             <ellipse class="ground-b" cx="320" cy="196" rx="300" ry="62" fill="#5fae52"/>
-            <g id="landmarks" font-size="34" text-anchor="middle"></g>
             <g class="water-body">
               <ellipse class="water-surface" cx="320" cy="198" rx="292" ry="58" fill="url(#water-shade)" stroke="#2a78b0" stroke-width="3"/>
               <ellipse cx="250" cy="178" rx="140" ry="14" fill="#a6e1fb" opacity=".45"/>
               <g class="waves" fill="none" stroke="#e8f7ff" stroke-width="3" stroke-linecap="round" opacity=".85">
                 <path d="M70 200q10-7 20 0t20 0M170 232q10-7 20 0t20 0M450 226q10-7 20 0t20 0M520 196q10-7 20 0t20 0M390 168q9-6 18 0t18 0M130 176q9-6 18 0t18 0"/>
               </g>
-              <g fill="#3f9d4d" stroke="#2d7a3a" stroke-width="1.5">
+              <g class="lily" fill="#3f9d4d" stroke="#2d7a3a" stroke-width="1.5">
                 <ellipse cx="236" cy="222" rx="16" ry="5"/>
                 <ellipse cx="258" cy="230" rx="11" ry="3.5"/>
                 <ellipse cx="560" cy="214" rx="14" ry="4.5"/>
               </g>
-              <circle cx="236" cy="219" r="4" fill="#ffb3c7"/>
+              <circle class="lily" cx="236" cy="219" r="4" fill="#ffb3c7"/>
             </g>
             <g class="flora" stroke="#4f8a3a" stroke-width="3.5" stroke-linecap="round" fill="none">
               <path d="M28 190v-24M36 194v-32M44 192v-22M598 188v-26M606 194v-34M614 190v-22"/>
@@ -145,6 +172,7 @@
               <ellipse cx="36" cy="160" rx="3.5" ry="8"/>
               <ellipse cx="606" cy="160" rx="3.5" ry="8"/>
             </g>
+            <g id="spots"></g>
             <g id="hoopBase">
               <ellipse class="base-ripple" cx="320" cy="198" rx="40" ry="10" fill="none" stroke="#fff" stroke-width="2.5"/>
               <ellipse class="base-ripple second" cx="320" cy="198" rx="40" ry="10" fill="none" stroke="#fff" stroke-width="2"/>
@@ -174,6 +202,16 @@
             <ellipse class="ring second" cx="130" cy="214" rx="26" ry="8" fill="none" stroke="#fff" stroke-width="2.5"/>
             <g id="effects"></g>
           </svg>
+          <aside class="spot-card" id="spotCard" hidden role="dialog" aria-live="polite">
+            <button class="spot-x" id="spotClose" type="button" aria-label="Luk">✕</button>
+            <div class="spot-emoji" id="spotEmoji" aria-hidden="true"></div>
+            <div class="spot-body">
+              <p class="spot-where" id="spotWhere"></p>
+              <h3 id="spotName"></h3>
+              <p class="spot-text" id="spotText"></p>
+              <button class="spot-play" id="spotPlay" type="button"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="spotPlayTxt">Hør igen</span></button>
+            </div>
+          </aside>
         </div>
         <div class="math-hint" id="mathHint" hidden>
           <p id="hintText"></p>
@@ -188,8 +226,42 @@
         </div>
       </div>
     </section>
-    <p class="footer-note">Øv plus og minus med basketballsvar.</p>
+    </section>
   </main>
+
+  <div class="overlay" id="book" hidden>
+    <div class="card book" role="dialog" aria-modal="true" aria-labelledby="bkTitle">
+      <header class="bk-head">
+        <div class="bk-top"><p class="eyebrow" id="bkEyebrow">Kontinent</p><div class="bk-dots" id="bkDots" aria-hidden="true"></div><button class="bk-close" id="bkClose" type="button" aria-label="Luk bogen">✕</button></div>
+        <h2 id="bkTitle">Verden</h2>
+        <div class="bk-stats" id="bkStats"></div>
+        <div class="bk-row">
+          <button class="pill" id="bkIntro" type="button"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="bkIntroTxt">Hør historien</span></button>
+          <div class="bk-prog" aria-live="polite"><i id="bkProgFill"></i><span id="bkProgText"></span></div>
+        </div>
+      </header>
+      <div class="bk-body" id="bkBody">
+        <div id="bkHome"></div>
+        <section class="bk-detail" id="bkDetail" hidden></section>
+      </div>
+      <footer class="bk-foot">
+        <button class="btn go" id="bkPlay" type="button"><span class="go-ico" aria-hidden="true"></span><span id="bkPlayTxt">Spil her</span></button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="star-popup found" id="foundPopup" role="alert" hidden>
+    <div class="star-popup-card found-card">
+      <p class="eyebrow">Nyt land fundet!</p>
+      <div class="found-flag" id="foundFlag" aria-hidden="true"></div>
+      <h2 id="foundName">Land</h2>
+      <p id="foundText"></p>
+      <div class="found-btns">
+        <button class="btn go" id="foundSee" type="button">📖 Se landet</button>
+        <button class="btn ghost" id="foundGo" type="button">Videre 🏀</button>
+      </div>
+    </div>
+  </div>
 
   <button class="problem-popup" id="problemPopup" type="button" hidden>
     <span class="problem-card">
@@ -228,6 +300,10 @@
   </div>
 
   <script src="../../shared/topbar.js"></script>
+  <script src="geo.js"></script>
+  <script src="flags.js"></script>
+  <script src="map.js"></script>
+  <script src="world.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
