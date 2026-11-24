@@ -1819,7 +1819,7 @@
       $("fnTitle").textContent = W.da;
       $("fnSub").textContent = `${W.fact}.`;
       $("fnIntro").hidden = false;
-      $("faunaGo").textContent = !onDone ? "Færdig" : G.newWords.length || G.reviewWords.length ? "Videre til ordene →" : "Lad os svinge →";
+      $("faunaGo").innerHTML = !onDone ? "✔ Færdig" : `<span class="go-ico" aria-hidden="true">▶</span> Start spillet`;
       openFaunaOverlay();
       FN.ctx = "intro";
       setTimeout(() => { if (!$("fauna").hidden && FN.idx < 0 && FN.mode === "world" && FN.w === w) playIntro(); }, 600);
@@ -1835,7 +1835,7 @@
       $("fnTitle").textContent = "Vælg din abe";
       $("fnSub").textContent = "Tryk på en abe for at høre om den og vælge den.";
       $("fnIntro").hidden = true;
-      $("faunaGo").textContent = "Færdig";
+      $("faunaGo").textContent = "✔ Færdig";
       openFaunaOverlay();
     }
     function closeFauna() {

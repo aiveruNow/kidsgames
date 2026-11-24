@@ -774,7 +774,7 @@
       $("fnDots").innerHTML = WORLDS.map((_, i) => `<i class="${i === w ? "on" : ""}"></i>`).join("");
       $("fnTitle").textContent = W.da;
       $("fnSub").textContent = `${W.fact}.`;
-      $("faunaGo").textContent = !onDone ? "Færdig" : G.newWords.length || G.reviewWords.length ? "Videre til ordene →" : "Lad os svømme →";
+      $("faunaGo").innerHTML = !onDone ? "✔ Færdig" : `<span class="go-ico" aria-hidden="true">▶</span> Start spillet`;
       showFaunaGrid();
       renderFaunaGrid();
       updateFaunaProgress();
