@@ -306,6 +306,9 @@ h1 {
 }
 
 .menu-label:first-child { margin-top: 0; }
+.settings [hidden] { display: none; }
+
+.control.table { min-width: 44px; padding: 8px 10px; }
 
 .menu-footer {
   display: flex;
@@ -486,9 +489,56 @@ h1 {
   margin: 6px 0 4px;
   border: 1px solid #cfe4f3;
   border-radius: 20px;
-  background: linear-gradient(180deg, #bfe6ff 0, #eaf8ff 62%, #cfeec3 100%);
+  background: linear-gradient(180deg, var(--sky-top, #bfe6ff) 0, var(--sky-bottom, #eaf8ff) 62%, var(--sky-ground, #cfeec3) 100%);
   box-shadow: inset 0 1px 3px #fff, 0 6px 16px #2636500f;
 }
+
+.lake .sun { fill: var(--sun, #ffd86b); }
+.lake .hills { fill: var(--hills, #a5d98f); }
+.lake .ground-a { fill: var(--ground-a, #7cc46a); }
+.lake .ground-b { fill: var(--ground-b, #5fae52); }
+.lake .water-top { stop-color: var(--water-top, #7fd0f7); }
+.lake .water-bottom { stop-color: var(--water-bottom, #2f8fcb); }
+.lake[data-continent="antarktis"] .flora { display: none; }
+#landmarks text { filter: drop-shadow(0 2px 2px #0003); }
+
+.continent {
+  padding: 8px 12px;
+  border: 1px solid #dfe7f3;
+  border-radius: 14px;
+  background: #fff;
+  color: #27426f;
+  font-size: .85rem;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px #243a5a0a;
+}
+
+.continent .bar {
+  display: block;
+  height: 5px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #e3ebf6;
+}
+
+.continent .bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: #2e9e44;
+  transition: width .4s;
+}
+
+.travel-emoji {
+  font-size: clamp(90px, 28vw, 150px);
+  line-height: 1.1;
+  animation: star-spin 1.1s cubic-bezier(.2, 1.3, .4, 1);
+}
+
+.control.continent-pick[disabled] { opacity: .5; cursor: not-allowed; }
+.control.continent-pick[disabled]:hover { transform: none; border-color: #dce5f1; }
 
 .lake svg {
   display: block;
@@ -773,6 +823,7 @@ h1 {
   .brand-icon { width: 40px; height: 40px; border-radius: 12px; font-size: 23px; }
   .subtitle { max-width: 190px; font-size: .8rem; }
   .score { padding: 8px 10px; font-size: .8rem; }
+  .continent { padding: 6px 9px; font-size: .74rem; }
   .stats { flex-direction: column; align-items: flex-end; gap: 5px; }
   .streak > span:first-child { display: none; }
   .streak-dots i { width: 9px; height: 9px; }
@@ -831,6 +882,8 @@ h1 {
   }
 
   .score { padding: 7px 10px; font-size: .8rem; }
+  .continent { padding: 5px 8px; font-size: .72rem; }
+  .continent .bar { display: none; }
 
   .game-card {
     display: flex;
@@ -886,9 +939,16 @@ h1 {
   }
 }
 
+/* Stående telefon: søen får et fast billedformat, så kurven og begge vandmål (x 80–560) altid er med */
+@media (orientation: portrait) and (max-width: 1200px) {
+  .lake { flex: 0 1 auto; min-height: 0; aspect-ratio: 480 / 282; }
+  .equation, .answer-tools { flex: none; }
+}
+
 @media (orientation: landscape) and ((max-width: 1200px) or (max-height: 1100px)) {
   .topline { margin-bottom: 4px; }
   .score { padding: 5px 9px; }
+  .continent { padding: 4px 8px; }
 
   .game-body {
     display: grid;
@@ -903,6 +963,7 @@ h1 {
   .operand { width: clamp(38px, 8vh, 52px); height: clamp(38px, 8vh, 52px); }
   .question-mark { width: clamp(36px, 7.5vh, 48px); height: clamp(36px, 7.5vh, 48px); }
   .answer-tools { grid-column: 1; grid-row: 2; }
+  .streak > span:first-child { display: none; }
   .answers-title { grid-column: 1; grid-row: 3; margin: 0; }
   .answers { grid-column: 1; grid-row: 4; align-self: end; gap: 4px; margin-left: 40px; }
   .answer { min-height: 60px; }

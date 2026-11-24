@@ -1,5 +1,10 @@
     const operationButtons = [...document.querySelectorAll(".operation")];
     const difficultyButtons = [...document.querySelectorAll(".difficulty")];
+    const tableButtons = [...document.querySelectorAll(".table")];
+    const tablesGroup = document.querySelector("#tablesGroup");
+    const tablesLabel = document.querySelector("#tablesLabel");
+    const maxGroup = document.querySelector("#maxGroup");
+    const maxLabel = document.querySelector("#maxLabel");
     const firstOperand = document.querySelector("#first");
     const secondOperand = document.querySelector("#second");
     const operatorDisplay = document.querySelector("#operator");
@@ -96,6 +101,40 @@
     };
 
     let operation = "add";
+    const OPERATORS = { add: ["+", "plus"], subtract: ["−", "minus"], multiply: ["×", "gange"] };
+    const opSign = () => OPERATORS[operation][0];
+    const opName = () => OPERATORS[operation][1];
+    let selectedTables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    try {
+      const saved = JSON.parse(localStorage.getItem("talbasket-tabeller"));
+      if (Array.isArray(saved)) {
+        const valid = selectedTables.filter(table => saved.includes(table));
+        if (valid.length) selectedTables = valid;
+      }
+    } catch { /* ingen lagring */ }
+
+    // Baner: hvert kontinent kræver CONTINENT_GOAL rigtige svar, før man rejser videre
+    const CONTINENT_GOAL = 30;
+    const CONTINENTS = [
+      { key: "europa", name: "Europa", emoji: "🗼", landmarks: ["🏰", "🗼", "🌷"], theme: {} },
+      { key: "afrika", name: "Afrika", emoji: "🐘", landmarks: ["🐘", "🌴", "🦒"], theme: { "sky-top": "#ffe2a8", "sky-bottom": "#fff3d6", "sky-ground": "#f6dca0", sun: "#ff9f1c", hills: "#e6c76f", "ground-a": "#d9a74e", "ground-b": "#c28d3a", "water-top": "#8fd6d0", "water-bottom": "#3a9aa3" } },
+      { key: "asien", name: "Asien", emoji: "🏯", landmarks: ["🎋", "🏯", "🐼"], theme: { "sky-top": "#ffd0dc", "sky-bottom": "#fff0f4", "sky-ground": "#e3f2c4", sun: "#ff6b6b", hills: "#b9d98a", "ground-a": "#8cc16a", "ground-b": "#6aa650", "water-top": "#8fd9d6", "water-bottom": "#2f9a9a" } },
+      { key: "nordamerika", name: "Nordamerika", emoji: "🗽", landmarks: ["🌲", "🗽", "🦅"], theme: { "sky-top": "#cfe3ff", "sky-bottom": "#f0f6ff", "sky-ground": "#d5ecd0", hills: "#8fc78a", "ground-a": "#6fae6a", "ground-b": "#539a52", "water-top": "#7fc3f0", "water-bottom": "#2f7fc0" } },
+      { key: "sydamerika", name: "Sydamerika", emoji: "🦜", landmarks: ["🌴", "🦜", "🐆"], theme: { "sky-top": "#c8f0c0", "sky-bottom": "#eaffe0", "sky-ground": "#bfe8b0", hills: "#6fc46a", "ground-a": "#3fa85a", "ground-b": "#2f8f48", "water-top": "#6fd6b0", "water-bottom": "#2a9a78" } },
+      { key: "australien", name: "Australien", emoji: "🦘", landmarks: ["🦘", "🏝️", "🐨"], theme: { "sky-top": "#ffd9b0", "sky-bottom": "#fff0dc", "sky-ground": "#f4d2a8", sun: "#ff8c42", hills: "#e0a86a", "ground-a": "#d98c4a", "ground-b": "#c0733a", "water-top": "#6fd2f0", "water-bottom": "#2a95c8" } },
+      { key: "antarktis", name: "Antarktis", emoji: "🐧", landmarks: ["🧊", "🐧", "❄️"], theme: { "sky-top": "#d6ecff", "sky-bottom": "#f6fbff", "sky-ground": "#ffffff", sun: "#fff3b0", hills: "#eef6fb", "ground-a": "#ffffff", "ground-b": "#dcecf7", "water-top": "#9fdcf5", "water-bottom": "#4aa3d6" } }
+    ];
+    const LAST_CONTINENT = CONTINENTS.length - 1;
+    let unlockedContinent = 0;
+    let continentProgress = 0;
+    let currentContinent = 0;
+    let pendingTravel = false;
+    try {
+      unlockedContinent = Math.min(LAST_CONTINENT, Math.max(0, Math.floor(Number(localStorage.getItem("talbasket-kontinent")) || 0)));
+      continentProgress = Math.max(0, Math.floor(Number(localStorage.getItem("talbasket-kontinent-point")) || 0)) % CONTINENT_GOAL;
+    } catch { /* ingen lagring */ }
+    currentContinent = unlockedContinent;
+
     // Niveauet stiger automatisk med 10 for hver optjent stjerne (op til 100), men kan låses i menuen
     const LEVEL_STEP = 10;
     const LEVEL_CAP = 100;
@@ -146,6 +185,11 @@
       clearTimeout(popupTimer);
       starPopup.hidden = true;
       for (const sparkle of starPopup.querySelectorAll(".sparkle")) sparkle.remove();
+      if (pendingTravel) {
+        pendingTravel = false;
+        showTravelPopup();
+        return;
+      }
       if (advanceAfterPopup) goToNextQuestion();
     }
 
@@ -178,8 +222,7 @@
       stars++;
       try { localStorage.setItem("talbasket-stars", String(stars)); } catch { /* ingen lagring */ }
       levelUpMessage = "";
-      if (autoLevel) {
-        const before = maximum;
+      if (autoLevel && operation !== "multiply") {
         levelSteps++;
         try { localStorage.setItem("talbasket-trin", String(levelSteps)); } catch { /* ingen lagring */ }
         maximum = autoMaximum();
@@ -190,10 +233,110 @@
       setTimeout(showStarPopup, reducedMotion ? 0 : 1600);
     }
 
+    const popupDelay = () => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1600);
+    const travelPopup = document.querySelector("#travelPopup");
+    const continentBadge = document.querySelector("#continentBadge");
+    const continentGroup = document.querySelector("#continentGroup");
+    const landmarkLayer = document.querySelector("#landmarks");
+    const LANDMARK_SPOTS = [[170, 138, 32], [470, 138, 32], [235, 112, 22]];
+    let travelTimer = null;
+
+    for (const [index, continent] of CONTINENTS.entries()) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "control continent-pick";
+      button.textContent = `${continent.emoji} ${continent.name}`;
+      button.addEventListener("click", () => {
+        if (index > unlockedContinent) return;
+        currentContinent = index;
+        applyScenery();
+        resetGame();
+      });
+      continentGroup.append(button);
+    }
+
+    function applyScenery() {
+      const continent = CONTINENTS[currentContinent];
+      for (const key of ["sky-top", "sky-bottom", "sky-ground", "sun", "hills", "ground-a", "ground-b", "water-top", "water-bottom"]) {
+        if (continent.theme[key]) lake.style.setProperty(`--${key}`, continent.theme[key]);
+        else lake.style.removeProperty(`--${key}`);
+      }
+      lake.dataset.continent = continent.key;
+      landmarkLayer.replaceChildren(...continent.landmarks.map((emoji, index) => {
+        const [x, y, size] = LANDMARK_SPOTS[index];
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", x);
+        text.setAttribute("y", y);
+        text.setAttribute("font-size", size);
+        text.textContent = emoji;
+        return text;
+      }));
+    }
+
+    function updateContinentUI() {
+      const continent = CONTINENTS[currentContinent];
+      const counting = currentContinent === unlockedContinent && unlockedContinent < LAST_CONTINENT;
+      continentBadge.innerHTML = counting
+        ? `${continent.emoji} ${continent.name} ${continentProgress}/${CONTINENT_GOAL}<span class="bar"><i style="width:${continentProgress / CONTINENT_GOAL * 100}%"></i></span>`
+        : `${continent.emoji} ${continent.name}`;
+      continentBadge.setAttribute("aria-label", counting
+        ? `${continent.name}: ${continentProgress} af ${CONTINENT_GOAL} rigtige til næste kontinent`
+        : continent.name);
+      [...continentGroup.children].forEach((button, index) => {
+        const locked = index > unlockedContinent;
+        button.disabled = locked;
+        button.setAttribute("aria-pressed", String(index === currentContinent));
+        button.textContent = `${locked ? "🔒" : CONTINENTS[index].emoji} ${CONTINENTS[index].name}`;
+      });
+    }
+
+    // Returnerer true, når et rigtigt svar åbner det næste kontinent
+    function addContinentProgress() {
+      if (currentContinent !== unlockedContinent || unlockedContinent >= LAST_CONTINENT) return false;
+      continentProgress++;
+      let traveled = false;
+      if (continentProgress >= CONTINENT_GOAL) {
+        unlockedContinent++;
+        currentContinent = unlockedContinent;
+        continentProgress = 0;
+        traveled = true;
+      }
+      try {
+        localStorage.setItem("talbasket-kontinent", String(unlockedContinent));
+        localStorage.setItem("talbasket-kontinent-point", String(continentProgress));
+      } catch { /* ingen lagring */ }
+      return traveled;
+    }
+
+    function showTravelPopup() {
+      const continent = CONTINENTS[currentContinent];
+      applyScenery();
+      updateContinentUI();
+      document.querySelector("#travelEmoji").textContent = continent.emoji;
+      document.querySelector("#travelTitle").textContent = `Du rejser til ${continent.name}!`;
+      document.querySelector("#travelText").textContent = currentContinent === LAST_CONTINENT
+        ? `Sidste stop på jorden rundt-turen! 🌍`
+        : `${CONTINENT_GOAL} rigtige – en ny bane er låst op 🏀`;
+      travelPopup.hidden = false;
+      clearTimeout(travelTimer);
+      travelTimer = setTimeout(hideTravelPopup, 5000);
+      sfx.fanfare();
+    }
+
+    function hideTravelPopup() {
+      if (travelPopup.hidden) return;
+      clearTimeout(travelTimer);
+      travelPopup.hidden = true;
+      if (advanceAfterPopup) goToNextQuestion();
+    }
+
+    travelPopup.addEventListener("click", hideTravelPopup);
+
     starPopup.addEventListener("click", hideStarPopup);
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && !starPopup.hidden) hideStarPopup();
       if (event.key === "Escape" && !problemPopup.hidden) hideProblemPopup();
+      if (event.key === "Escape" && !travelPopup.hidden) hideTravelPopup();
     });
     updateStreak();
     let round = 1;
@@ -205,7 +348,17 @@
     }
 
     function makeProblem() {
-      if (operation === "add") {
+      if (operation === "multiply") {
+        // Undgå at få præcis samme stykke to gange i træk
+        let table, factor;
+        do {
+          table = selectedTables[Math.floor(Math.random() * selectedTables.length)];
+          factor = randomInteger(10);
+        } while (table === first && factor === second);
+        first = table;
+        second = factor;
+        answer = first * second;
+      } else if (operation === "add") {
         first = randomInteger(maximum - 1);
         second = randomInteger(Math.min(MAX_TERM, maximum - first));
         answer = first + second;
@@ -217,17 +370,47 @@
 
       firstOperand.textContent = first;
       secondOperand.textContent = second;
-      operatorDisplay.textContent = operation === "add" ? "+" : "−";
-      operatorDisplay.setAttribute("aria-label", operation === "add" ? "plus" : "minus");
+      operatorDisplay.textContent = opSign();
+      operatorDisplay.setAttribute("aria-label", opName());
     }
 
     function makeChoices() {
       const choices = new Set([answer]);
-      while (choices.size < 4) choices.add(Math.floor(Math.random() * (maximum + 1)));
+      if (operation === "multiply") {
+        // Lokkende fejlsvar: nabo-produkter i samme tabel og med byttede tal
+        const near = [answer - first, answer + first, answer - second, answer + second, answer - 1, answer + 1, (first + 1) * second, (second + 1) * first]
+          .filter(value => value >= 0 && value !== answer);
+        for (const value of near.sort(() => Math.random() - 0.5)) {
+          if (choices.size >= 4) break;
+          choices.add(value);
+        }
+        while (choices.size < 4) choices.add(Math.floor(Math.random() * 101));
+      } else {
+        while (choices.size < 4) choices.add(Math.floor(Math.random() * (maximum + 1)));
+      }
       return [...choices].sort(() => Math.random() - 0.5);
     }
 
+    function updateMultiplyHint() {
+      hintText.textContent = `Tæl i spring af ${first}, ${second} gange: ${first} × ${second} er ${second} ${second === 1 ? "gang" : "gange"} ${first}.`;
+      numberLine.setAttribute("aria-label", `Tæl i spring af ${first} i ${second} gange. Svaret er ${answer}.`);
+      const slot = Math.min(62, 600 / second);
+      const startX = (640 - slot * second) / 2;
+      let chips = "";
+      for (let i = 1; i <= second; i++) {
+        const centerX = startX + slot * (i - 0.5);
+        const delay = (0.4 + (i - 1) * 0.7).toFixed(1);
+        const isLast = i === second;
+        const size = second > 7 ? 18 : 24;
+        chips += `
+          <rect class="finger" x="${(centerX - slot * .42).toFixed(1)}" y="22" width="${(slot * .84).toFixed(1)}" height="64" rx="14" fill="${isLast ? "#d9f7e6" : "#e8f1ff"}" stroke="${isLast ? "#2e9e44" : "#9ab8e9"}" stroke-width="2.5" style="animation-delay:${delay}s"/>
+          <text class="count-num" x="${centerX.toFixed(1)}" y="64" text-anchor="middle" font-size="${size}" font-weight="900" fill="${isLast ? "#13804f" : "#2764c5"}" font-family="Trebuchet MS, sans-serif" style="animation-delay:${delay}s">${first * i}</text>`;
+      }
+      numberLine.innerHTML = `<title>Tæl i spring af ${first}</title>${chips}`;
+    }
+
     function updateHint() {
+      if (operation === "multiply") { updateMultiplyHint(); return; }
       const isAddition = operation === "add";
       // Største tal i hovedet, mindste tal på fingrene, og så tælles der op (plus) eller ned (minus)
       const head = isAddition ? Math.max(first, second) : first;
@@ -263,9 +446,8 @@
 
     function showProblemPopup() {
       Topbar.closeMenu();
-      const sign = operation === "add" ? "+" : "−";
-      problemEq.innerHTML = `<span class="n">${first}</span><span class="op">${sign}</span><span class="n">${second}</span><span class="eqs">=</span><span class="n q">?</span>`;
-      problemPopup.setAttribute("aria-label", `Regnestykke: ${first} ${operation === "add" ? "plus" : "minus"} ${second}. Tryk for at starte.`);
+      problemEq.innerHTML = `<span class="n">${first}</span><span class="op">${opSign()}</span><span class="n">${second}</span><span class="eqs">=</span><span class="n q">?</span>`;
+      problemPopup.setAttribute("aria-label", `Regnestykke: ${first} ${opName()} ${second}. Tryk for at starte.`);
       problemPopup.hidden = false;
       problemPopup.focus({ preventScroll: true });
       sfx.pop();
@@ -414,8 +596,12 @@
       const rim = hoop.querySelector(".rim-target").getBoundingClientRect();
       const water = lake.querySelector(".water-surface").getBoundingClientRect();
       const rimY = rim.top + rim.height / 2;
+      // Pixel pr. billedenhed og ringens midte uden sidebevægelse, så kurvens plads kan regnes ud til ethvert tidspunkt
+      const pixelsPerUnit = rim.width / (68 * hoopScale());
+      const restX = rim.left + rim.width / 2 - pixelsPerUnit * hoopOffset(performance.now());
       return {
         rimX: rim.left + rim.width / 2,
+        rimXAt: time => restX + pixelsPerUnit * hoopOffset(time),
         rimY,
         rimHalf: rim.width / 2,
         netBottom: rimY + rim.width * .7,
@@ -428,7 +614,8 @@
       return ((x - water.x) / water.rx) ** 2 + ((y - water.y) / water.ry) ** 2 <= 1;
     }
 
-    function simulate(start, velocity, geo, { detectHoop = true, maxTime = 4, tolerance = geo.rimHalf * .85 } = {}) {
+    // clock er tidspunktet (ms) hvor bolden forlader hånden; kurven kan nemlig bevæge sig, mens bolden er i luften
+    function simulate(start, velocity, geo, { detectHoop = true, maxTime = 4, tolerance = geo.rimHalf * .85, clock = performance.now() } = {}) {
       let { x, y } = start;
       let { vx, vy } = velocity;
       const points = [{ x, y }];
@@ -443,10 +630,12 @@
 
         if (detectHoop && vy > 0 && previousY < geo.rimY && y >= geo.rimY) {
           const crossX = previousX + (x - previousX) * (geo.rimY - previousY) / (y - previousY);
-          if (Math.abs(crossX - geo.rimX) <= tolerance) {
+          const center = geo.rimXAt(clock + time * 1000);
+          if (Math.abs(crossX - center) <= tolerance) {
             points.push({ x: crossX, y: geo.rimY });
             result.hit = true;
             result.crossX = crossX;
+            result.center = center;
             return result;
           }
         }
@@ -461,13 +650,13 @@
       return result;
     }
 
-    function launchVelocity(drag, pull) {
+    function launchVelocity(drag, pull, clock) {
       const velocity = { vx: -pull.x * drag.speedPerPixel, vy: -pull.y * drag.speedPerPixel };
       // Kurven trækker i kastet: er bolden tæt på, drejes den ind mod midten af ringen
-      const rough = simulate(drag.start, velocity, drag.geo, { tolerance: drag.geo.rimHalf * HOOP_MAGNET });
+      const rough = simulate(drag.start, velocity, drag.geo, { tolerance: drag.geo.rimHalf * HOOP_MAGNET, clock });
       if (rough.hit) {
         const flightTime = (rough.points.length - 1) * SIM_STEP;
-        velocity.vx += (drag.geo.rimX - rough.crossX) * .9 / flightTime;
+        velocity.vx += (rough.center - rough.crossX) * .9 / flightTime;
       }
       return velocity;
     }
@@ -499,7 +688,8 @@
 
       if (Math.hypot(drag.pull.x, drag.pull.y) < MIN_PULL) return;
 
-      const preview = simulate(drag.start, launchVelocity(drag, drag.pull), drag.geo, { maxTime: 1.3 });
+      const clock = performance.now();
+      const preview = simulate(drag.start, launchVelocity(drag, drag.pull, clock), drag.geo, { maxTime: 1.3, clock });
       const stride = 5;
       for (let index = stride; index < preview.points.length; index += stride) {
         const point = preview.points[index];
@@ -624,32 +814,91 @@
       }
     }
 
+    // Kurvens størrelse og afstand (længere væk = mindre og højere oppe) styres med en transformation på #hoop
+    const HOOP_DISTANCES = [{ shift: 0, scale: 1 }, { shift: 22, scale: .88 }, { shift: 40, scale: .78 }];
+    const hoopBase = document.querySelector("#hoopBase");
+    const hoopSizeButtons = [...document.querySelectorAll(".hoop-size")];
+    const hoopDistanceButtons = [...document.querySelectorAll(".hoop-distance")];
+    let hoopSize = 1;
+    let hoopDistance = 0;
+    try {
+      const savedSize = Number(localStorage.getItem("talbasket-kurv-stoerrelse"));
+      if (hoopSizeButtons.some(button => Number(button.dataset.size) === savedSize)) hoopSize = savedSize;
+      const savedDistance = Number(localStorage.getItem("talbasket-kurv-afstand"));
+      if (HOOP_DISTANCES[savedDistance]) hoopDistance = savedDistance;
+    } catch { /* ingen lagring */ }
+
+    const hoopScale = () => hoopSize * HOOP_DISTANCES[hoopDistance].scale;
+    // Sidebevægelse i billedenheder: en rolig sinuskurve, der kun afhænger af uret, så kast kan forudsige hvor kurven er
+    const HOOP_MOTIONS = [{ amplitude: 0, period: 1 }, { amplitude: 24, period: 4200 }, { amplitude: 46, period: 3000 }];
+    const hoopMotionButtons = [...document.querySelectorAll(".hoop-motion")];
+    let hoopMotion = 0;
+    try {
+      const savedMotion = Number(localStorage.getItem("talbasket-kurv-bevaegelse"));
+      if (HOOP_MOTIONS[savedMotion]) hoopMotion = savedMotion;
+    } catch { /* ingen lagring */ }
+    const hoopOffset = time => {
+      const { amplitude, period } = HOOP_MOTIONS[hoopMotion];
+      return amplitude && !prefersReducedMotion() ? amplitude * Math.sin(2 * Math.PI * time / period) : 0;
+    };
+    // Omregner et punkt i kurvens egne koordinater til billedets koordinater
+    const hoopToScene = (x, y) => ({
+      x: 320 + hoopOffset(performance.now()) + (x - 320) * hoopScale(),
+      y: 198 - HOOP_DISTANCES[hoopDistance].shift + (y - 198) * hoopScale()
+    });
+
+    let hoopFrame = 0;
+    function renderHoop() {
+      const transform = `translate(${320 + hoopOffset(performance.now())} ${198 - HOOP_DISTANCES[hoopDistance].shift}) scale(${hoopScale()}) translate(-320 -198)`;
+      hoop.setAttribute("transform", transform);
+      hoopBase.setAttribute("transform", transform);
+    }
+
+    function hoopLoop() {
+      renderHoop();
+      hoopFrame = requestAnimationFrame(hoopLoop);
+    }
+
+    function applyHoop() {
+      cancelAnimationFrame(hoopFrame);
+      hoopFrame = 0;
+      renderHoop();
+      if (HOOP_MOTIONS[hoopMotion].amplitude && !prefersReducedMotion()) hoopFrame = requestAnimationFrame(hoopLoop);
+      for (const button of hoopSizeButtons) button.setAttribute("aria-pressed", String(Number(button.dataset.size) === hoopSize));
+      hoopDistanceButtons.forEach((button, index) => button.setAttribute("aria-pressed", String(index === hoopDistance)));
+      hoopMotionButtons.forEach((button, index) => button.setAttribute("aria-pressed", String(index === hoopMotion)));
+    }
+
     // Bolden falder gennem nettet, så man tydeligt ser at den er i kurven
     function playBasket(clientX, clientY, label, radius) {
       showScored();
       if (prefersReducedMotion()) return;
 
+      const scale = hoopScale();
+      const localRadius = radius / scale;
       const start = clientToSvg(clientX, clientY);
-      const startX = Math.max(298, Math.min(342, start.x));
+      const startX = Math.max(298, Math.min(342, 320 + (start.x - 320 - hoopOffset(performance.now())) / scale));
       const netBall = document.createElementNS(SVG_NS, "g");
       netBall.setAttribute("class", "net-ball");
-      netBall.innerHTML = ballMarkup(radius, label);
+      netBall.innerHTML = ballMarkup(localRadius, label);
       hoop.querySelector(".net-lines").before(netBall);
 
-      burstStars(320, 78);
-      popText(320, 66, "KURV!", "#ff8a00");
+      const top = hoopToScene(320, 78);
+      burstStars(top.x, top.y);
+      popText(top.x, top.y - 12 * scale, "KURV!", "#ff8a00");
 
       const midX = (startX + 320) / 2;
       netBall.animate([
         { transform: `translate(${startX}px, 74px) scale(1, 1) rotate(0deg)` },
         { transform: `translate(${midX}px, 98px) scale(.97, 1.05) rotate(45deg)`, offset: .28 },
         { transform: `translate(320px, 122px) scale(.9, 1.14) rotate(95deg)`, offset: .55 },
-        { transform: `translate(320px, ${130 + radius}px) scale(1, 1) rotate(140deg)`, offset: .7 },
+        { transform: `translate(320px, ${130 + localRadius}px) scale(1, 1) rotate(140deg)`, offset: .7 },
         { transform: `translate(320px, 200px) scale(.9, .9) rotate(230deg)`, opacity: 1, offset: .94 },
         { transform: `translate(320px, 206px) scale(.5, .5) rotate(250deg)`, opacity: 0 }
       ], { duration: 1300, easing: "ease-in" }).onfinish = () => {
         netBall.remove();
-        splashAtSvg(320, 206);
+        const bottom = hoopToScene(320, 206);
+        splashAtSvg(bottom.x, bottom.y);
       };
     }
 
@@ -736,10 +985,10 @@
       }, total * .35);
     }
 
-    function buildShot(start, velocity, geo, isCorrect) {
-      const trajectory = simulate(start, velocity, geo);
+    function buildShot(start, velocity, geo, isCorrect, clock) {
+      const trajectory = simulate(start, velocity, geo, { clock });
       const points = trajectory.points;
-      const shot = { points, kind: "miss", splash: null, hitIndex: -1 };
+      const shot = { points, kind: "miss", splash: null, hitIndex: -1, clock };
 
       if (trajectory.hit) {
         const hit = points[points.length - 1];
@@ -748,7 +997,7 @@
           shot.kind = "basket";
         } else {
           shot.kind = "bounce";
-          const direction = Math.abs(hit.x - geo.rimX) < 3 ? (Math.random() < .5 ? -1 : 1) : Math.sign(hit.x - geo.rimX);
+          const direction = Math.abs(hit.x - trajectory.center) < 3 ? (Math.random() < .5 ? -1 : 1) : Math.sign(hit.x - trajectory.center);
           const bounce = simulate(hit, { vx: direction * 170, vy: -220 }, geo, { detectHoop: false, maxTime: 3 });
           points.push(...bounce.points.slice(1));
           shot.splash = points[points.length - 1];
@@ -791,33 +1040,58 @@
       const { ball, size, flightScale } = drag;
       ball.classList.remove("dragged-ball");
       ball.classList.add("flying-ball");
-      const startTime = performance.now();
-      flight = { frame: 0 };
+      const startTime = shot.clock;
+      flight = { frame: 0, startedAt: performance.now() };
 
       const step = now => {
-        const elapsed = (now - startTime) / 1000;
-        const index = Math.min(shot.points.length - 1, Math.floor(elapsed / SIM_STEP));
-        // Forkert bold: ringen klinger, når bolden rammer den (kun én gang)
-        if (shot.kind === "bounce" && !shot.clanged && index >= shot.hitIndex) {
-          shot.clanged = true;
-          sfx.clang();
-        }
-        const point = shot.points[index];
-        const shrinkIn = Math.min(1, elapsed / .15);
-        const scale = (1 - (1 - flightScale) * shrinkIn) * (point.shrink || 1);
-        ball.style.left = `${point.x - size / 2}px`;
-        ball.style.top = `${point.y - size / 2}px`;
-        ball.style.opacity = point.fade ?? 1;
-        ball.style.transform = `scale(${scale}) rotate(${elapsed * 540}deg)`;
+        try {
+          const elapsed = Math.max(0, (now - startTime) / 1000);
+          const index = Math.min(shot.points.length - 1, Math.floor(elapsed / SIM_STEP));
+          // Forkert bold: ringen klinger, når bolden rammer den (kun én gang)
+          if (shot.kind === "bounce" && !shot.clanged && index >= shot.hitIndex) {
+            shot.clanged = true;
+            sfx.clang();
+          }
+          const point = shot.points[index];
+          const shrinkIn = Math.min(1, elapsed / .15);
+          const scale = (1 - (1 - flightScale) * shrinkIn) * (point.shrink || 1);
+          ball.style.left = `${point.x - size / 2}px`;
+          ball.style.top = `${point.y - size / 2}px`;
+          ball.style.opacity = point.fade ?? 1;
+          ball.style.transform = `scale(${scale}) rotate(${elapsed * 540}deg)`;
 
-        if (index >= shot.points.length - 1) finishFlight(drag, shot);
-        else flight.frame = requestAnimationFrame(step);
+          if (index >= shot.points.length - 1) finishFlight(drag, shot);
+          else flight.frame = requestAnimationFrame(step);
+        } catch (error) {
+          // En fejl i animationen må aldrig efterlade en bold i luften, som blokerer for næste skud
+          console.error(error);
+          ball.remove();
+          drag.button.classList.remove("is-dragging");
+          flight = null;
+        }
       };
       flight.frame = requestAnimationFrame(step);
     }
 
+    function cancelDrag() {
+      if (!activeDrag) return;
+      activeDrag.button.classList.remove("is-dragging");
+      activeDrag.ball.remove();
+      activeDrag = null;
+      clearAim();
+    }
+
     function beginDrag(event, button, choice) {
-      if (!event.isPrimary || event.button !== 0 || button.disabled || activeDrag || flight) return;
+      if (!event.isPrimary || event.button !== 0 || button.disabled) return;
+      // Et skud tager under to sekunder; hænger det længere, ryddes det, så næste træk kan starte
+      if (flight && performance.now() - flight.startedAt > 5000) {
+        cancelAnimationFrame(flight.frame);
+        for (const stale of document.querySelectorAll(".flying-ball")) stale.remove();
+        flight = null;
+      }
+      if (flight) return;
+      // Et tidligere træk, der aldrig fik sin slip-hændelse, må ikke blokere for et nyt
+      cancelDrag();
 
       const ballSource = button.querySelector(".ball");
       const bounds = ballSource.getBoundingClientRect();
@@ -860,7 +1134,11 @@
         speedPerPixel: maxSpeed / maxPull
       };
       button.classList.add("is-dragging");
-      button.setPointerCapture(event.pointerId);
+      try { button.setPointerCapture(event.pointerId); } catch { /* pegeren er allerede væk */ }
+      // Mister knappen fingeren (fx kantsvip eller systemgestus), afbrydes trækket i stedet for at hænge
+      button.addEventListener("lostpointercapture", () => {
+        if (activeDrag && activeDrag.button === button && activeDrag.pointerId === event.pointerId && !activeDrag.released) cancelDrag();
+      }, { once: true });
       feedback.className = "feedback";
       feedback.textContent = "Træk bolden tilbage, sigt mod kurven og slip.";
     }
@@ -869,8 +1147,12 @@
       if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
 
       const drag = activeDrag;
-      let pullX = event.clientX - drag.origin.x;
-      let pullY = event.clientY - drag.origin.y;
+      // Bolden holdes inden for skærmen, så den aldrig forsvinder ud over kanten
+      const half = drag.size / 2;
+      const centerX = Math.min(window.innerWidth - half, Math.max(half, drag.start.x + event.clientX - drag.origin.x));
+      const centerY = Math.min(window.innerHeight - half, Math.max(half, drag.start.y + event.clientY - drag.origin.y));
+      let pullX = centerX - drag.start.x;
+      let pullY = centerY - drag.start.y;
       const length = Math.hypot(pullX, pullY);
       if (length > drag.maxPull) {
         pullX *= drag.maxPull / length;
@@ -891,6 +1173,7 @@
       if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
 
       const drag = activeDrag;
+      drag.released = true;
       activeDrag = null;
       clearAim();
       ignoreNextClick = true;
@@ -904,17 +1187,23 @@
       }
 
       const start = { ...drag.start };
-      const shot = buildShot(start, launchVelocity(drag, drag.pull), drag.geo, drag.choice === answer);
+      const clock = performance.now();
+      const shot = buildShot(start, launchVelocity(drag, drag.pull, clock), drag.geo, drag.choice === answer, clock);
       playFlight(drag, shot);
     });
 
     document.addEventListener("pointercancel", event => {
       if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
-      activeDrag.button.classList.remove("is-dragging");
-      activeDrag.ball.remove();
-      activeDrag = null;
-      clearAim();
+      cancelDrag();
     });
+    // Højreklik, fanebladsskift, vinduesfokus og skærmdrejning sluger slip-hændelsen og ville ellers lade bolden hænge
+    document.addEventListener("contextmenu", event => {
+      if (activeDrag || event.target.closest?.(".answer")) event.preventDefault();
+      cancelDrag();
+    });
+    window.addEventListener("blur", cancelDrag);
+    window.addEventListener("resize", cancelDrag);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) cancelDrag(); });
 
     function submitShot(selectedButton, choice) {
       animateShot(selectedButton, choice === answer);
@@ -927,7 +1216,7 @@
       if (isCorrect) correctCount++;
 
       feedback.className = "feedback";
-      const equation = `${first} ${operation === "add" ? "+" : "−"} ${second} = ${answer}`;
+      const equation = `${first} ${opSign()} ${second} = ${answer}`;
       if (isCorrect) {
         for (const button of answerContainer.querySelectorAll(".answer")) {
           button.disabled = true;
@@ -944,8 +1233,16 @@
 
       if (isCorrect) {
         streak++;
-        if (streak % STREAK_GOAL === 0) {
-          awardStar();
+        const starEarned = streak % STREAK_GOAL === 0;
+        const traveled = addContinentProgress();
+        if (starEarned) awardStar();
+        if (traveled) {
+          if (starEarned) pendingTravel = true;
+          else setTimeout(showTravelPopup, popupDelay());
+        } else {
+          updateContinentUI();
+        }
+        if (starEarned || traveled) {
           advanceAfterPopup = true;
         } else {
           sfx.streak(streak);
@@ -975,6 +1272,14 @@
         const pressed = autoLevel ? option.dataset.max === "auto" : Number(option.dataset.max) === maximum;
         option.setAttribute("aria-pressed", String(pressed));
       }
+      for (const option of tableButtons) {
+        option.setAttribute("aria-pressed", String(selectedTables.includes(Number(option.dataset.table))));
+      }
+      const multiply = operation === "multiply";
+      tablesGroup.hidden = !multiply;
+      tablesLabel.hidden = !multiply;
+      maxGroup.hidden = multiply;
+      maxLabel.hidden = multiply;
     }
 
     Topbar.init({ kid: "ari", controls: [settings] });
@@ -986,6 +1291,7 @@
       streak = 0;
       updateStreak();
       updateMenuLabel();
+      updateContinentUI();
       scoreDisplay.textContent = "Rigtige: 0 / 0";
       startRound();
     }
@@ -999,6 +1305,45 @@
         resetGame();
       });
     }
+
+    for (const button of tableButtons) {
+      button.addEventListener("click", () => {
+        const table = Number(button.dataset.table);
+        if (selectedTables.includes(table)) {
+          // Mindst én tabel skal altid være valgt
+          if (selectedTables.length === 1) return;
+          selectedTables = selectedTables.filter(value => value !== table);
+        } else {
+          selectedTables = [...selectedTables, table].sort((a, b) => a - b);
+        }
+        try { localStorage.setItem("talbasket-tabeller", JSON.stringify(selectedTables)); } catch { /* ingen lagring */ }
+        resetGame();
+      });
+    }
+
+    for (const button of hoopSizeButtons) {
+      button.addEventListener("click", () => {
+        hoopSize = Number(button.dataset.size);
+        try { localStorage.setItem("talbasket-kurv-stoerrelse", String(hoopSize)); } catch { /* ingen lagring */ }
+        applyHoop();
+      });
+    }
+
+    hoopDistanceButtons.forEach((button, index) => {
+      button.addEventListener("click", () => {
+        hoopDistance = index;
+        try { localStorage.setItem("talbasket-kurv-afstand", String(hoopDistance)); } catch { /* ingen lagring */ }
+        applyHoop();
+      });
+    });
+
+    hoopMotionButtons.forEach((button, index) => {
+      button.addEventListener("click", () => {
+        hoopMotion = index;
+        try { localStorage.setItem("talbasket-kurv-bevaegelse", String(hoopMotion)); } catch { /* ingen lagring */ }
+        applyHoop();
+      });
+    });
 
     for (const button of difficultyButtons) {
       button.addEventListener("click", () => {
@@ -1018,4 +1363,7 @@
     });
 
     updateMenuLabel();
+    applyHoop();
+    applyScenery();
+    updateContinentUI();
     startRound();

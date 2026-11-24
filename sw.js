@@ -1,4 +1,4 @@
-const CACHE = "regnespil-v2.1.5";
+const CACHE = "regnespil-v2.1.13";
 
 // Listen over filer der gemmes til offline laves af tools\build-precache.mjs (kører i opdater.ps1)
 importScripts("precache.js");
