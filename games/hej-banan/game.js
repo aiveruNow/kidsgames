@@ -1832,7 +1832,7 @@
       $("fnTitle").textContent = W.da;
       $("fnSub").textContent = `${W.fact}.`;
       $("fnIntro").hidden = false;
-      $("faunaGo").innerHTML = !onDone ? "✔ Færdig" : `<span class="go-ico" aria-hidden="true">▶</span> Start spillet`;
+      $("faunaGo").innerHTML = !onDone ? "✔ Færdig" : `<span class="go-ico" aria-hidden="true"></span> Start spillet`;
       openFaunaOverlay();
       FN.ctx = "intro";
       setTimeout(() => { if (!$("fauna").hidden && FN.idx < 0 && FN.mode === "world" && FN.w === w) playIntro(); }, 600);
