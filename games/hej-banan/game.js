@@ -637,6 +637,7 @@
       const target = m.x - WV * .32;
       if (m.back) camX = Math.max(0, camX + (m.x - WV * .45 - camX) * Math.min(1, dt * 5));
       else if (target > camX) camX += (target - camX) * Math.min(1, dt * 3.5);
+      else if (m.x < camX + WV * .2) camX = Math.max(0, camX + (m.x - WV * .2 - camX) * Math.min(1, dt * 6)); // aben svinger til venstre: kameraet følger med
     }
 
     // Støv ved fødderne
