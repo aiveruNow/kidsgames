@@ -67,7 +67,7 @@
     const FACT = { rolig: .65, normal: .85, hurtig: 1.05 };
     let speedKey = FACT[read("fart", "")] ? read("fart", "") : "normal";
     let easy = read("styring", "let") !== "normal"; // let: aben griber selv
-    let backOn = read("tilbage", "1") !== "0"; // et tryk i venstre side hopper tilbage til forrige liane
+    let backOn = read("tilbage", "1") !== "0"; // svinger lianen til venstre, hopper aben tilbage til forrige liane ved et tryk
     const hintText = () => (easy ? "Tryk for at slippe lianen – aben griber selv den næste!" : "Tryk for at slippe – tryk igen for at gribe!");
 
     // ---------- Billeder til ordene ----------
@@ -757,8 +757,10 @@
     }
 
     // Et tryk: slip lianen. I luften griber man den næste liane, og på jorden hopper man.
-    // left = trykket er i venstre del af skærmen: hænger aben i en liane, hopper den tilbage til forrige liane (hvis valget er slået til).
-    function onTap(left = false) {
+    // Et tryk: slip lianen. Svinger lianen til højre, hopper aben fremad (som før). Svinger den til venstre, vender aben sig om og hopper tilbage til forrige liane
+    // (hvis valget er slået til og der er en forrige liane). I luften griber man den næste liane, og på jorden hopper man.
+    // forceBack: pil venstre på tastaturet (til test).
+    function onTap(forceBack = false) {
       if (state === "ready") {
         state = "play";
         G.grace = 1.4;
@@ -768,7 +770,7 @@
       }
       if (state !== "play") return;
       const m = mk;
-      if (left && backOn && m.vine && backJump()) return;
+      if (backOn && m.vine && (forceBack || swingingLeft()) && backJump()) return;
       if (m.vine) release();
       else if (m.mode === "run") {
         if (m.onGround || m.coy > 0) jumpUp();
@@ -776,10 +778,13 @@
       } else m.grabReq = .4;
     }
 
+    const swingingLeft = () => !!mk && !!mk.vine && mk.vx < -4;
+    const prevVineOf = (v) => vines.filter((x) => x.x < v.x - 8).sort((a, b) => b.x - a.x)[0];
+
     // Et hop bagud: beregner farten, så aben ender midt på forrige liane efter ca. 0,85 sek. Kameraet følger med (se movePhys).
     function backJump() {
       const m = mk;
-      const prev = vines.filter((v) => v.x < m.vine.x - 8).sort((a, b) => b.x - a.x)[0];
+      const prev = prevVineOf(m.vine);
       if (!prev) return false;
       const T = .85;
       const g = GRAV * FLYG;
@@ -1506,7 +1511,7 @@
       drawLayer("near");
       drawLayer("ground");
       toWorld();
-      const next = vines.find((v) => v.x > mk.x + 3 && v !== mk.vine);
+      const next = (backOn && state === "play" && swingingLeft() && prevVineOf(mk.vine)) || vines.find((v) => v.x > mk.x + 3 && v !== mk.vine);
       for (const v of vines) if (v.x > camX - 12 && v.x < camX + WV + 12) drawVine(v, next);
       for (const e of ents) if (e.beh === "hang" || e.beh === "thread" || e.beh === "sit" || e.beh === "branch") drawEnt(e);
       for (const b of bananas) {
@@ -1546,26 +1551,16 @@
       const dt = Math.min(.05, (now - last) / 1000);
       last = now;
       if (screen === "play" && !SW) resize();
-      if (screen === "play" && SW > 0) { update(dt); draw(); updateBackHint(); }
+      if (screen === "play" && SW > 0) { update(dt); draw(); }
       requestAnimationFrame(frame);
     }
-    // Svag pil i venstre side, når et tryk dér hopper tilbage
-    let backHintOn = null;
-    function updateBackHint() {
-      const on = backOn && state === "play" && !!mk && !!mk.vine && vines.some((v) => v.x < mk.vine.x - 8);
-      if (on === backHintOn) return;
-      backHintOn = on;
-      $("backHint").classList.toggle("on", on);
-    }
-
     // ---------- Styring: et tryk slipper lianen, griber den næste eller hopper (hold nede for at hoppe højere) ----------
     const setHold = (on) => { if (mk) mk.hold = on; };
     stage.addEventListener("pointerdown", (e) => {
       if (!G) return;
       e.preventDefault();
       setHold(true);
-      const r = stage.getBoundingClientRect();
-      onTap(e.clientX - r.left < r.width * .28);
+      onTap();
     });
     for (const ev of ["pointerup", "pointercancel", "pointerleave"]) stage.addEventListener(ev, () => setHold(false));
     document.addEventListener("keydown", (e) => {
