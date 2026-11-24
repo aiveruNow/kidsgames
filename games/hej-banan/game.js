@@ -347,12 +347,12 @@
     const GJ = 160; // tyngde, når aben hopper på jorden
     const JV = 110; // hopstyrke (enheder i sekundet): et kort hop er ca. 38 enheder højt og varer 1,3 sek.
     const runSpeed = () => 24 * speedFactor();
-    const GOAL = 30; // point, der skal til for at klare en jungle (korte jungler: aben vokser fra baby til voksen undervejs)
+    const GOAL = 100; // point, der skal til for at klare en jungle (aben vokser fra baby til voksen undervejs)
     const BABY = .6; // abens størrelse ved start (1 = voksen)
     const MAXTH = 1.25; // størst udsving (radianer, ca. 70 grader)
     const SLIDE_AFTER = 4; // sekunder på samme liane, før aben begynder at glide ned
     const SLIDE_SPEED = 4; // enheder i sekundet
-    const stageOf = (points) => Math.min(5, 1 + Math.floor(points / (GOAL / 5))); // 1-5, nyt trin for hver 6 point
+    const stageOf = (points) => Math.min(5, 1 + Math.floor(points / (GOAL / 5))); // 1-5, nyt trin for hver 20 point
     const world = () => WORLDS[G.w];
     const diff = () => G.w * 2 + (G.n - 1);
     const speedFactor = () => FACT[speedKey] * Math.min(1.25, 1 + .02 * diff());
@@ -1015,7 +1015,7 @@
       if (stageOf(G.points) > G.n) { sizeUp(); return; }
       if (G.total % 6 === 0) { const wd = pickWeighted(seenIds(), 1)[0]; if (wd) wordPop(wd); }
     }
-    // Hver 6 point: en stjerne og et nyt ord (spillet stopper ikke), og junglen bliver lidt sværere
+    // Hver 20 point: en stjerne og et nyt ord (spillet stopper ikke), og junglen bliver lidt sværere
     function sizeUp() {
       G.n = stageOf(G.points);
       stars += 1;
@@ -1031,7 +1031,7 @@
       if (nw) { const st = ws(nw); st.seen = true; st.t = Date.now(); saveWords(); wordPop(nw, true); }
     }
 
-    // 30 point (GOAL): junglen er klaret
+    // 100 point (GOAL): junglen er klaret
     function worldDone() {
       state = "world";
       hidePop();
