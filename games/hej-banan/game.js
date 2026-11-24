@@ -348,6 +348,8 @@
     const runSpeed = () => 24 * speedFactor();
     const GOAL = 250; // bananpoint, der skal til for at klare en jungle
     const MAXTH = 1.25; // størst udsving (radianer, ca. 70 grader)
+    const SLIDE_AFTER = 4; // sekunder på samme liane, før aben begynder at glide ned
+    const SLIDE_SPEED = 2.5; // enheder i sekundet
     const stageOf = (points) => Math.min(5, 1 + Math.floor(points / (GOAL / 5))); // 1-5, nyt trin for hver 50 point
     const world = () => WORLDS[G.w];
     const diff = () => G.w * 2 + (G.n - 1);
@@ -404,7 +406,7 @@
       const first = { x: WV * .3, ay: 5, len: 30, ph: rr(0, 6.28), id: ++vineSeq, leaves: makeLeaves() };
       vines.push(first);
       ensureVines();
-      mk = { x: 0, y: 0, vx: 0, vy: 0, vine: null, mode: "vine", onGround: false, L: 24, th: .5, w: 1.6, last: null, lastT: 0, flightT: 0, grabReq: 0, face: 1, pop: 0, tilt: 0, spin: 0, shrink: 1, ph: 0, sq: 0, gT: 0, hold: false, holdT: 0, coy: 0, jb: 0, stepA: 0 };
+      mk = { x: 0, y: 0, vx: 0, vy: 0, vine: null, vineT: 0, mode: "vine", onGround: false, L: 24, th: .5, w: 1.6, last: null, lastT: 0, flightT: 0, grabReq: 0, face: 1, pop: 0, tilt: 0, spin: 0, shrink: 1, ph: 0, sq: 0, gT: 0, hold: false, holdT: 0, coy: 0, jb: 0, stepA: 0 };
       attach(mk, first, 24, .5, 1.6);
       G.checkpoint = first;
       G.grace = 0;
@@ -418,6 +420,7 @@
     // Aben hænger i en liane: pendul med længden L om forankringen
     function attach(m, v, L, th, w) {
       m.vine = v;
+      m.vineT = 0;
       m.mode = "vine";
       m.onGround = false;
       m.L = L;
@@ -448,15 +451,15 @@
         G.gpat = (G.gpat || 0) + 1;
         const x0 = G.gx;
         if (G.gpat % 2 === 1) { // række på jorden
-          for (let i = 0; i < 4; i++) bananas.push({ x: x0 + i * 4.6, y: FL - MR - 1, type: "b", taken: false, ph: rr(0, 6.28) });
-          G.gx = x0 + 4 * 4.6 + rr(14, 22);
+          for (let i = 0; i < 3; i++) bananas.push({ x: x0 + i * 4.6, y: FL - MR - 1, type: "b", taken: false, ph: rr(0, 6.28) });
+          G.gx = x0 + 3 * 4.6 + rr(24, 36);
         } else { // bue
-          const n = 5;
+          const n = 4;
           for (let i = 0; i < n; i++) {
             const f = i / (n - 1);
             bananas.push({ x: x0 + f * 24, y: FL - MR - 1 - 20 * Math.sin(Math.PI * f), type: i === 2 && G.gpat % 6 === 0 ? "bunch" : "b", taken: false, ph: rr(0, 6.28) });
           }
-          G.gx = x0 + 24 + rr(14, 24);
+          G.gx = x0 + 24 + rr(24, 36);
         }
       }
     }
@@ -465,7 +468,7 @@
     function addBananas(a, b) {
       G.patN = (G.patN || 0) + 1;
       const pat = rnd(4);
-      const n = pat === 3 ? 4 : 3 + rnd(2);
+      const n = pat === 3 ? 3 : 2 + rnd(2);
       const x0 = a.x + 11;
       const x1 = b.x - 4;
       const base = a.ay + rr(17, 27);
@@ -480,10 +483,8 @@
         bananas.push({ x: x0 + (x1 - x0) * f, y, type: "b", taken: false, ph: rr(0, 6.28) });
       }
       const mid = bananas[bananas.length - 1 - Math.floor(n / 2)];
-      if (G.patN % 6 === 0) { mid.type = "bunch"; mid.y = clamp(mid.y - 6, 9, 50); }
-      if (G.patN % 13 === 0) { const g = bananas[bananas.length - 1]; g.type = "gold"; g.y = rr(10, 20); }
-      // et par bananer langs selve svinget ned til lianen
-      if (G.patN % 2 === 0) for (const th of [-.5, -.8]) bananas.push({ x: b.x + Math.sin(th) * 22, y: b.ay + Math.cos(th) * 22, type: "b", taken: false, ph: rr(0, 6.28) });
+      if (G.patN % 4 === 0) { mid.type = "bunch"; mid.y = clamp(mid.y - 6, 9, 50); }
+      if (G.patN % 9 === 0) { const g = bananas[bananas.length - 1]; g.type = "gold"; g.y = rr(10, 20); }
     }
 
     function startWorld(w) {
@@ -588,6 +589,18 @@
       if (m.coy > 0) m.coy -= dt;
       if (m.pop > 0) m.pop = Math.max(0, m.pop - dt * 2.5);
       if (m.sq > 0) m.sq = Math.max(0, m.sq - dt * 4);
+      if (m.vine && state === "play") {
+        // Hænger aben for længe, glider den langsomt ned ad lianen og slipper, når den når enden
+        m.vineT += dt;
+        if (m.vineT > SLIDE_AFTER) {
+          const maxL = m.vine.len + MR * .8;
+          if (m.L < maxL) {
+            const nl = Math.min(maxL, m.L + SLIDE_SPEED * dt);
+            m.w *= m.L / nl; // bevarer drejningsimpulsen, så svinget bare bliver roligere
+            m.L = nl;
+          } else release();
+        }
+      }
       if (m.vine) {
         const steps = Math.max(1, Math.ceil(dt / (1 / 120)));
         const h = dt / steps;
