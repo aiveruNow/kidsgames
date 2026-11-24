@@ -349,7 +349,7 @@
     const GOAL = 250; // bananpoint, der skal til for at klare en jungle
     const MAXTH = 1.25; // størst udsving (radianer, ca. 70 grader)
     const SLIDE_AFTER = 4; // sekunder på samme liane, før aben begynder at glide ned
-    const SLIDE_SPEED = 2.5; // enheder i sekundet
+    const SLIDE_SPEED = 4; // enheder i sekundet
     const stageOf = (points) => Math.min(5, 1 + Math.floor(points / (GOAL / 5))); // 1-5, nyt trin for hver 50 point
     const world = () => WORLDS[G.w];
     const diff = () => G.w * 2 + (G.n - 1);
