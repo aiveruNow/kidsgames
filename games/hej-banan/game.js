@@ -347,11 +347,12 @@
     const GJ = 160; // tyngde, når aben hopper på jorden
     const JV = 110; // hopstyrke (enheder i sekundet): et kort hop er ca. 38 enheder højt og varer 1,3 sek.
     const runSpeed = () => 24 * speedFactor();
-    const GOAL = 250; // bananpoint, der skal til for at klare en jungle
+    const GOAL = 30; // point, der skal til for at klare en jungle (korte jungler: aben vokser fra baby til voksen undervejs)
+    const BABY = .6; // abens størrelse ved start (1 = voksen)
     const MAXTH = 1.25; // størst udsving (radianer, ca. 70 grader)
     const SLIDE_AFTER = 4; // sekunder på samme liane, før aben begynder at glide ned
     const SLIDE_SPEED = 4; // enheder i sekundet
-    const stageOf = (points) => Math.min(5, 1 + Math.floor(points / (GOAL / 5))); // 1-5, nyt trin for hver 50 point
+    const stageOf = (points) => Math.min(5, 1 + Math.floor(points / (GOAL / 5))); // 1-5, nyt trin for hver 6 point
     const world = () => WORLDS[G.w];
     const diff = () => G.w * 2 + (G.n - 1);
     const speedFactor = () => FACT[speedKey] * Math.min(1.25, 1 + .02 * diff());
@@ -407,7 +408,7 @@
       const first = { x: WV * .3, ay: 5, len: 30, ph: rr(0, 6.28), id: ++vineSeq, leaves: makeLeaves() };
       vines.push(first);
       ensureVines();
-      mk = { x: 0, y: 0, vx: 0, vy: 0, vine: null, vineT: 0, mode: "vine", onGround: false, L: 24, th: .5, w: 1.6, last: null, lastT: 0, flightT: 0, grabReq: 0, face: 1, pop: 0, tilt: 0, spin: 0, shrink: 1, ph: 0, sq: 0, gT: 0, hold: false, holdT: 0, coy: 0, jb: 0, stepA: 0 };
+      mk = { x: 0, y: 0, vx: 0, vy: 0, vine: null, vineT: 0, mode: "vine", onGround: false, L: 24, th: .5, w: 1.6, last: null, lastT: 0, flightT: 0, grabReq: 0, face: 1, pop: 0, tilt: 0, spin: 0, shrink: 1, size: BABY, ph: 0, sq: 0, gT: 0, hold: false, holdT: 0, coy: 0, jb: 0, stepA: 0 };
       attach(mk, first, 24, .5, 1.6);
       G.checkpoint = first;
       G.grace = 0;
@@ -453,15 +454,15 @@
         G.gpat = (G.gpat || 0) + 1;
         const x0 = G.gx;
         if (G.gpat % 2 === 1) { // række på jorden
-          for (let i = 0; i < 3; i++) bananas.push({ x: x0 + i * 4.6, y: FL - MR - 1, type: "b", taken: false, ph: rr(0, 6.28) });
-          G.gx = x0 + 3 * 4.6 + rr(24, 36);
+          for (let i = 0; i < 2; i++) bananas.push({ x: x0 + i * 4.6, y: FL - MR - 1, type: "b", taken: false, ph: rr(0, 6.28) });
+          G.gx = x0 + 2 * 4.6 + rr(30, 44);
         } else { // bue
-          const n = 4;
+          const n = 3;
           for (let i = 0; i < n; i++) {
             const f = i / (n - 1);
-            bananas.push({ x: x0 + f * 24, y: FL - MR - 1 - 20 * Math.sin(Math.PI * f), type: i === 2 && G.gpat % 6 === 0 ? "bunch" : "b", taken: false, ph: rr(0, 6.28) });
+            bananas.push({ x: x0 + f * 24, y: FL - MR - 1 - 20 * Math.sin(Math.PI * f), type: i === 1 && G.gpat % 6 === 0 ? "bunch" : "b", taken: false, ph: rr(0, 6.28) });
           }
-          G.gx = x0 + 24 + rr(24, 36);
+          G.gx = x0 + 24 + rr(30, 44);
         }
       }
     }
@@ -470,7 +471,7 @@
     function addBananas(a, b) {
       G.patN = (G.patN || 0) + 1;
       const pat = rnd(4);
-      const n = pat === 3 ? 3 : 2 + rnd(2);
+      const n = pat === 3 ? 2 : 1 + rnd(2);
       const x0 = a.x + 11;
       const x1 = b.x - 4;
       const base = a.ay + rr(17, 27);
@@ -1014,7 +1015,7 @@
       if (stageOf(G.points) > G.n) { sizeUp(); return; }
       if (G.total % 6 === 0) { const wd = pickWeighted(seenIds(), 1)[0]; if (wd) wordPop(wd); }
     }
-    // Hver 20 point: en stjerne og et nyt ord (spillet stopper ikke), og junglen bliver lidt sværere
+    // Hver 6 point: en stjerne og et nyt ord (spillet stopper ikke), og junglen bliver lidt sværere
     function sizeUp() {
       G.n = stageOf(G.points);
       stars += 1;
@@ -1030,7 +1031,7 @@
       if (nw) { const st = ws(nw); st.seen = true; st.t = Date.now(); saveWords(); wordPop(nw, true); }
     }
 
-    // 100 point: junglen er klaret
+    // 30 point (GOAL): junglen er klaret
     function worldDone() {
       state = "world";
       hidePop();
@@ -1096,6 +1097,7 @@
     function update(dt) {
       time += dt;
       if (!G || !mk) return;
+      mk.size += (BABY + (1 - BABY) * Math.min(1, G.points / GOAL) - mk.size) * Math.min(1, dt * 5);
       if (shake > 0) shake = Math.max(0, shake - dt * 1.6);
       if (flash > 0) flash = Math.max(0, flash - dt * 2);
       if (state === "ready") { movePhys(dt); ensureVines(); }
@@ -1391,8 +1393,8 @@
       ctx.strokeStyle = "#5b4a22"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(v.x, v.ay);
       if (attached) {
-        const hx = mk.x - Math.sin(mk.th) * MR * 1.6;
-        const hy = mk.y - Math.cos(mk.th) * MR * 1.6;
+        const hx = mk.x - Math.sin(mk.th) * MR * 1.6 * mk.size;
+        const hy = mk.y - Math.cos(mk.th) * MR * 1.6 * mk.size;
         ctx.lineTo(hx, hy);
         ctx.stroke();
         ctx.strokeStyle = "#8fbf4a"; ctx.lineWidth = .35; ctx.beginPath(); ctx.moveTo(v.x, v.ay); ctx.lineTo(hx, hy); ctx.stroke();
@@ -1457,28 +1459,28 @@
       if (!m) return;
       // skygge på jorden viser, hvor højt aben er
       const sh = clamp(1 - (FL - m.y) / 60, .15, .6);
-      ctx.fillStyle = `rgba(0,0,0,${sh * .5})`; ctx.beginPath(); ctx.ellipse(m.x, FL + 1.2, MR * (.5 + sh), MR * .22, 0, 0, 6.28); ctx.fill();
+      ctx.fillStyle = `rgba(0,0,0,${sh * .5})`; ctx.beginPath(); ctx.ellipse(m.x, FL + 1.2, MR * m.size * (.5 + sh), MR * m.size * .22, 0, 0, 6.28); ctx.fill();
       ctx.save();
       const sc = 1 + .14 * m.pop;
       if (state === "dying") {
         ctx.translate(m.x, m.y); ctx.rotate(m.spin); ctx.scale(m.shrink, m.shrink);
-        AR.draw(ctx, apeId, { r: MR, t: time, mode: "dizzy" });
+        AR.draw(ctx, apeId, { r: MR * m.size, t: time, mode: "dizzy" });
       } else if (m.vine) {
-        const hx = m.x - Math.sin(m.th) * MR * 1.6;
-        const hy = m.y - Math.cos(m.th) * MR * 1.6;
+        const hx = m.x - Math.sin(m.th) * MR * 1.6 * m.size;
+        const hy = m.y - Math.cos(m.th) * MR * 1.6 * m.size;
         ctx.translate(hx, hy); ctx.rotate(-m.th);
         if (m.face < 0) ctx.scale(-1, 1);
-        AR.draw(ctx, apeId, { r: MR * sc, t: time, mode: "swing" });
+        AR.draw(ctx, apeId, { r: MR * sc * m.size, t: time, mode: "swing" });
       } else if (m.mode === "run") {
-        ctx.translate(m.x, m.y); // fødderne er ved y + MR = jorden
+        ctx.translate(m.x, m.y + MR * (1 - m.size)); // fødderne er ved y + MR = jorden (også for en lille abe)
         const bob = m.onGround ? 1 : 0;
         if (m.face < 0) ctx.scale(-1, 1);
-        AR.draw(ctx, apeId, { r: MR * (1 + .06 * m.pop), t: time, mode: m.onGround ? "run" : "jump", ph: m.ph, jv: clamp(m.vy / (JV * .95), -1, 1), sq: m.sq * bob });
+        AR.draw(ctx, apeId, { r: MR * m.size * (1 + .06 * m.pop), t: time, mode: m.onGround ? "run" : "jump", ph: m.ph, jv: clamp(m.vy / (JV * .95), -1, 1), sq: m.sq * bob });
       } else {
         ctx.translate(m.x, m.y);
         ctx.rotate(clamp(m.vy / 60, -.7, .7) * .5 * m.face);
         if (m.face < 0) ctx.scale(-1, 1);
-        AR.draw(ctx, apeId, { r: MR * sc, t: time, mode: "fly" });
+        AR.draw(ctx, apeId, { r: MR * sc * m.size, t: time, mode: "fly" });
       }
       ctx.restore();
     }
@@ -2130,7 +2132,7 @@
     function restartLevel() {
       loadWorld(G.w, G.newWords, G.reviewWords);
       beginReady();
-      toast("Forfra!", "Du starter forfra i junglen");
+      toast("Forfra!", "Aben er en baby igen. Du starter forfra i junglen");
     }
 
     function goHome() {
