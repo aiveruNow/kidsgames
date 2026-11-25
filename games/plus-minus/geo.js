@@ -290,7 +290,7 @@
     },
     {
       id: "it", cont: "europa", name: "Italien", emoji: "🇮🇹", i: "i Italien",
-      capital: "Rom", pv: "ca. 59 mio.", people: "ca. 59 millioner", ps: "nioghalvtreds millioner",
+      capital: "Rom", capSay: "byen Rom", pv: "ca. 59 mio.", people: "ca. 59 millioner", ps: "nioghalvtreds millioner",
       cur: "Euro", curSay: "euro", lang: "Italiensk", langSay: "italiensk",
       hello: { text: "Ciao", say: "tjau" },
       intro: "Italien ligger i Sydeuropa og ligner en lang støvle, der sparker til en bold. Landet ligger ved Middelhavet og har høje bjerge i nord. Her ligger hovedstaden Rom. Italienerne er glade for mad, fodbold og at snakke højt.",
