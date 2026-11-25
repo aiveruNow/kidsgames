@@ -210,5 +210,16 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40"' + (attrs ? " " + attrs : "") + ">" + body + "</svg>";
   }
 
-  return { ids: ORDER.slice(), inner: inner, svg: svg };
+  // Flere flag lægges til fra andre filer (flags-europa.js osv.): add({ se: function () { return "...svg..."; } }).
+  // h giver de samme små tegnehjælpere, som de første flag bruger.
+  function add(map) {
+    Object.keys(map).forEach(function (id) {
+      if (Object.prototype.hasOwnProperty.call(F, id)) throw new Error("flag findes allerede: " + id);
+      F[id] = map[id];
+      ORDER.push(id);
+    });
+  }
+  var H = { n: n, rect: rect, path: path, poly: poly, circle: circle, burst: burst, star: star, stripesH: stripesH, stripesV: stripesV, jack: jack, jackCanton: jackCanton, W: W };
+
+  return { ids: ORDER, inner: inner, svg: svg, add: add, h: H };
 });

@@ -115,7 +115,7 @@
     } catch { /* ingen lagring */ }
 
     // Baner: hvert land kræver PER_COUNTRY rigtige svar. Når et kontinents lande er fundet, rejser man videre.
-    const PER_COUNTRY = 6;
+    const PER_COUNTRY = 3;
     const Geo = window.TalbasketGeo;
     const World = window.TalbasketWorld;
     const CONTINENTS = [
@@ -362,19 +362,18 @@
     }
     setInterval(launchFlyer, 9000);
 
-    // Opdaterer kontinent-chippen øverst i banen: navn, fundne lande og vej til næste land
+    // Opdaterer kontinent-chippen øverst i banen: navn, antal fundne lande, de nyeste flag og vej til næste land
     function updateContinentUI() {
       const continent = CONTINENTS[currentContinent];
       const geo = Geo.continent(continent.key);
       const list = Geo.countriesOf(continent.key);
       const found = foundIn(currentContinent);
       const counting = currentContinent === unlockedContinent && !journeyDone;
-      const flags = list.map((country, index) => {
-        if (index < found) return `<i class="got">${World.flagSvg(country.id, "mini")}${country.kind === "place" ? `<b>${country.emoji}</b>` : ""}</i>`;
-        return `<i class="${index === found && counting ? "nx" : ""}">?</i>`;
-      }).join("");
+      const recent = list.slice(Math.max(0, found - 5), found);
+      const flags = recent.map((country) => `<i class="got">${World.flagSvg(country.id, "mini")}${country.kind === "place" ? `<b>${country.emoji}</b>` : ""}</i>`).join("")
+        + (counting && found < list.length ? `<i class="nx">?</i>` : "");
       const left = counting ? toNextCountry() : 0;
-      continentBadge.innerHTML = `<span class="hc-emoji" aria-hidden="true">${geo.emoji}</span><span class="hc-main"><span class="hc-name">${geo.name.replace(" og Oceanien", "")}</span><span class="hc-flags">${flags}</span></span>${counting ? `<span class="hc-bar" aria-hidden="true"><i style="width:${(continentProgress % PER_COUNTRY) / PER_COUNTRY * 100}%"></i></span>` : ""}`;
+      continentBadge.innerHTML = `<span class="hc-emoji" aria-hidden="true">${geo.emoji}</span><span class="hc-main"><span class="hc-name">${geo.name.replace(" og Oceanien", "")} <b class="hc-count">${found}/${list.length}</b></span><span class="hc-flags">${flags}</span></span>${counting ? `<span class="hc-bar" aria-hidden="true"><i style="width:${(continentProgress % PER_COUNTRY) / PER_COUNTRY * 100}%"></i></span>` : ""}`;
       continentBadge.setAttribute("aria-label", counting
         ? `${geo.name}: ${found} af ${list.length} fundet. Skyd ${left} rigtige mere for at finde næste land. Tryk for at åbne bogen.`
         : `${geo.name}: ${found} af ${list.length} fundet. Tryk for at åbne bogen.`);
@@ -454,6 +453,9 @@
       if (qMode !== "math") geoFocus = foundPopup.dataset.id;
       World.openBook(foundPopup.dataset.cont, foundPopup.dataset.id, { onClose: runNextPopup });
     }));
+
+    // Tryk på baggrunden = Videre
+    foundPopup.addEventListener("click", (event) => { if (event.target === foundPopup) document.querySelector("#foundGo").click(); });
 
     function showTravelPopup() {
       const continent = CONTINENTS[currentContinent];
@@ -535,7 +537,11 @@
         target = pick(candidates.length ? candidates : pool);
       }
       lastGeoId = target.id;
-      const type = pick(["flag", "capital", "currency"]);
+      // Hovedstadsspørgsmål giver ikke mening, når hovedstaden hedder det samme som landet (Monaco, Luxembourg, Vatikanstaten …)
+      const cap = target.capital.toLowerCase();
+      const nm = target.name.toLowerCase();
+      const sameName = cap.includes(nm) || nm.includes(cap);
+      const type = pick(sameName ? ["flag", "currency"] : ["flag", "capital", "currency"]);
       geoQ = { type, country: target };
       isGeo = true;
       answer = target.id;
@@ -547,17 +553,21 @@
           : `<span class="gq-ico" aria-hidden="true">💰</span><span class="gq-name">${target.currency}</span><span class="gq-lbl">bruger man i …</span>`;
     }
 
+    // Flag, der ligner hinanden, må ikke begge være svarmuligheder i flagspørgsmål
+    const LOOKALIKES = [["id", "mc", "pl"], ["ro", "td"], ["ie", "ci", "it"], ["nl", "lu"], ["au", "nz"], ["no", "is"], ["se", "fi"], ["ru", "sk", "si"], ["cu", "pr"], ["bo", "gh"], ["ml", "gn"], ["sn", "ml"], ["ve", "co", "ec"], ["at", "lv"], ["dk", "no"], ["sy", "ye", "iq", "eg"]];
+    const lookAlike = (a, b) => LOOKALIKES.some((group) => group.includes(a) && group.includes(b));
+
     // Tre andre lande som svarmuligheder: helst lande, man har mødt
     function geoChoices() {
       const target = geoQ.country;
       // To lande med samme valuta (fx euro) må ikke begge være svarmuligheder
-      const clash = (country) => geoQ.type === "currency" && country.currency === target.currency;
+      const clash = (country) => (geoQ.type === "currency" && country.currency === target.currency) || (geoQ.type === "flag" && lookAlike(country.id, target.id));
       const others = (list) => shuffled(list.filter((country) => country.kind === "country" && country.id !== target.id && !clash(country)));
       const picked = [];
       for (const list of [foundCountries(), Geo.countriesOf(target.cont), Geo.countries]) {
         for (const country of others(list)) {
           if (picked.length >= 3) break;
-          if (!picked.includes(country.id)) picked.push(country.id);
+          if (!picked.includes(country.id) && !picked.some((id) => geoQ.type === "flag" && lookAlike(id, country.id))) picked.push(country.id);
         }
       }
       return shuffled([target.id, ...picked]);

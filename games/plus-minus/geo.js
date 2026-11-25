@@ -13,7 +13,7 @@
       stats: [
         { icon: "📐", label: "Størrelse", value: "ca. 10 mio. km²" },
         { icon: "👨‍👩‍👧", label: "Mennesker", value: "ca. 750 mio." },
-        { icon: "🏳️", label: "Lande", value: "44" }
+        { icon: "🏳️", label: "Lande", value: "45" }
       ],
       intro: "Velkommen til Europa! Her bor omkring syv hundrede og halvtreds millioner mennesker. Europa har mange små og store lande, som ligger tæt på hinanden. Man kan tage toget fra by til by og høre mange forskellige sprog. Her ligger Danmark, og her findes sneklædte bjerge, varme strande og gamle slotte.",
       introFile: "europa-intro",
@@ -69,7 +69,7 @@
       stats: [
         { icon: "📐", label: "Størrelse", value: "ca. 44 mio. km²" },
         { icon: "👨‍👩‍👧", label: "Mennesker", value: "ca. 4,7 mia." },
-        { icon: "🏳️", label: "Lande", value: "48" }
+        { icon: "🏳️", label: "Lande", value: "46" }
       ],
       intro: "Velkommen til Asien! Asien er verdens største kontinent, og her bor mere end halvdelen af alle mennesker. Her ligger verdens højeste bjerg, store byer med lynhurtige tog og varme jungler med elefanter. Asien har pandaer, tigre og masser af god mad. Hvilket land vil du besøge først?",
       introFile: "asien-intro",
@@ -97,7 +97,7 @@
       stats: [
         { icon: "📐", label: "Størrelse", value: "ca. 24 mio. km²" },
         { icon: "👨‍👩‍👧", label: "Mennesker", value: "ca. 600 mio." },
-        { icon: "🏳️", label: "Lande", value: "23" }
+        { icon: "🏳️", label: "Lande", value: "24" }
       ],
       intro: "Velkommen til Nordamerika! Her ligger Canada, USA og Mexico, og det er et kæmpestort kontinent. Her er høje bjerge, store søer, ørkener og regnskove. Mod nord bor der isbjørne, og i syd bor der dovendyr. Her ligger også Grønland, som er verdens største ø. Tag med på tur!",
       introFile: "nordamerika-intro",
@@ -639,6 +639,45 @@
   ];
 
   const COUNTRIES = RAW.map((r) => (r.place ? buildPlace(r) : buildCountry(r)));
+
+  // ---------- Flere lande: lette poster fra geo-<kontinent>.js (id, navn, hovedstad, tal, valuta, sprog, hilsen, historie) ----------
+  const flagEmoji = (id) => [...id.toUpperCase()].map((ch) => String.fromCodePoint(0x1F1E6 + ch.charCodeAt(0) - 65)).join("");
+  function buildLight(r) {
+    const I = cap(r.i);
+    return {
+      id: r.id, cont: r.cont, kind: "country", name: r.name, emoji: flagEmoji(r.id),
+      capital: r.capital, people: r.pv, currency: r.cur, language: r.lang,
+      hello: r.hello || null, intro: r.intro, introFile: `${r.id}-intro`,
+      tiles: [
+        { key: "capital", icon: "🏙️", label: "Hovedstad", value: r.capital, say: `Hovedstaden ${r.i} hedder ${r.capSay || r.capital}.`, file: `${r.id}-capital` },
+        { key: "people", icon: "👨‍👩‍👧", label: "Indbyggere", value: r.pv, say: `${I} bor der omkring ${r.ps} mennesker.`, file: `${r.id}-people` },
+        { key: "currency", icon: "💰", label: "Valuta", value: r.cur, say: `${I} betaler man med ${r.curSay}.`, file: `${r.id}-currency` },
+        { key: "language", icon: "🗣️", label: "Sprog", value: r.lang, say: `${I} taler man ${r.langSay}.`, file: `${r.id}-language` }
+      ],
+      specials: [],
+      animals: [],
+      light: true
+    };
+  }
+  const MORE_NAMES = ["europa", "afrika", "asien", "nordamerika", "sydamerika", "australien"];
+  const MORE_PRON = {};
+  const globalScope = typeof self !== "undefined" ? self : {};
+  for (const name of MORE_NAMES) {
+    let part = null;
+    if (typeof module === "object" && module.exports) {
+      try { part = require(`./geo-${name}.js`); } catch (error) { if (error.code !== "MODULE_NOT_FOUND") throw error; }
+    } else {
+      part = globalScope[`TalbasketGeo${name.charAt(0).toUpperCase()}${name.slice(1)}`] || null;
+    }
+    if (!part) continue;
+    for (const row of part.rows) COUNTRIES.push(buildLight(row));
+    Object.assign(MORE_PRON, part.pron || {});
+  }
+  const seenIds = new Set();
+  for (const c of COUNTRIES) {
+    if (seenIds.has(c.id)) throw new Error(`geo: id bruges to gange: ${c.id}`);
+    seenIds.add(c.id);
+  }
   const ids = COUNTRIES.map((c) => c.id);
   const byId = {};
   for (const c of COUNTRIES) byId[c.id] = c;
@@ -674,6 +713,7 @@
     "Pura vida": "Pura bida", "Big Ben": "Bigg Benn"
   };
   const PRON = {};
+  Object.assign(PRON_RAW, MORE_PRON);
   Object.keys(PRON_RAW).sort((a, b) => b.length - a.length).forEach((k) => { PRON[k] = PRON_RAW[k]; });
 
   // Alle talte tekster og deres filnavne. Fejl her opdages med det samme, når filen indlæses.
@@ -706,17 +746,21 @@
       c.helloLine = `I ${c.name} siger man ${c.hello.say}.`;
       addClip(c.helloLine, c.helloFile);
     }
-    // Geografi-skud: spørgsmålet læses højt
+    // Geografi-skud: spørgsmålet læses højt. Lette lande (uden eget klip) bruger enhedens stemme.
     if (c.kind === "country") {
       c.q = {
         flag: { text: `Hvilket flag har ${c.name}?`, file: `${c.id}-sp-flag` },
         capital: { text: `${c.capital} er hovedstaden i hvilket land?`, file: `${c.id}-sp-capital` },
         currency: { text: `Hvilket land bruger ${c.currency.toLowerCase()}?`, file: `${c.id}-sp-currency` }
       };
-      // Samme spørgsmål (fx om euro) deler ét klip
-      for (const q of Object.values(c.q)) {
-        if (fileOf.has(q.text)) q.file = fileOf.get(q.text).replace(/\.mp3$/, "");
-        else addClip(q.text, q.file);
+      if (c.light) {
+        for (const q of Object.values(c.q)) q.file = null;
+      } else {
+        // Samme spørgsmål (fx om euro) deler ét klip
+        for (const q of Object.values(c.q)) {
+          if (fileOf.has(q.text)) q.file = fileOf.get(q.text).replace(/\.mp3$/, "");
+          else addClip(q.text, q.file);
+        }
       }
     }
   }

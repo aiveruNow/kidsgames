@@ -87,6 +87,8 @@
     clip.ontimeupdate = () => {
       if (mine === token && hooks.onprogress && clip.duration) hooks.onprogress(clip.currentTime / clip.duration);
     };
+    // Uden klip (fx spørgsmål om lande uden eget lydklip) læser enhedens stemme teksten
+    if (!file) { if (hooks.onstart) hooks.onstart(); viaVoice(); return; }
     clip.src = `audio/${file}.mp3`;
     const p = clip.play();
     if (hooks.onstart) hooks.onstart();
@@ -355,8 +357,8 @@
         <button class="play" type="button" data-play="intro"><span class="ico"><svg class="pl" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="pa" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></span><span class="lbl"><span>Hør om ${esc(item.name)}</span><small>Lyt og lær</small></span><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="bar"></span></button>
         <p class="dt-text">${esc(item.intro)}</p>
         <div class="dt-tiles">${item.tiles.map((t, k) => `<button class="dtile" type="button" data-tile="${k}"><span class="dtile-ico">${t.icon}</span><span class="dtile-lbl">${esc(t.label)}</span><span class="dtile-val">${esc(t.value)}</span><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>`).join("")}</div>
-        <p class="dt-sec">Specialiteter</p>
-        <div class="specials">${item.specials.map((s, k) => `<button class="spec" type="button" data-spec="${k}"><span>${s.icon}</span>${esc(s.label)}</button>`).join("")}</div>
+        ${item.specials.length ? `<p class="dt-sec">Specialiteter</p>
+        <div class="specials">${item.specials.map((s, k) => `<button class="spec" type="button" data-spec="${k}"><span>${s.icon}</span>${esc(s.label)}</button>`).join("")}</div>` : ""}
         <div class="say" id="dtSay" hidden></div>`;
       if (item.hello) h += `<button class="hello" type="button" data-hello="1"><span class="hello-lbl">Sig hej</span><b>${esc(item.hello.text)}</b></button>`;
       const an = (item.animals || []).map((aid) => c.animals.find((a) => a.id === aid)).filter(Boolean);
