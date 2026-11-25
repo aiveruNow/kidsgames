@@ -735,8 +735,25 @@
     c.facts.forEach((f) => addClip(f.text, f.file));
     c.animals.forEach((a) => addClip(a.fact, a.file));
     c.landmarks.forEach((l) => addClip(l.fact, l.file));
+    // Rejsen til kontinentet (vises og læses, når alle landene i det forrige er fundet)
+    const short = c.name.replace(" og Oceanien", "");
+    c.travelTitle = `Du er nu rejst til ${short}!`;
+    c.travelText = "Her venter nye lande, dyr og steder.";
+    c.travelFile = `${c.id}-rejse`;
+    addClip(`${c.travelTitle} ${c.travelText}`, c.travelFile);
   }
+  const DONE = { title: "Du har rejst jorden rundt!", text: "Du har fundet alle landene. Hurra, det var flot klaret!", file: "jorden-rundt" };
+  addClip(`${DONE.title} ${DONE.text}`, DONE.file);
   for (const c of COUNTRIES) {
+    // Ankomst: vises og læses, når landet er fundet. Hovedstaden springes over, hvis den hedder det samme som landet.
+    const contName = CONTINENTS.find((k) => k.id === c.cont).name;
+    const spoken = c.name === "DR Congo" ? "Den Demokratiske Republik Congo" : c.name;
+    const same = c.kind === "country" && (c.capital.toLowerCase().includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(c.capital.toLowerCase()));
+    c.arriveLine = c.kind === "place"
+      ? `Du er nu kommet til ${spoken}. Det er et sted i ${contName}.`
+      : `Du er nu kommet til ${spoken}. Landet ligger i ${contName}.${same ? "" : " " + c.tiles[0].say}`;
+    c.arriveFile = `${c.id}-ankomst`;
+    addClip(c.arriveLine, c.arriveFile);
     addClip(c.intro, c.introFile);
     c.tiles.forEach((t) => addClip(t.say, t.file));
     c.specials.forEach((s) => addClip(s.text, s.file));
@@ -782,6 +799,6 @@
   const clipFile = (text) => fileOf.get(text);
   const allFiles = () => [...fileOf.values()];
 
-  return { continents: CONTINENTS, countries: COUNTRIES, pron: PRON, byId, ids, continent, country, countriesOf, animal, landmark, allClips, clipFile, allFiles };
+  return { continents: CONTINENTS, countries: COUNTRIES, done: DONE, pron: PRON, byId, ids, continent, country, countriesOf, animal, landmark, allClips, clipFile, allFiles };
 
 });

@@ -410,12 +410,10 @@
     }
 
     function showFoundPopup(country) {
-      const geo = Geo.continent(country.cont);
       document.querySelector("#foundFlag").innerHTML = country.kind === "place" ? `<span class="place-emoji big">${country.emoji}</span>` : World.flagSvg(country.id, "big");
       document.querySelector("#foundName").textContent = country.name;
-      document.querySelector("#foundText").textContent = country.kind === "place"
-        ? `Nyt sted i ${geo.name.replace(" og Oceanien", "")}. Tryk for at høre mere.`
-        : `${country.name} ligger i ${geo.name.replace(" og Oceanien", "")}. Hovedstaden hedder ${country.capital}.`;
+      // Den viste tekst er præcis det, der siges ("Du er nu kommet til Danmark …")
+      document.querySelector("#foundText").textContent = country.arriveLine;
       foundPopup.dataset.id = country.id;
       foundPopup.dataset.cont = country.cont;
       const card = foundPopup.querySelector(".star-popup-card");
@@ -434,10 +432,17 @@
       foundPopup.hidden = false;
       updateContinentUI();
       sfx.fanfare();
+      // Fanfaren først, så siger stemmen, hvor man er kommet hen
+      clearTimeout(arriveTimer);
+      arriveTimer = setTimeout(() => { if (!foundPopup.hidden) World.speak(country.arriveFile, country.arriveLine); }, 900);
     }
+
+    let arriveTimer = null;
 
     function hideFoundPopup(then) {
       if (foundPopup.hidden) return;
+      clearTimeout(arriveTimer);
+      World.stopSpeech();
       foundPopup.hidden = true;
       then();
     }
@@ -463,20 +468,23 @@
       applyScenery();
       updateContinentUI();
       document.querySelector("#travelEmoji").textContent = journeyDone ? "🏆" : geo.emoji;
-      document.querySelector("#travelTitle").textContent = journeyDone ? "Du har rejst jorden rundt!" : `Du rejser til ${geo.name.replace(" og Oceanien", "")}!`;
-      document.querySelector("#travelText").textContent = journeyDone
-        ? "Alle lande og steder er fundet. +1 ⭐"
-        : `Alle landene er fundet. Ny bane låst op. +1 ⭐`;
+      const line = journeyDone ? { title: Geo.done.title, text: Geo.done.text, file: Geo.done.file } : { title: geo.travelTitle, text: geo.travelText, file: geo.travelFile };
+      document.querySelector("#travelTitle").textContent = line.title;
+      document.querySelector("#travelText").textContent = `${line.text} +1 ⭐`;
       travelPopup.hidden = false;
       clearTimeout(travelTimer);
-      travelTimer = setTimeout(hideTravelPopup, 6000);
+      travelTimer = setTimeout(hideTravelPopup, 9000);
       sfx.fanfare();
       Topbar.refreshStars(true);
+      clearTimeout(arriveTimer);
+      arriveTimer = setTimeout(() => { if (!travelPopup.hidden) World.speak(line.file, `${line.title} ${line.text}`); }, 900);
     }
 
     function hideTravelPopup() {
       if (travelPopup.hidden) return;
       clearTimeout(travelTimer);
+      clearTimeout(arriveTimer);
+      World.stopSpeech();
       travelPopup.hidden = true;
       runNextPopup();
     }
